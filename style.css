@@ -13,10 +13,153 @@
   display: block;
 }
 
-/* A little body styling so the placeholder text isn't squashed against
-   the edges of the browser window. */
+/* =============================================================
+   STEP 2 — setup screen styling
+   ============================================================= */
+
+/* ===== Page-wide foundation ===== */
+
+/* The body in Step 1 had a white background and basic padding.
+   Replace those rules with this dark, branded look. */
 body {
-  font-family: system-ui, -apple-system, sans-serif;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
   margin: 0;
-  padding: 20px;
+  padding: 0;
+  background: #0e0e12;          /* near-black, slightly blue */
+  color: #f0f0f0;                /* off-white text */
+  min-height: 100vh;             /* fill the whole browser height */
+}
+
+/* ===== Setup screen layout ===== */
+
+/* Center the form box on the page, with breathing room on all sides */
+.setup-container {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 40px 24px;
+}
+
+/* Big bold title */
+.setup-container h1 {
+  font-size: 2.5rem;
+  font-weight: 800;
+  margin: 0 0 8px 0;
+  letter-spacing: -0.02em;       /* tighter spacing reads more confident */
+  background: linear-gradient(90deg, #ff3d8b, #ffae3d, #3dd2ff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;            /* this + background-clip = gradient text */
+}
+
+.tagline {
+  margin: 0 0 32px 0;
+  color: #9a9aa8;                /* muted gray for the subtitle */
+  font-size: 1rem;
+}
+
+/* Each section (Players, Who goes first, etc.) */
+.setup-section {
+  margin-bottom: 32px;
+}
+
+.setup-section h2 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0 0 4px 0;
+}
+
+.hint {
+  margin: 0 0 12px 0;
+  font-size: 0.875rem;
+  color: #8a8a98;                /* slightly dimmer than tagline */
+}
+
+/* ===== Player input rows ===== */
+
+.player-input-row {
+  margin-bottom: 8px;
+}
+
+.player-name-input {
+  width: 100%;
+  box-sizing: border-box;        /* include padding in the width calc */
+  padding: 12px 14px;
+  font-size: 1rem;
+  font-family: inherit;
+  background: #1a1a22;
+  color: #f0f0f0;
+  border: 1px solid #2a2a36;
+  border-radius: 8px;
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+
+.player-name-input::placeholder {
+  color: #5a5a68;
+}
+
+.player-name-input:focus {
+  border-color: #ff3d8b;         /* pink highlight when typing */
+}
+
+/* ===== Dropdown ===== */
+
+.full-width-select {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px 14px;
+  font-size: 1rem;
+  font-family: inherit;
+  background: #1a1a22;
+  color: #f0f0f0;
+  border: 1px solid #2a2a36;
+  border-radius: 8px;
+  outline: none;
+  cursor: pointer;
+}
+
+/* ===== Buttons ===== */
+
+/* Secondary button: "+ Add player" — outlined, less prominent */
+.secondary-btn {
+  margin-top: 8px;
+  padding: 10px 16px;
+  font-size: 0.95rem;
+  font-family: inherit;
+  background: transparent;
+  color: #f0f0f0;
+  border: 1px solid #3a3a48;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.secondary-btn:hover {
+  background: #1a1a22;
+  border-color: #5a5a68;
+}
+
+/* Primary button: "Start Game" — bold, can't miss it */
+.primary-btn {
+  width: 100%;
+  margin-top: 16px;
+  padding: 16px;
+  font-size: 1.05rem;
+  font-weight: 600;
+  font-family: inherit;
+  color: #0e0e12;                /* dark text on bright background */
+  background: linear-gradient(90deg, #ff3d8b, #ffae3d);
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.primary-btn:hover {
+  transform: translateY(-1px);   /* tiny lift on hover */
+  box-shadow: 0 8px 24px rgba(255, 61, 139, 0.25);
+}
+
+.primary-btn:active {
+  transform: translateY(0);      /* press-down effect on click */
 }

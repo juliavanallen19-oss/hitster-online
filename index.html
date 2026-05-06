@@ -1,1 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hitster Online</title>
 
+  <!-- Our own stylesheet -->
+  <link rel="stylesheet" href="style.css">
+
+  <!-- QR code library (Task 1.3). Loaded from a CDN so we don't have to host it ourselves. -->
+  <!-- This must come BEFORE game.js, because game.js calls `new QRCode(...)`. -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+</head>
+<body>
+
+  <!-- =========================================================== -->
+  <!-- SCREEN 1: SETUP                                               -->
+  <!-- The first thing players see. Players enter names, pick mode,  -->
+  <!-- and click Start. We'll fill this in properly in Step 2.       -->
+  <!-- =========================================================== -->
+  <div id="setup-screen" class="screen active">
+    <h1>Hitster Online</h1>
+    <p>Setup screen — coming in Step 2.</p>
+  </div>
+
+  <!-- =========================================================== -->
+  <!-- SCREEN 2: GAME BOARD                                          -->
+  <!-- The main playing area: active player, QR card, timeline,      -->
+  <!-- token counters, action buttons. Filled in Step 3 and Step 4.  -->
+  <!-- =========================================================== -->
+  <div id="game-screen" class="screen">
+    <p>Game board — coming in Step 3.</p>
+  </div>
+
+  <!-- =========================================================== -->
+  <!-- SCREEN 3: WIN                                                 -->
+  <!-- Shown when someone wins. Filled in Step 5.                    -->
+  <!-- =========================================================== -->
+  <div id="win-screen" class="screen">
+    <p>Win screen — coming in Step 5.</p>
+  </div>
+
+  <!-- =========================================================== -->
+  <!-- SCRIPTS                                                       -->
+  <!-- Loaded at the bottom so all the HTML above already exists     -->
+  <!-- when the JavaScript runs. Order matters: game.js first        -->
+  <!-- (defines the game logic), then ui.js (which uses it).         -->
+  <!-- =========================================================== -->
+  <script src="game.js"></script>
+  <script src="ui.js"></script>
+
+</body>
+</html>

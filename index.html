@@ -20,9 +20,47 @@
   <!-- and click Start. We'll fill this in properly in Step 2.       -->
   <!-- =========================================================== -->
   <div id="setup-screen" class="screen active">
+
+  <div class="setup-container">
+
     <h1>Hitster Online</h1>
-    <p>Setup screen — coming in Step 2.</p>
+    <p class="tagline">Build your timeline. Guess the year. Win the game.</p>
+
+    <!-- ===== Player names section ===== -->
+    <section class="setup-section">
+      <h2>Players</h2>
+      <p class="hint">Add 2 to 6 players.</p>
+
+      <!-- This list will hold all the player input rows. -->
+      <!-- It starts with 2 inputs; ui.js will add/remove rows from here later. -->
+      <div id="player-inputs">
+        <div class="player-input-row">
+          <input type="text" class="player-name-input" placeholder="Player 1 name" maxlength="20">
+        </div>
+        <div class="player-input-row">
+          <input type="text" class="player-name-input" placeholder="Player 2 name" maxlength="20">
+        </div>
+      </div>
+
+      <button type="button" id="add-player-btn" class="secondary-btn">+ Add player</button>
+    </section>
+
+    <!-- ===== Starting player section ===== -->
+    <section class="setup-section">
+      <h2>Who goes first? Choose one player.</h2>
+      <p class="hint">The dropdown will update once you've typed in player names.</p>
+
+      <select id="starting-player-select" class="full-width-select">
+        <option value="0">Player 1</option>
+      </select>
+    </section>
+
+    <!-- ===== Start button ===== -->
+    <button type="button" id="start-game-btn" class="primary-btn">Start Game</button>
+
   </div>
+
+</div>
 
   <!-- =========================================================== -->
   <!-- SCREEN 2: GAME BOARD                                          -->

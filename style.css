@@ -1,1 +1,22 @@
+/* =============================================================
+   STEP 1 — minimal styling, just enough to show one screen at a time.
+   We'll add the real visual design in Steps 2–5.
+   ============================================================= */
 
+/* All three screens are hidden by default... */
+.screen {
+  display: none;
+}
+
+/* ...except the one currently marked `active`. */
+.screen.active {
+  display: block;
+}
+
+/* A little body styling so the placeholder text isn't squashed against
+   the edges of the browser window. */
+body {
+  font-family: system-ui, -apple-system, sans-serif;
+  margin: 0;
+  padding: 20px;
+}

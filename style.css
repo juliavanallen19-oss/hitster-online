@@ -517,6 +517,61 @@ body {
   margin: 0 0 16px 0;
 }
 
+/* ===== Face-down card (placed but not yet revealed) ===== */
+
+.timeline-card--facedown {
+  background: #2a2a36;
+  border: 2px dashed #ff3d8b;
+  color: transparent;              /* hide text */
+  position: relative;
+  overflow: hidden;
+}
+
+.timeline-card--facedown::after {
+  content: "?";
+  position: absolute;
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: #ff3d8b;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* ===== Steal token marker (shown in a slot on the active player's timeline) ===== */
+
+.steal-token-marker {
+  flex-shrink: 0;
+  width: 48px;
+  min-height: 48px;
+  background: #1a1a22;
+  border: 2px solid #ffae3d;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  font-size: 0.65rem;
+  color: #ffae3d;
+  text-align: center;
+  padding: 4px;
+}
+
+/* ===== Stealer's timeline reveal section ===== */
+
+#stealer-timeline-section {
+  border: 2px solid #ffae3d;
+  border-radius: 12px;
+  padding: 12px;
+  animation: steal-flash 0.4s ease;
+}
+
+@keyframes steal-flash {
+  0%   { opacity: 0; transform: scale(0.97); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
 /* ===== Disabled button state (tasks 5.4, 5.5) ===== */
 
 .btn-disabled {

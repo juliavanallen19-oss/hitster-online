@@ -36,9 +36,11 @@
       <div id="player-inputs">
         <div class="player-input-row">
           <input type="text" class="player-name-input" placeholder="Player 1 name" maxlength="20">
+          <button type="button" class="delete-player-btn" aria-label="Remove player">×</button>
         </div>
         <div class="player-input-row">
           <input type="text" class="player-name-input" placeholder="Player 2 name" maxlength="20">
+          <button type="button" class="delete-player-btn" aria-label="Remove player">×</button>
         </div>
       </div>
 
@@ -85,6 +87,7 @@
           <span class="token-icon">🎵</span>
           <span id="active-player-token-count">0</span>
         </div>
+        <button type="button" id="finish-game-btn" class="finish-game-btn">Finish game</button>
       </header>
 
       <!-- ===== Song card: QR code + hidden info + name guess form ===== -->

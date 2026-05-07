@@ -24,16 +24,20 @@ function showScreen(id) {
 
 // =============================================================
 // FEEDBACK MESSAGE BAR
+// persistent = true  → stays until beginTurn() clears it
+// persistent = false → auto-hides after 3.5 s
 // =============================================================
 
 let messageTimer = null;
 
-function showMessage(text) {
+function showMessage(text, persistent = false) {
     const bar = el('message-bar');
     bar.textContent = text;
     bar.classList.remove('hidden');
     clearTimeout(messageTimer);
-    messageTimer = setTimeout(() => bar.classList.add('hidden'), 3500);
+    if (!persistent) {
+        messageTimer = setTimeout(() => bar.classList.add('hidden'), 3500);
+    }
 }
 
 
@@ -44,7 +48,10 @@ function showMessage(text) {
 function initSetupScreen() {
     el('add-player-btn').addEventListener('click', addPlayerInput);
     el('player-inputs').addEventListener('input', updateStartingPlayerDropdown);
+    // Delete buttons use event delegation so dynamic rows are covered too
+    el('player-inputs').addEventListener('click', onDeletePlayer);
     el('start-game-btn').addEventListener('click', onStartGame);
+    updateDeleteButtons();
     updateStartingPlayerDropdown();
 }
 
@@ -56,23 +63,47 @@ function addPlayerInput() {
     }
     const row = document.createElement('div');
     row.className = 'player-input-row';
-    row.innerHTML = `<input type="text" class="player-name-input" placeholder="Player ${rows.length + 1} name" maxlength="20">`;
+    row.innerHTML = `<input type="text" class="player-name-input" placeholder="Player ${rows.length + 1} name" maxlength="20">
+                     <button type="button" class="delete-player-btn" aria-label="Remove player">×</button>`;
     el('player-inputs').appendChild(row);
+    updateDeleteButtons();
     updateStartingPlayerDropdown();
 }
 
+// Handles a click on any × delete button inside #player-inputs
+function onDeletePlayer(e) {
+    if (!e.target.classList.contains('delete-player-btn')) return;
+    const rows = document.querySelectorAll('.player-input-row');
+    if (rows.length <= 2) return;
+    e.target.closest('.player-input-row').remove();
+    updateDeleteButtons();
+    updateStartingPlayerDropdown();
+}
+
+// Disables delete buttons when only 2 rows remain (can't go below minimum)
+function updateDeleteButtons() {
+    const rows = document.querySelectorAll('.player-input-row');
+    rows.forEach(row => {
+        const btn = row.querySelector('.delete-player-btn');
+        if (btn) btn.disabled = rows.length <= 2;
+    });
+}
+
+// "Who goes first?" dropdown — only shows players who have typed a name (fix #2)
 function updateStartingPlayerDropdown() {
     const inputs  = document.querySelectorAll('.player-name-input');
     const select  = el('starting-player-select');
     const current = select.value;
     select.innerHTML = '';
-    inputs.forEach((input, i) => {
+    inputs.forEach(input => {
+        const name = input.value.trim();
+        if (!name) return; // skip empty rows
         const opt       = document.createElement('option');
-        opt.value       = i;
-        opt.textContent = input.value.trim() || `Player ${i + 1}`;
+        opt.value       = name; // store name, not index
+        opt.textContent = name;
         select.appendChild(opt);
     });
-    if (current && current < inputs.length) select.value = current;
+    if (current) select.value = current; // restore previous selection if still present
 }
 
 function onStartGame() {
@@ -82,9 +113,10 @@ function onStartGame() {
         showMessage('Please enter at least 2 player names.');
         return;
     }
-    const startingIndex = parseInt(el('starting-player-select').value) || 0;
+    const startingName  = el('starting-player-select').value;
+    const startingIndex = names.indexOf(startingName);
     const mode          = el('mode-select').value;
-    startGame(names, mode, startingIndex);
+    startGame(names, mode, startingIndex >= 0 ? startingIndex : 0);
     showScreen('game-screen');
     beginTurn();
 }
@@ -200,8 +232,9 @@ function updateButtonStates() {
 
     // Before Place Here: only Skip and Buy are relevant
     // After Place Here: only Steal is relevant (others hidden)
+    const anyoneCanSteal = game.players.some((p, i) => i !== game.currentPlayerIndex && p.tokens >= 1);
     setButtonEnabled(el('place-btn'),  hasSlot && !placed);
-    setButtonEnabled(el('steal-btn'),  placed && game.pendingSteal === null);
+    setButtonEnabled(el('steal-btn'),  placed && game.pendingSteal === null && anyoneCanSteal);
     setButtonEnabled(el('skip-btn'),   !placed && player.tokens >= 1);
     setButtonEnabled(el('buy-btn'),    !placed && player.tokens >= 3);
 }
@@ -290,12 +323,11 @@ function renderStealPanel() {
     const panel     = el('steal-panel');
     const nonActive = game.players
         .map((p, i) => ({ player: p, index: i }))
-        .filter(({ index }) => index !== game.currentPlayerIndex);
+        .filter(({ player, index }) => index !== game.currentPlayerIndex && player.tokens >= 1);
 
     let html = '<p class="steal-label">Who wants to challenge? (costs 1 🎵 token)</p>';
     nonActive.forEach(({ player, index }) => {
-        const canSteal = player.tokens >= 1;
-        html += `<button class="secondary-btn steal-player-btn${canSteal ? '' : ' btn-disabled'}"
+        html += `<button class="secondary-btn steal-player-btn"
                          data-player-index="${index}">
                    ${player.name} — ${player.tokens} token${player.tokens !== 1 ? 's' : ''}
                  </button>`;
@@ -467,34 +499,40 @@ el('submit-btn').addEventListener('click', () => {
     el('steal-btn').classList.add('hidden');
     el('steal-panel').classList.add('hidden');
 
-    // Show feedback
-    if (result.nameGuessCorrect) {
-        showMessage('Correct artist & title! Bonus token earned. 🎵');
-    } else if (nameGuess) {
-        showMessage('Not quite on the name — better luck next time!');
-    }
-
     updateTokenDisplay();
     renderTimeline();
     renderAllPlayers();
 
-    // Handle steal outcome
+    // Handle steal outcome first (steal_wins returns early)
     if (result.stealResult) {
         const { outcome, stealer } = result.stealResult;
 
         if (outcome === 'steal_wins') {
-            // Stealer gets the card — show their timeline briefly, then next turn
             showStealerTimelineReveal(stealer, result.card);
             return; // showStealerTimelineReveal handles endTurn + beginTurn
         } else if (outcome === 'both_wrong') {
-            showMessage(`Both positions were wrong — card discarded. ${stealer.name} loses their token.`);
+            showMessage(`Both positions were wrong — card discarded. ${stealer.name} loses their token.`, true);
         } else {
-            showMessage(`${game.getCurrentPlayer().name} was right! ${stealer.name}'s token is lost.`);
+            // Active player's placement was correct, steal failed
+            if (result.nameGuessCorrect) {
+                showMessage(`Right placement ✅ Bonus token for artist & title! 🎵 ${stealer.name}'s steal failed.`, true);
+            } else if (nameGuess) {
+                showMessage(`Right placement ✅ But artist & title not quite — good try! ${stealer.name}'s steal failed.`, true);
+            } else {
+                showMessage(`${game.getCurrentPlayer().name} was right! ✅ ${stealer.name}'s steal failed.`, true);
+            }
         }
     } else if (!result.activeCorrect) {
-        showMessage('Wrong position — card discarded. Better luck next turn!');
+        showMessage('Wrong position — card discarded. Better luck next turn!', true);
     } else {
-        showMessage('Correct placement! ✅');
+        // No steal, placement correct
+        if (result.nameGuessCorrect) {
+            showMessage('Correct placement! ✅ Bonus token for artist & title! 🎵', true);
+        } else if (nameGuess) {
+            showMessage('Right placement ✅ But artist & title not quite — good try!', true);
+        } else {
+            showMessage('Correct placement! ✅', true);
+        }
     }
 
     el('next-turn-btn').classList.remove('hidden');
@@ -527,6 +565,7 @@ el('skip-btn').addEventListener('click', () => {
             generateQRCode(result.card.spotify_url);
             renderTimeline();
             updateButtonStates();
+            showMessage('Skipped! New card ready — scan the QR code again to hear your next song.');
         } else {
             showWinScreen(handleEmptyDeck(game));
         }
@@ -555,6 +594,12 @@ el('buy-btn').addEventListener('click', () => {
     }
 });
 
+// --- Finish game early ---
+el('finish-game-btn').addEventListener('click', () => {
+    if (!game) return;
+    showWinScreen(handleEmptyDeck(game));
+});
+
 // --- Play Again ---
 el('play-again-btn').addEventListener('click', () => {
     game             = null;
@@ -564,11 +609,14 @@ el('play-again-btn').addEventListener('click', () => {
     el('player-inputs').innerHTML = `
         <div class="player-input-row">
             <input type="text" class="player-name-input" placeholder="Player 1 name" maxlength="20">
+            <button type="button" class="delete-player-btn" aria-label="Remove player">×</button>
         </div>
         <div class="player-input-row">
             <input type="text" class="player-name-input" placeholder="Player 2 name" maxlength="20">
+            <button type="button" class="delete-player-btn" aria-label="Remove player">×</button>
         </div>
     `;
+    updateDeleteButtons();
     updateStartingPlayerDropdown();
     showScreen('setup-screen');
 });

@@ -77,7 +77,41 @@ body {
 /* ===== Player input rows ===== */
 
 .player-input-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   margin-bottom: 8px;
+}
+
+.player-input-row .player-name-input {
+  flex: 1;  /* input takes all available space, delete button sits beside it */
+}
+
+/* Delete player button */
+.delete-player-btn {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  font-size: 1.1rem;
+  line-height: 1;
+  font-family: inherit;
+  background: transparent;
+  color: #9a9aa8;
+  border: 1px solid #3a3a48;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.delete-player-btn:hover {
+  color: #ff3d8b;
+  border-color: #ff3d8b;
+}
+
+.delete-player-btn:disabled {
+  opacity: 0.25;
+  cursor: not-allowed;
 }
 
 .player-name-input {
@@ -233,6 +267,25 @@ body {
 
 .token-icon {
   font-size: 1.1rem;
+}
+
+/* Finish game early button — sits in the top bar, unobtrusive */
+.finish-game-btn {
+  font-size: 0.75rem;
+  font-family: inherit;
+  padding: 6px 10px;
+  background: transparent;
+  color: #9a9aa8;
+  border: 1px solid #3a3a48;
+  border-radius: 6px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.finish-game-btn:hover {
+  color: #ff3d8b;
+  border-color: #ff3d8b;
 }
 
 /* ===== QR code area ===== */

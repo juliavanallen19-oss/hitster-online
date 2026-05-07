@@ -448,14 +448,5 @@ function startGame(playerNames, mode = "original", startingPlayerIndex = 0) {
     }
 
     game = new Game(playerNames, PLACEHOLDER_SONGS, mode, startingPlayerIndex);
-
-    // Draw the first card for the first player's turn
-    let firstCard = drawCard(game);
-    if (firstCard) {
-        generateQRCode(firstCard.spotify_url);
-    }
-
-    console.log("Game started!", game);
-    console.log("First card:", firstCard);
-    console.log("Current player:", game.getCurrentPlayer().name);
+    // ui.js beginTurn() draws the first card and generates the QR code
 }

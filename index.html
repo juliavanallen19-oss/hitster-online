@@ -45,10 +45,18 @@
       <button type="button" id="add-player-btn" class="secondary-btn">+ Add player</button>
     </section>
 
+    <!-- ===== Game mode section ===== -->
+    <section class="setup-section">
+      <h2>Game mode</h2>
+      <select id="mode-select" class="full-width-select">
+        <option value="original">Original (2 starting tokens)</option>
+      </select>
+    </section>
+
     <!-- ===== Starting player section ===== -->
     <section class="setup-section">
-      <h2>Who goes first? Choose one player.</h2>
-      <p class="hint">The dropdown will update once you've typed in player names.</p>
+      <h2>Who goes first?</h2>
+      <p class="hint">The dropdown updates as you type player names.</p>
 
       <select id="starting-player-select" class="full-width-select">
         <option value="0">Player 1</option>
@@ -127,13 +135,20 @@
         </div>
       </section>
 
+      <!-- ===== Feedback message bar ===== -->
+      <div id="message-bar" class="message-bar hidden"></div>
+
       <!-- ===== Action buttons ===== -->
       <section class="action-buttons">
         <button type="button" id="place-btn" class="primary-btn">Place here ✓</button>
-        <button type="button" id="skip-btn" class="secondary-btn">Skip card (costs 1 token)</button>
-        <button type="button" id="steal-btn" class="secondary-btn hidden">HITSTER! steal (costs 1 token)</button>
-        <button type="button" id="buy-btn" class="secondary-btn hidden">Buy placement (costs 3 tokens)</button>
+        <button type="button" id="skip-btn" class="secondary-btn">Skip card (costs 1 🎵)</button>
+        <button type="button" id="steal-btn" class="secondary-btn">HITSTER! steal (costs 1 🎵)</button>
+        <button type="button" id="buy-btn" class="secondary-btn">Buy placement (costs 3 🎵)</button>
+        <button type="button" id="next-turn-btn" class="primary-btn hidden">Next turn →</button>
       </section>
+
+      <!-- ===== HITSTER! steal panel ===== -->
+      <div id="steal-panel" class="steal-panel hidden"></div>
 
       <!-- ===== All players panel: names + token counts ===== -->
       <section class="players-panel">

@@ -517,6 +517,76 @@ body {
   margin: 0 0 16px 0;
 }
 
+/* ===== Disabled button state (tasks 5.4, 5.5) ===== */
+
+.btn-disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.btn-disabled:hover {
+  transform: none;
+  box-shadow: none;
+  background: transparent;
+  border-color: #3a3a48;
+}
+
+/* ===== Feedback message bar (task 5.7) ===== */
+
+.message-bar {
+  background: #1a1a22;
+  border: 1px solid #ff3d8b;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 0.875rem;
+  color: #f0f0f0;
+  text-align: center;
+}
+
+/* ===== Selected timeline slot (task 5.4) ===== */
+
+.timeline-slot.selected {
+  width: 20px;
+  background: #ffae3d;
+  box-shadow: 0 0 10px rgba(255, 174, 61, 0.6);
+}
+
+/* ===== Player row: card count ===== */
+
+.player-row-cards {
+  font-size: 0.85rem;
+  color: #9a9aa8;
+}
+
+/* ===== HITSTER! steal panel ===== */
+
+.steal-panel {
+  background: #1a1a22;
+  border: 1px solid #3a3a48;
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.steal-label {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #9a9aa8;
+}
+
+.steal-slot-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.steal-slot-btn {
+  text-align: left;
+  font-size: 0.85rem;
+}
+
 /* ===== Responsive: on wider screens, show QR + timeline side by side ===== */
 @media (min-width: 560px) {
   .action-buttons {

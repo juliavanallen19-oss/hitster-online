@@ -375,6 +375,57 @@ function handleEmptyDeck(game) {
 
 
 // =============================================================
+// TASK 4.1 — Skip card (costs 1 token)
+// Discards the current card and draws the next one from the deck.
+// =============================================================
+
+function skipCard(game) {
+    let player = game.getCurrentPlayer();
+    if (player.tokens < 1) return { success: false, card: null };
+    player.tokens -= 1;
+    discardCard(game);
+    let nextCard = drawCard(game);
+    return { success: true, card: nextCard };
+}
+
+
+// =============================================================
+// TASKS 4.2 + 4.3 — HITSTER! steal attempt
+// A non-active player pays 1 token and picks a position on their
+// OWN timeline. If the year fits → they keep the card.
+// If wrong → the active player keeps it (normal flow continues).
+// =============================================================
+
+function stealAttempt(game, stealerIndex, chosenPosition) {
+    let stealer = game.players[stealerIndex];
+    let card = game.currentCard;
+    if (stealer.tokens < 1) return { stealCorrect: false, stealer, card };
+    stealer.tokens -= 1;
+    let correct = isPlacementCorrect(stealer.timeline, card, chosenPosition);
+    if (correct) {
+        insertCardIntoTimeline(stealer, card, chosenPosition);
+        game.currentCard = null;
+    }
+    return { stealCorrect: correct, stealer, card };
+}
+
+
+// =============================================================
+// TASK 4.4 — Buy a placement (costs 3 tokens)
+// Places the card at the chosen position without any year check.
+// =============================================================
+
+function buyPlacement(game, chosenPosition) {
+    let player = game.getCurrentPlayer();
+    if (player.tokens < 3) return { success: false };
+    player.tokens -= 3;
+    insertCardIntoTimeline(player, game.currentCard, chosenPosition);
+    game.currentCard = null;
+    return { success: true };
+}
+
+
+// =============================================================
 // START THE GAME — called by the UI when the player clicks "Start"
 // =============================================================
 

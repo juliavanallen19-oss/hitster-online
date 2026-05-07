@@ -163,3 +163,373 @@ body {
 .primary-btn:active {
   transform: translateY(0);      /* press-down effect on click */
 }
+
+/* =============================================================
+   UTILITY
+   ============================================================= */
+
+/* JS toggles this class to show/hide elements throughout the game */
+.hidden {
+  display: none !important;
+}
+
+/* =============================================================
+   STEP 3 — Game board layout (Task 1.5)
+   Mobile-first: single column by default, wider on larger screens.
+   ============================================================= */
+
+/* Outer wrapper: same max-width as setup, centered */
+.game-container {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 16px 24px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+/* ===== Top bar ===== */
+
+.turn-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #1a1a22;
+  border: 1px solid #2a2a36;
+  border-radius: 12px;
+  padding: 14px 18px;
+}
+
+.turn-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.turn-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #9a9aa8;
+}
+
+.active-player-name {
+  font-size: 1.3rem;
+  font-weight: 700;
+}
+
+.token-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #0e0e12;
+  border: 1px solid #2a2a36;
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 1rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.token-icon {
+  font-size: 1.1rem;
+}
+
+/* ===== QR code area ===== */
+
+.card-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+.qr-container {
+  width: 200px;
+  height: 200px;
+  background: #ffffff;           /* QR codes need a white background to scan */
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.scan-hint {
+  margin: 0;
+  font-size: 0.875rem;
+  color: #9a9aa8;
+  text-align: center;
+}
+
+/* ===== Timeline section ===== */
+
+.section-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: #9a9aa8;
+  margin: 0 0 10px 0;
+}
+
+/* Wrapper enables horizontal scroll when cards overflow */
+.timeline-scroll-wrapper {
+  overflow-x: auto;
+  padding-bottom: 8px;           /* space for scrollbar on desktop */
+}
+
+.timeline-track {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  min-height: 90px;
+  align-items: center;
+  padding: 8px 4px;
+  border: 1px dashed #2a2a36;
+  border-radius: 10px;
+  min-width: max-content;        /* don't wrap cards — scroll instead */
+}
+
+/* Individual card in the timeline */
+.timeline-card {
+  flex-shrink: 0;
+  width: 72px;
+  min-height: 72px;
+  background: #1a1a22;
+  border: 1px solid #3a3a48;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 8px 6px;
+  text-align: center;
+  font-size: 0.7rem;
+  color: #c0c0cc;
+}
+
+.timeline-card .card-year {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #ff3d8b;
+}
+
+/* Slot indicator: the empty gap where a new card can be dropped */
+.timeline-slot {
+  flex-shrink: 0;
+  width: 8px;
+  min-height: 72px;
+  background: #2a2a36;
+  border-radius: 4px;
+  transition: background 0.15s ease, width 0.15s ease;
+}
+
+.timeline-slot.active {
+  width: 16px;
+  background: #ff3d8b;
+}
+
+/* ===== Action buttons ===== */
+
+.action-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* ===== All players panel ===== */
+
+.players-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* One row per player */
+.player-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #1a1a22;
+  border: 1px solid #2a2a36;
+  border-radius: 8px;
+  padding: 10px 14px;
+}
+
+.player-row.active-turn {
+  border-color: #ff3d8b;         /* highlight whose turn it is */
+}
+
+.player-row-name {
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.player-row-tokens {
+  font-size: 0.85rem;
+  color: #9a9aa8;
+}
+
+/* ===== Song card component (Tasks 1.6 + 1.10) ===== */
+
+/* The card wraps QR code, guess form, reveal button, and song info */
+.song-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  background: #1a1a22;
+  border: 1px solid #2a2a36;
+  border-radius: 16px;
+  padding: 24px 20px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Name guess form (task 1.10) */
+.name-guess-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+.guess-label {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #9a9aa8;
+  text-align: center;
+}
+
+/* Song info revealed after player clicks Reveal (task 1.6) */
+.song-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  text-align: center;
+  width: 100%;
+  padding-top: 8px;
+  border-top: 1px solid #2a2a36;
+}
+
+.song-title {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #f0f0f0;
+}
+
+.song-artist {
+  margin: 0;
+  font-size: 1rem;
+  color: #9a9aa8;
+}
+
+.song-year {
+  margin: 0;
+  font-size: 1.4rem;
+  font-weight: 800;
+  background: linear-gradient(90deg, #ff3d8b, #ffae3d);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* ===== Timeline enhancements (Task 1.7) ===== */
+
+/* Slots are clickable — make that obvious */
+.timeline-slot {
+  cursor: pointer;
+  transition: background 0.15s ease, width 0.15s ease, box-shadow 0.15s ease;
+}
+
+.timeline-slot:hover {
+  width: 20px;
+  background: #ff3d8b;
+  box-shadow: 0 0 8px rgba(255, 61, 139, 0.5);
+}
+
+/* Decade-based card colors — border and year color per era.
+   JS adds one of these classes to each .timeline-card. */
+.timeline-card.decade-60s { border-color: #c9a84c; }
+.timeline-card.decade-60s .card-year { color: #c9a84c; }
+
+.timeline-card.decade-70s { border-color: #e07b39; }
+.timeline-card.decade-70s .card-year { color: #e07b39; }
+
+.timeline-card.decade-80s { border-color: #e03d8f; }
+.timeline-card.decade-80s .card-year { color: #e03d8f; }
+
+.timeline-card.decade-90s { border-color: #2dbfaa; }
+.timeline-card.decade-90s .card-year { color: #2dbfaa; }
+
+.timeline-card.decade-00s { border-color: #3d9be0; }
+.timeline-card.decade-00s .card-year { color: #3d9be0; }
+
+.timeline-card.decade-10s { border-color: #7c5ce0; }
+.timeline-card.decade-10s .card-year { color: #7c5ce0; }
+
+.timeline-card.decade-20s { border-color: #b0b8cc; }
+.timeline-card.decade-20s .card-year { color: #b0b8cc; }
+
+/* ===== Win screen (Task 1.8) ===== */
+
+.win-container {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 80px 24px 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  text-align: center;
+}
+
+.win-trophy {
+  font-size: 5rem;
+  line-height: 1;
+}
+
+.win-title {
+  font-size: 2rem;
+  font-weight: 800;
+  margin: 8px 0 0 0;
+  letter-spacing: -0.02em;
+  background: linear-gradient(90deg, #ff3d8b, #ffae3d, #3dd2ff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.winner-name {
+  font-size: 2.8rem;
+  font-weight: 800;
+  color: #f0f0f0;
+  margin: 0;
+}
+
+.win-subtitle {
+  font-size: 1rem;
+  color: #9a9aa8;
+  margin: 0 0 16px 0;
+}
+
+/* ===== Responsive: on wider screens, show QR + timeline side by side ===== */
+@media (min-width: 560px) {
+  .action-buttons {
+    flex-direction: row;
+  }
+
+  .action-buttons .primary-btn {
+    flex: 1;
+    margin-top: 0;
+  }
+
+  .action-buttons .secondary-btn {
+    flex: 1;
+    margin-top: 0;
+  }
+}

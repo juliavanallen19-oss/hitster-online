@@ -61,5 +61,7 @@ document.getElementById('steal-btn').addEventListener('click', () => {
 
 document.getElementById('buy-btn').addEventListener('click', () => {
     if (!game) return;
+    // buyPlacement() finds the correct position automatically — no position picker needed.
+    // Full UI reveal wired in Phase 5.
     console.log('Buy placement button clicked — will be wired in Phase 5');
 });

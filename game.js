@@ -412,16 +412,26 @@ function stealAttempt(game, stealerIndex, chosenPosition) {
 
 // =============================================================
 // TASK 4.4 — Buy a placement (costs 3 tokens)
-// Places the card at the chosen position without any year check.
+// The game automatically finds the correct chronological position
+// and inserts the card there. No manual placement or year check needed.
 // =============================================================
 
-function buyPlacement(game, chosenPosition) {
+function buyPlacement(game) {
     let player = game.getCurrentPlayer();
-    if (player.tokens < 3) return { success: false };
+    if (player.tokens < 3) return { success: false, position: null };
     player.tokens -= 3;
-    insertCardIntoTimeline(player, game.currentCard, chosenPosition);
+    let card = game.currentCard;
+
+    // Walk the timeline left to right to find where the card's year fits.
+    // Insert just before the first card that is newer than this one.
+    let position = 0;
+    while (position < player.timeline.length && player.timeline[position].year <= card.year) {
+        position++;
+    }
+
+    insertCardIntoTimeline(player, card, position);
     game.currentCard = null;
-    return { success: true };
+    return { success: true, position };
 }
 
 

@@ -729,7 +729,7 @@ body {
 }
 
 .deck-icon {
-  color: #7a9acc;   /* muted blue — visible but not distracting */
+  color: #5a5a78;   /* same tone as the surrounding text */
   font-size: 1rem;
 }
 
@@ -742,9 +742,16 @@ body {
 
 .now-playing-icon {
   color: #ff3d8b;
-  font-size: 0.7rem;
-  vertical-align: middle;
-  margin-left: 4px;
+  font-size: 0.65rem;
+  vertical-align: 0.05em;   /* fine-tuned to sit exactly mid-line of the name text */
+  margin-right: 5px;
+}
+
+/* ===== Token icon: light golden tint ===== */
+
+.token-icon,
+.player-token-icon {
+  filter: brightness(1.6) saturate(1.4);
 }
 
 /* ===== Win screen: deck-empty note ===== */
@@ -821,6 +828,17 @@ body {
   font-size: 0.85rem;
   color: #9a9aa8;
   white-space: nowrap;
+}
+
+/* ===== Non-interactive timeline slot (read-only timelines, post-resolve) ===== */
+/* Thinner, grey, no hover — purely visual divider between cards */
+
+.timeline-slot-static {
+  flex-shrink: 0;
+  width: 5px;
+  min-height: 72px;
+  background: #222230;
+  border-radius: 4px;
 }
 
 /* ===== Newly won card: glows gold, then settles back to normal ===== */

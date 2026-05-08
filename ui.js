@@ -164,8 +164,12 @@ function renderTimelineInto(container, timeline, pendingPos, stealPos, interacti
             // Steal token marker
             slot.className = 'steal-token-marker';
             slot.innerHTML = `🪙<br>${game.players[game.pendingSteal ? game.pendingSteal.stealerIndex : 0].name}`;
-        } else {
+        } else if (interactive) {
+            // Interactive slots: hoverable, clickable, highlight when selected
             slot.className = 'timeline-slot' + (i === selectedPosition ? ' selected' : '');
+        } else {
+            // Non-interactive slots: thin grey divider, no hover effects
+            slot.className = 'timeline-slot-static';
         }
 
         if (interactive) {
@@ -202,8 +206,8 @@ function renderAllPlayers() {
         const row      = document.createElement('div');
         row.className  = 'player-row' + (isActive ? ' active-turn' : '');
         row.innerHTML  = `
-            <span class="player-row-name">${player.name}${isActive ? ' <span class="now-playing-icon">▶</span>' : ''}</span>
-            <span class="player-row-tokens"><span class="player-token-count">${player.tokens}</span> tokens</span>
+            <span class="player-row-name">${isActive ? '<span class="now-playing-icon">▶</span>' : ''}${player.name}</span>
+            <span class="player-row-tokens"><span class="player-token-icon">🪙</span> <span class="player-token-count">${player.tokens}</span></span>
             <span class="player-row-cards">${player.timeline.length} cards</span>
         `;
         list.appendChild(row);
@@ -495,7 +499,7 @@ function showStealerTimelineReveal(stealer, card) {
 // --- Place Here ---
 el('place-btn').addEventListener('click', () => {
     if (selectedPosition === null) {
-        showMessage('First tap a slot in your timeline, then hit "Place here".');
+        showMessage('First tap a slot in your timeline, then hit "Place here".', true);
         return;
     }
     if (el('place-btn').classList.contains('btn-disabled')) return;
@@ -512,6 +516,7 @@ el('place-btn').addEventListener('click', () => {
     el('steal-btn').classList.remove('hidden');
     el('name-guess-form').classList.remove('hidden');
 
+    showMessage('Card placed face-down — any player can steal, or type your guess and click Submit & reveal.', true);
     updateButtonStates();
 });
 
@@ -567,7 +572,8 @@ el('submit-btn').addEventListener('click', () => {
     }
 
     updateTokenDisplay();
-    renderTimeline();
+    // Render timeline as non-interactive — the turn is resolved, no more placement possible
+    renderTimelineInto(el('timeline-container'), game.getCurrentPlayer().timeline, null, null, false);
     renderAllPlayers();
 
     // Handle steal outcome first (steal_wins returns early)

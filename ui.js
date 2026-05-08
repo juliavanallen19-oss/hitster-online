@@ -131,6 +131,7 @@ function renderPlayerHeader() {
     el('active-player-name').textContent        = player.name;
     el('active-player-token-count').textContent = player.tokens;
     el('timeline-label').textContent            = `${player.name}'s timeline`;
+    el('deck-count').textContent                = game.deck.length;
 }
 
 function decadeClass(year) {
@@ -282,7 +283,7 @@ function beginTurn() {
     if (!game.currentCard) {
         const card = drawCard(game);
         if (!card) {
-            showWinScreen(handleEmptyDeck(game));
+            showWinScreen(handleEmptyDeck(game), true);
             return;
         }
     }
@@ -308,12 +309,62 @@ function onSlotClick(position) {
 
 // =============================================================
 // WIN SCREEN
+// deckEmpty = true  → game ended because the deck ran out
+// deckEmpty = false → someone reached 10 cards (normal win)
 // =============================================================
 
-function showWinScreen(winners) {
-    const list  = Array.isArray(winners) ? winners : [winners];
-    const names = list.map(p => p.name).join(' & ');
-    el('winner-name').textContent = names;
+function showWinScreen(winners, deckEmpty = false) {
+    const list = Array.isArray(winners) ? winners : [winners];
+
+    // "The song deck is empty" note — only shown when relevant
+    if (deckEmpty) {
+        el('win-deck-note').classList.remove('hidden');
+    } else {
+        el('win-deck-note').classList.add('hidden');
+    }
+
+    // Headline + winner names
+    el('win-headline').textContent  = list.length > 1 ? 'We have a winning team!' : 'We have a winner!';
+    el('winner-name').textContent   = list.map(p => p.name).join(' & ');
+
+    // Stats line under the winner name(s)
+    const cardCount = list[0].timeline.length;
+    let statsText = `${cardCount} card${cardCount !== 1 ? 's' : ''} · `;
+    if (list.length === 1) {
+        statsText += `${list[0].tokens} token${list[0].tokens !== 1 ? 's' : ''} remaining`;
+    } else {
+        // Multiple co-winners — show each person's token count
+        statsText += list.map(p => `${p.name}: ${p.tokens} 🎵`).join(' · ');
+    }
+    el('winner-stats').textContent = statsText;
+
+    // Full ranking — sorted by cards (desc), then tokens (desc) as tiebreaker
+    const sorted = [...game.players].sort(
+        (a, b) => b.timeline.length - a.timeline.length || b.tokens - a.tokens
+    );
+    const rankEl = el('win-ranking');
+    rankEl.innerHTML = '<h3 class="win-ranking-title">Final standings</h3>';
+
+    let rank = 1;
+    sorted.forEach((player, i) => {
+        // Only increment rank when this player genuinely scored lower than the one above
+        if (i > 0) {
+            const prev = sorted[i - 1];
+            if (prev.timeline.length !== player.timeline.length || prev.tokens !== player.tokens) {
+                rank = i + 1;
+            }
+        }
+        const isWinner = list.some(w => w === player);
+        const row = document.createElement('div');
+        row.className = 'win-rank-row' + (isWinner ? ' win-rank-row--winner' : '');
+        row.innerHTML = `
+            <span class="win-rank-pos">${isWinner ? '🏆' : '#' + rank}</span>
+            <span class="win-rank-name">${player.name}</span>
+            <span class="win-rank-stats">${player.timeline.length} card${player.timeline.length !== 1 ? 's' : ''} · ${player.tokens} 🎵</span>
+        `;
+        rankEl.appendChild(row);
+    });
+
     showScreen('win-screen');
 }
 
@@ -476,6 +527,7 @@ el('steal-btn').addEventListener('click', () => {
 
 // --- Submit & reveal ---
 el('submit-btn').addEventListener('click', () => {
+    el('message-bar').classList.add('hidden'); // dismiss any previous message (e.g. "token placed")
     const artist = el('guess-artist').value.trim();
     const title  = el('guess-title').value.trim();
 
@@ -586,9 +638,9 @@ el('skip-btn').addEventListener('click', () => {
             generateQRCode(result.card.spotify_url);
             renderTimeline();
             updateButtonStates();
-            showMessage('Skipped! New card ready — scan the QR code again to hear your next song.');
+            showMessage('Skipped! New card ready — scan the QR code again to hear your next song.', true);
         } else {
-            showWinScreen(handleEmptyDeck(game));
+            showWinScreen(handleEmptyDeck(game), true);
         }
     }
 });
@@ -611,14 +663,14 @@ el('buy-btn').addEventListener('click', () => {
         el('steal-btn').classList.add('hidden');
         el('buy-btn').classList.add('hidden');
         el('next-turn-btn').classList.remove('hidden');
-        showMessage('Card automatically placed at the correct position! ✅');
+        showMessage('Card automatically placed at the correct position! ✅', true);
     }
 });
 
 // --- Finish game early ---
 el('finish-game-btn').addEventListener('click', () => {
     if (!game) return;
-    showWinScreen(handleEmptyDeck(game));
+    showWinScreen(handleEmptyDeck(game), true);
 });
 
 // --- Play Again ---

@@ -719,6 +719,96 @@ body {
   border-color: #f0b429;
 }
 
+/* ===== Deck counter (below scan hint) ===== */
+
+.deck-counter {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #5a5a78;
+  letter-spacing: 0.03em;
+}
+
+#deck-count {
+  font-weight: 700;
+  color: #8a8aaa;
+}
+
+/* ===== Win screen: deck-empty note ===== */
+
+.win-deck-note {
+  margin: 0 0 4px 0;
+  font-size: 0.85rem;
+  color: #9a9aa8;
+  letter-spacing: 0.02em;
+}
+
+/* ===== Win screen: winner stats line ===== */
+
+.winner-stats {
+  margin: 4px 0 24px 0;
+  font-size: 1rem;
+  color: #9a9aa8;
+}
+
+/* ===== Win screen: final standings ranking ===== */
+
+.win-ranking {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.win-ranking-title {
+  margin: 0 0 6px 0;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #5a5a78;
+  text-align: left;
+}
+
+.win-rank-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #1a1a22;
+  border: 1px solid #2a2a36;
+  border-radius: 8px;
+  padding: 10px 14px;
+}
+
+.win-rank-row--winner {
+  border-color: #ffae3d;
+  background: #1e1c14;
+}
+
+.win-rank-pos {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #5a5a78;
+  min-width: 28px;
+  text-align: center;
+}
+
+.win-rank-row--winner .win-rank-pos {
+  color: #ffae3d;
+}
+
+.win-rank-name {
+  flex: 1;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #f0f0f0;
+}
+
+.win-rank-stats {
+  font-size: 0.85rem;
+  color: #9a9aa8;
+  white-space: nowrap;
+}
+
 /* ===== Responsive: on wider screens, show QR + timeline side by side ===== */
 @media (min-width: 560px) {
   .action-buttons {

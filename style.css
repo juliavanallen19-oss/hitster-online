@@ -728,9 +728,23 @@ body {
   letter-spacing: 0.03em;
 }
 
+.deck-icon {
+  color: #7a9acc;   /* muted blue — visible but not distracting */
+  font-size: 1rem;
+}
+
 #deck-count {
   font-weight: 700;
   color: #8a8aaa;
+}
+
+/* ===== "Now playing" ▶ indicator in the players panel ===== */
+
+.now-playing-icon {
+  color: #ff3d8b;
+  font-size: 0.7rem;
+  vertical-align: middle;
+  margin-left: 4px;
 }
 
 /* ===== Win screen: deck-empty note ===== */
@@ -807,6 +821,22 @@ body {
   font-size: 0.85rem;
   color: #9a9aa8;
   white-space: nowrap;
+}
+
+/* ===== Newly won card: glows gold, then settles back to normal ===== */
+
+.timeline-card--won {
+  animation: card-won-glow 2.4s ease forwards;
+}
+
+@keyframes card-won-glow {
+  0%   { box-shadow: 0 0 0 3px rgba(255, 174, 61, 0.9),
+                     0 0 24px 8px rgba(255, 174, 61, 0.55);
+         transform: scale(1.12); }
+  40%  { box-shadow: 0 0 0 2px rgba(255, 174, 61, 0.6),
+                     0 0 14px 4px rgba(255, 174, 61, 0.35);
+         transform: scale(1.06); }
+  100% { box-shadow: none; transform: scale(1); }
 }
 
 /* ===== Responsive: on wider screens, show QR + timeline side by side ===== */

@@ -7,6 +7,7 @@
 let selectedPosition = null; // slot the active player clicked (index into timeline gaps)
 let activePosition   = null; // confirmed after Place Here is clicked (used in resolveRound)
 let lastPlayedCard   = null; // stored for reveal display
+let justWonCard      = null; // card that was just added to a timeline (gets glow animation)
 
 // --- Shorthand helper ---
 function el(id) { return document.getElementById(id); }
@@ -162,7 +163,7 @@ function renderTimelineInto(container, timeline, pendingPos, stealPos, interacti
         } else if (i === stealPos) {
             // Steal token marker
             slot.className = 'steal-token-marker';
-            slot.innerHTML = `🎵<br>${game.players[game.pendingSteal ? game.pendingSteal.stealerIndex : 0].name}`;
+            slot.innerHTML = `🪙<br>${game.players[game.pendingSteal ? game.pendingSteal.stealerIndex : 0].name}`;
         } else {
             slot.className = 'timeline-slot' + (i === selectedPosition ? ' selected' : '');
         }
@@ -177,7 +178,9 @@ function renderTimelineInto(container, timeline, pendingPos, stealPos, interacti
         if (i < timeline.length) {
             const card   = timeline[i];
             const cardEl = document.createElement('div');
-            cardEl.className = `timeline-card ${decadeClass(card.year)}`;
+            // Add glow class if this is the card that was just won this turn
+            const wonClass = (card === justWonCard) ? ' timeline-card--won' : '';
+            cardEl.className = `timeline-card ${decadeClass(card.year)}${wonClass}`;
             cardEl.innerHTML = `<span class="card-year">${card.year}</span>
                                 <span class="card-title">${card.title}</span>`;
             container.appendChild(cardEl);
@@ -199,7 +202,7 @@ function renderAllPlayers() {
         const row      = document.createElement('div');
         row.className  = 'player-row' + (isActive ? ' active-turn' : '');
         row.innerHTML  = `
-            <span class="player-row-name">${player.name}${isActive ? ' 🎵' : ''}</span>
+            <span class="player-row-name">${player.name}${isActive ? ' <span class="now-playing-icon">▶</span>' : ''}</span>
             <span class="player-row-tokens"><span class="player-token-count">${player.tokens}</span> tokens</span>
             <span class="player-row-cards">${player.timeline.length} cards</span>
         `;
@@ -257,6 +260,7 @@ function beginTurn() {
     selectedPosition = null;
     activePosition   = null;
     lastPlayedCard   = null;
+    justWonCard      = null;
 
     // Reset all panels
     el('name-guess-form').classList.add('hidden');
@@ -334,7 +338,7 @@ function showWinScreen(winners, deckEmpty = false) {
         statsText += `${list[0].tokens} token${list[0].tokens !== 1 ? 's' : ''} remaining`;
     } else {
         // Multiple co-winners — show each person's token count
-        statsText += list.map(p => `${p.name}: ${p.tokens} 🎵`).join(' · ');
+        statsText += list.map(p => `${p.name}: ${p.tokens} 🪙`).join(' · ');
     }
     el('winner-stats').textContent = statsText;
 
@@ -360,7 +364,7 @@ function showWinScreen(winners, deckEmpty = false) {
         row.innerHTML = `
             <span class="win-rank-pos">${isWinner ? '🏆' : '#' + rank}</span>
             <span class="win-rank-name">${player.name}</span>
-            <span class="win-rank-stats">${player.timeline.length} card${player.timeline.length !== 1 ? 's' : ''} · ${player.tokens} 🎵</span>
+            <span class="win-rank-stats">${player.timeline.length} card${player.timeline.length !== 1 ? 's' : ''} · ${player.tokens} 🪙</span>
         `;
         rankEl.appendChild(row);
     });
@@ -381,7 +385,7 @@ function renderStealPanel() {
         .map((p, i) => ({ player: p, index: i }))
         .filter(({ player, index }) => index !== game.currentPlayerIndex && player.tokens >= 1);
 
-    let html = '<p class="steal-label">Who wants to challenge? (costs 1 🎵 token)</p>';
+    let html = '<p class="steal-label">Who wants to challenge? (costs 1 🪙 token)</p>';
     nonActive.forEach(({ player, index }) => {
         html += `<button class="secondary-btn steal-player-btn"
                          data-player-index="${index}">
@@ -541,6 +545,11 @@ el('submit-btn').addEventListener('click', () => {
     const result = resolveRound(game, activePosition, nameGuess);
     lastPlayedCard = result.card;
 
+    // Track which card was just won so the timeline can glow it
+    // (steal_wins overrides this below once we know the stealer won)
+    justWonCard  = result.activeCorrect ? result.card : null;
+    activePosition = null; // clear so renderTimeline() no longer shows the ? face-down card
+
     // Show the revealed card info
     showSongInfo(lastPlayedCard);
     el('steal-btn').classList.add('hidden');
@@ -566,6 +575,7 @@ el('submit-btn').addEventListener('click', () => {
         const { outcome, stealer } = result.stealResult;
 
         if (outcome === 'steal_wins') {
+            justWonCard = result.card; // override — card went to stealer's timeline, glow it there
             showStealerTimelineReveal(stealer, result.card);
             return; // showStealerTimelineReveal handles endTurn + beginTurn
         } else if (outcome === 'both_wrong') {
@@ -573,7 +583,7 @@ el('submit-btn').addEventListener('click', () => {
         } else {
             // Active player's placement was correct, steal failed
             if (result.nameGuessCorrect) {
-                showMessage(`Right placement ✅ Bonus token for artist & title! 🎵 ${stealer.name}'s steal failed.`, true);
+                showMessage(`Right placement ✅ Bonus token for artist & title! 🪙 ${stealer.name}'s steal failed.`, true);
             } else if (nameGuess) {
                 showMessage(`Right placement ✅ But artist & title not quite — good try! ${stealer.name}'s steal failed.`, true);
             } else {
@@ -585,7 +595,7 @@ el('submit-btn').addEventListener('click', () => {
     } else {
         // No steal, placement correct
         if (result.nameGuessCorrect) {
-            showMessage('Correct placement! ✅ Bonus token for artist & title! 🎵', true);
+            showMessage('Correct placement! ✅ Bonus token for artist & title! 🪙', true);
         } else if (nameGuess) {
             showMessage('Right placement ✅ But artist & title not quite — good try!', true);
         } else {
@@ -608,7 +618,7 @@ el('override-btn').addEventListener('click', () => {
     updateTokenDisplay();
     renderAllPlayers();
     el('override-btn').classList.add('hidden');
-    showMessage('Override accepted — bonus token awarded! 🎵', true);
+    showMessage('Override accepted — bonus token awarded! 🪙', true);
 });
 
 // --- Next turn ---

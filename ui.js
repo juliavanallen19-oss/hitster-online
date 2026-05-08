@@ -149,7 +149,8 @@ function decadeClass(year) {
 // pendingPos: if not null, shows a face-down card at that slot index.
 // stealPos:   if not null, shows a steal token marker at that slot index.
 // interactive: if true, slots are clickable (used for active player's timeline).
-function renderTimelineInto(container, timeline, pendingPos, stealPos, interactive) {
+// chosenPos: slot index to keep highlighted (orange) after reveal on wrong placement
+function renderTimelineInto(container, timeline, pendingPos, stealPos, interactive, chosenPos = null) {
     container.innerHTML = '';
 
     for (let i = 0; i <= timeline.length; i++) {
@@ -163,13 +164,14 @@ function renderTimelineInto(container, timeline, pendingPos, stealPos, interacti
         } else if (i === stealPos) {
             // Steal token marker
             slot.className = 'steal-token-marker';
-            slot.innerHTML = `🪙<br>${game.players[game.pendingSteal ? game.pendingSteal.stealerIndex : 0].name}`;
+            slot.innerHTML = `✪<br>${game.players[game.pendingSteal ? game.pendingSteal.stealerIndex : 0].name}`;
         } else if (interactive) {
             // Interactive slots: hoverable, clickable, highlight when selected
             slot.className = 'timeline-slot' + (i === selectedPosition ? ' selected' : '');
         } else {
             // Non-interactive slots: thin grey divider, no hover effects
-            slot.className = 'timeline-slot-static';
+            // Exception: chosenPos keeps the orange highlight to show a wrong placement
+            slot.className = 'timeline-slot-static' + (i === chosenPos ? ' timeline-slot-chosen' : '');
         }
 
         if (interactive) {
@@ -207,7 +209,7 @@ function renderAllPlayers() {
         row.className  = 'player-row' + (isActive ? ' active-turn' : '');
         row.innerHTML  = `
             <span class="player-row-name">${isActive ? '<span class="now-playing-icon">▶</span>' : ''}${player.name}</span>
-            <span class="player-row-tokens"><span class="player-token-icon">🪙</span> <span class="player-token-count">${player.tokens}</span></span>
+            <span class="player-row-tokens"><span class="player-token-icon">✪</span> <span class="player-token-count">${player.tokens}</span></span>
             <span class="player-row-cards">${player.timeline.length} cards</span>
         `;
         list.appendChild(row);
@@ -291,7 +293,7 @@ function beginTurn() {
     if (!game.currentCard) {
         const card = drawCard(game);
         if (!card) {
-            showWinScreen(handleEmptyDeck(game), true);
+            showWinScreen(handleEmptyDeck(game), 'deck-empty');
             return;
         }
     }
@@ -317,18 +319,28 @@ function onSlotClick(position) {
 
 // =============================================================
 // WIN SCREEN
-// deckEmpty = true  → game ended because the deck ran out
-// deckEmpty = false → someone reached 10 cards (normal win)
+// reason: 'goal'           → someone reached the target card count
+//         'deck-empty'     → deck ran out naturally
+//         'finished-early' → player clicked "Finish game"
+//         null             → no note shown
 // =============================================================
 
-function showWinScreen(winners, deckEmpty = false) {
+function showWinScreen(winners, reason = null) {
     const list = Array.isArray(winners) ? winners : [winners];
 
-    // "The song deck is empty" note — only shown when relevant
-    if (deckEmpty) {
-        el('win-deck-note').classList.remove('hidden');
+    // Context note above the headline
+    const noteEl = el('win-deck-note');
+    if (reason === 'deck-empty') {
+        noteEl.textContent = 'The song deck is empty';
+        noteEl.classList.remove('hidden');
+    } else if (reason === 'finished-early') {
+        noteEl.textContent = 'The game has been finished';
+        noteEl.classList.remove('hidden');
+    } else if (reason === 'goal') {
+        noteEl.textContent = 'Goal achieved.';
+        noteEl.classList.remove('hidden');
     } else {
-        el('win-deck-note').classList.add('hidden');
+        noteEl.classList.add('hidden');
     }
 
     // Headline + winner names
@@ -342,7 +354,7 @@ function showWinScreen(winners, deckEmpty = false) {
         statsText += `${list[0].tokens} token${list[0].tokens !== 1 ? 's' : ''} remaining`;
     } else {
         // Multiple co-winners — show each person's token count
-        statsText += list.map(p => `${p.name}: ${p.tokens} 🪙`).join(' · ');
+        statsText += list.map(p => `${p.name}: ${p.tokens} ✪`).join(' · ');
     }
     el('winner-stats').textContent = statsText;
 
@@ -368,7 +380,7 @@ function showWinScreen(winners, deckEmpty = false) {
         row.innerHTML = `
             <span class="win-rank-pos">${isWinner ? '🏆' : '#' + rank}</span>
             <span class="win-rank-name">${player.name}</span>
-            <span class="win-rank-stats">${player.timeline.length} card${player.timeline.length !== 1 ? 's' : ''} · ${player.tokens} 🪙</span>
+            <span class="win-rank-stats">${player.timeline.length} card${player.timeline.length !== 1 ? 's' : ''} · ${player.tokens} ✪</span>
         `;
         rankEl.appendChild(row);
     });
@@ -389,7 +401,7 @@ function renderStealPanel() {
         .map((p, i) => ({ player: p, index: i }))
         .filter(({ player, index }) => index !== game.currentPlayerIndex && player.tokens >= 1);
 
-    let html = '<p class="steal-label">Who wants to challenge? (costs 1 🪙 token)</p>';
+    let html = '<p class="steal-label">Who wants to challenge? (costs 1 ✪ token)</p>';
     nonActive.forEach(({ player, index }) => {
         html += `<button class="secondary-btn steal-player-btn"
                          data-player-index="${index}">
@@ -515,13 +527,16 @@ el('place-btn').addEventListener('click', () => {
     // Show steal button + name guess form + submit
     el('steal-btn').classList.remove('hidden');
     el('name-guess-form').classList.remove('hidden');
-
-    showMessage('Card placed face-down — any player can steal, or type your guess and click Submit & reveal.', true);
     updateButtonStates();
 });
 
 // --- HITSTER! steal ---
 el('steal-btn').addEventListener('click', () => {
+    const anyoneCanSteal = game.players.some((p, i) => i !== game.currentPlayerIndex && p.tokens >= 1);
+    if (!anyoneCanSteal) {
+        showMessage('No player has enough tokens to steal.', true);
+        return;
+    }
     if (activePosition === null) {
         showMessage('The active player must place their card first.', true);
         return;
@@ -550,8 +565,8 @@ el('submit-btn').addEventListener('click', () => {
     const result = resolveRound(game, activePosition, nameGuess);
     lastPlayedCard = result.card;
 
-    // Track which card was just won so the timeline can glow it
-    // (steal_wins overrides this below once we know the stealer won)
+    // Save chosen position before clearing — used to keep the orange slot visible after wrong placement
+    const resolvedPosition = activePosition;
     justWonCard  = result.activeCorrect ? result.card : null;
     activePosition = null; // clear so renderTimeline() no longer shows the ? face-down card
 
@@ -572,8 +587,9 @@ el('submit-btn').addEventListener('click', () => {
     }
 
     updateTokenDisplay();
-    // Render timeline as non-interactive — the turn is resolved, no more placement possible
-    renderTimelineInto(el('timeline-container'), game.getCurrentPlayer().timeline, null, null, false);
+    // Render non-interactive; wrong placement keeps the orange slot visible as feedback
+    const chosenHighlight = result.activeCorrect ? null : resolvedPosition;
+    renderTimelineInto(el('timeline-container'), game.getCurrentPlayer().timeline, null, null, false, chosenHighlight);
     renderAllPlayers();
 
     // Handle steal outcome first (steal_wins returns early)
@@ -589,7 +605,7 @@ el('submit-btn').addEventListener('click', () => {
         } else {
             // Active player's placement was correct, steal failed
             if (result.nameGuessCorrect) {
-                showMessage(`Right placement ✅ Bonus token for artist & title! 🪙 ${stealer.name}'s steal failed.`, true);
+                showMessage(`Right placement ✅ Bonus token for artist & title! ✪ ${stealer.name}'s steal failed.`, true);
             } else if (nameGuess) {
                 showMessage(`Right placement ✅ But artist & title not quite — good try! ${stealer.name}'s steal failed.`, true);
             } else {
@@ -601,7 +617,7 @@ el('submit-btn').addEventListener('click', () => {
     } else {
         // No steal, placement correct
         if (result.nameGuessCorrect) {
-            showMessage('Correct placement! ✅ Bonus token for artist & title! 🪙', true);
+            showMessage('Correct placement! ✅ Bonus token for artist & title! ✪', true);
         } else if (nameGuess) {
             showMessage('Right placement ✅ But artist & title not quite — good try!', true);
         } else {
@@ -624,14 +640,14 @@ el('override-btn').addEventListener('click', () => {
     updateTokenDisplay();
     renderAllPlayers();
     el('override-btn').classList.add('hidden');
-    showMessage('Override accepted — bonus token awarded! 🪙', true);
+    showMessage('Override accepted — bonus token awarded! ✪', true);
 });
 
 // --- Next turn ---
 el('next-turn-btn').addEventListener('click', () => {
     const result = endTurn(game);
     if (result.won) {
-        showWinScreen(result.winner);
+        showWinScreen(result.winner, 'goal');
     } else {
         beginTurn();
     }
@@ -656,7 +672,7 @@ el('skip-btn').addEventListener('click', () => {
             updateButtonStates();
             showMessage('Skipped! New card ready — scan the QR code again to hear your next song.', true);
         } else {
-            showWinScreen(handleEmptyDeck(game), true);
+            showWinScreen(handleEmptyDeck(game), 'deck-empty');
         }
     }
 });
@@ -686,7 +702,7 @@ el('buy-btn').addEventListener('click', () => {
 // --- Finish game early ---
 el('finish-game-btn').addEventListener('click', () => {
     if (!game) return;
-    showWinScreen(handleEmptyDeck(game), true);
+    showWinScreen(handleEmptyDeck(game), 'finished-early');
 });
 
 // --- Play Again ---

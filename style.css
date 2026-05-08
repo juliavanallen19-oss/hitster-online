@@ -695,6 +695,30 @@ body {
   font-size: 0.85rem;
 }
 
+/* ===== Name guess inputs after Submit: read-only (disabled) look ===== */
+
+.player-name-input:disabled {
+  opacity: 0.6;
+  cursor: default;
+  background: #13131a;
+}
+
+/* ===== Override button (appears after reveal if name guess was wrong) ===== */
+
+.override-btn {
+  width: 100%;
+  box-sizing: border-box;
+  border-color: #f0b429;
+  color: #f0b429;
+  font-size: 0.875rem;
+  margin-top: 0;
+}
+
+.override-btn:hover {
+  background: rgba(240, 180, 41, 0.12);
+  border-color: #f0b429;
+}
+
 /* ===== Responsive: on wider screens, show QR + timeline side by side ===== */
 @media (min-width: 560px) {
   .action-buttons {

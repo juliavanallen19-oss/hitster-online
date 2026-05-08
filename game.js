@@ -484,14 +484,14 @@ function resolveRound(game, activePosition, nameGuess) {
     let activePlayer  = game.getCurrentPlayer();
     let card          = game.currentCard;
 
-    // Check name guess first (card still in currentCard, not yet inserted)
+    // Placement must be checked before name-guess: bonus token only awarded if placement is also correct
+    let activeCorrect = isPlacementCorrect(activePlayer.timeline, card, activePosition);
+
     let nameGuessCorrect = false;
-    if (nameGuess) {
+    if (nameGuess && activeCorrect) {
         nameGuessCorrect = checkNameGuess(card, nameGuess.artist, nameGuess.title);
         if (nameGuessCorrect) earnToken(activePlayer);
     }
-
-    let activeCorrect = isPlacementCorrect(activePlayer.timeline, card, activePosition);
     let stealResult   = null;
 
     if (game.pendingSteal !== null) {

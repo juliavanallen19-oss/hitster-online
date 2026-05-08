@@ -264,8 +264,12 @@ function beginTurn() {
     el('message-bar').classList.add('hidden');
     el('steal-panel').classList.add('hidden');
     el('stealer-timeline-section').classList.add('hidden');
-    el('guess-artist').value = '';
-    el('guess-title').value  = '';
+    el('override-btn').classList.add('hidden');
+    el('guess-artist').value    = '';
+    el('guess-title').value     = '';
+    el('guess-artist').disabled = false;
+    el('guess-title').disabled  = false;
+    el('submit-btn').classList.remove('hidden');
 
     // Show action buttons
     el('place-btn').classList.remove('hidden');
@@ -296,6 +300,7 @@ function beginTurn() {
 function onSlotClick(position) {
     if (activePosition !== null) return; // already placed — steal slots handled separately
     selectedPosition = position;
+    el('message-bar').classList.add('hidden'); // clear any previous hint when a new slot is chosen
     renderTimeline();
     updateButtonStates();
 }
@@ -408,7 +413,7 @@ function confirmSteal(stealerIndex, stealPosition) {
     renderAllPlayers();
     renderTimeline(); // re-render with token marker visible
     updateButtonStates(); // disable steal button (one per turn)
-    showMessage(`${result.stealer.name} has placed their token! Click "Submit & reveal" when ready.`);
+    showMessage(`${result.stealer.name} has placed their token! Click "Submit & reveal" when ready.`, true);
 }
 
 
@@ -423,17 +428,8 @@ function showStealerTimelineReveal(stealer, card) {
     el('stealer-timeline-label').textContent = `🎉 ${stealer.name} steals the card!`;
     renderTimelineInto(el('stealer-timeline-container'), stealer.timeline, null, null, false);
     section.classList.remove('hidden');
-
-    // Hide after 2.5 seconds, then proceed to next turn
-    setTimeout(() => {
-        section.classList.add('hidden');
-        const turnResult = endTurn(game);
-        if (turnResult.won) {
-            showWinScreen(turnResult.winner);
-        } else {
-            beginTurn();
-        }
-    }, 2500);
+    // Stay visible until the group is ready — next-turn-btn handles endTurn + beginTurn
+    el('next-turn-btn').classList.remove('hidden');
 }
 
 
@@ -467,11 +463,11 @@ el('place-btn').addEventListener('click', () => {
 // --- HITSTER! steal ---
 el('steal-btn').addEventListener('click', () => {
     if (activePosition === null) {
-        showMessage('The active player must place their card first.');
+        showMessage('The active player must place their card first.', true);
         return;
     }
     if (game.pendingSteal !== null) {
-        showMessage('Only one steal per turn is allowed.');
+        showMessage('Only one steal per turn is allowed.', true);
         return;
     }
     renderStealPanel();
@@ -495,9 +491,19 @@ el('submit-btn').addEventListener('click', () => {
 
     // Show the revealed card info
     showSongInfo(lastPlayedCard);
-    el('name-guess-form').classList.add('hidden');
     el('steal-btn').classList.add('hidden');
     el('steal-panel').classList.add('hidden');
+
+    // If the player typed a guess, keep the form visible (read-only) so they can
+    // compare what they typed against the revealed answer.
+    // If no guess was attempted, just hide the form.
+    if (nameGuess) {
+        el('guess-artist').disabled = true;
+        el('guess-title').disabled  = true;
+        el('submit-btn').classList.add('hidden');
+    } else {
+        el('name-guess-form').classList.add('hidden');
+    }
 
     updateTokenDisplay();
     renderTimeline();
@@ -535,7 +541,22 @@ el('submit-btn').addEventListener('click', () => {
         }
     }
 
+    // Show override button if a name guess was attempted but the automatic check said wrong
+    // (lets the group correct a typo or a "close enough" answer)
+    if (nameGuess && !result.nameGuessCorrect && result.activeCorrect) {
+        el('override-btn').classList.remove('hidden');
+    }
+
     el('next-turn-btn').classList.remove('hidden');
+});
+
+// --- Override: group decides the name guess was actually correct ---
+el('override-btn').addEventListener('click', () => {
+    overrideAndGrantToken(game);
+    updateTokenDisplay();
+    renderAllPlayers();
+    el('override-btn').classList.add('hidden');
+    showMessage('Override accepted — bonus token awarded! 🎵', true);
 });
 
 // --- Next turn ---
@@ -551,7 +572,7 @@ el('next-turn-btn').addEventListener('click', () => {
 // --- Skip card ---
 el('skip-btn').addEventListener('click', () => {
     if (game.getCurrentPlayer().tokens < 1) {
-        showMessage("You don't have enough tokens. Gain them first to use this feature.");
+        showMessage("You don't have enough tokens. Gain them first to use this feature.", true);
         return;
     }
     const result = skipCard(game);
@@ -575,7 +596,7 @@ el('skip-btn').addEventListener('click', () => {
 // --- Buy placement ---
 el('buy-btn').addEventListener('click', () => {
     if (game.getCurrentPlayer().tokens < 3) {
-        showMessage("You don't have enough tokens. Gain them first to use this feature.");
+        showMessage("You don't have enough tokens. Gain them first to use this feature.", true);
         return;
     }
     const card = game.currentCard;

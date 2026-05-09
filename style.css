@@ -77,7 +77,41 @@ body {
 /* ===== Player input rows ===== */
 
 .player-input-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   margin-bottom: 8px;
+}
+
+.player-input-row .player-name-input {
+  flex: 1;  /* input takes all available space, delete button sits beside it */
+}
+
+/* Delete player button */
+.delete-player-btn {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  font-size: 1.1rem;
+  line-height: 1;
+  font-family: inherit;
+  background: transparent;
+  color: #9a9aa8;
+  border: 1px solid #3a3a48;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.delete-player-btn:hover {
+  color: #ff3d8b;
+  border-color: #ff3d8b;
+}
+
+.delete-player-btn:disabled {
+  opacity: 0.25;
+  cursor: not-allowed;
 }
 
 .player-name-input {
@@ -233,6 +267,25 @@ body {
 
 .token-icon {
   font-size: 1.1rem;
+}
+
+/* Finish game early button — sits in the top bar, unobtrusive */
+.finish-game-btn {
+  font-size: 0.75rem;
+  font-family: inherit;
+  padding: 6px 10px;
+  background: transparent;
+  color: #9a9aa8;
+  border: 1px solid #3a3a48;
+  border-radius: 6px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.finish-game-btn:hover {
+  color: #ff3d8b;
+  border-color: #ff3d8b;
 }
 
 /* ===== QR code area ===== */
@@ -515,6 +568,302 @@ body {
   font-size: 1rem;
   color: #9a9aa8;
   margin: 0 0 16px 0;
+}
+
+/* ===== Face-down card (placed but not yet revealed) ===== */
+
+.timeline-card--facedown {
+  background: #2a2a36;
+  border: 2px dashed #ff3d8b;
+  color: transparent;              /* hide text */
+  position: relative;
+  overflow: hidden;
+}
+
+.timeline-card--facedown::after {
+  content: "?";
+  position: absolute;
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: #ff3d8b;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* ===== Steal token marker (shown in a slot on the active player's timeline) ===== */
+
+.steal-token-marker {
+  flex-shrink: 0;
+  width: 48px;
+  min-height: 48px;
+  background: #1a1a22;
+  border: 2px solid #ffae3d;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  font-size: 0.65rem;
+  color: #ffae3d;
+  text-align: center;
+  padding: 4px;
+}
+
+/* ===== Stealer's timeline reveal section ===== */
+
+#stealer-timeline-section {
+  border: 2px solid #ffae3d;
+  border-radius: 12px;
+  padding: 12px;
+  animation: steal-flash 0.4s ease;
+}
+
+@keyframes steal-flash {
+  0%   { opacity: 0; transform: scale(0.97); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+/* ===== Disabled button state (tasks 5.4, 5.5) ===== */
+
+.btn-disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.btn-disabled:hover {
+  transform: none;
+  box-shadow: none;
+  background: transparent;
+  border-color: #3a3a48;
+}
+
+/* ===== Feedback message bar (task 5.7) ===== */
+
+.message-bar {
+  background: #1a1a22;
+  border: 1px solid #ff3d8b;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 0.875rem;
+  color: #f0f0f0;
+  text-align: center;
+}
+
+/* ===== Selected timeline slot (task 5.4) ===== */
+
+.timeline-slot.selected {
+  width: 20px;
+  background: #ffae3d;
+  box-shadow: 0 0 10px rgba(255, 174, 61, 0.6);
+}
+
+/* ===== Player row: card count ===== */
+
+.player-row-cards {
+  font-size: 0.85rem;
+  color: #9a9aa8;
+}
+
+/* ===== HITSTER! steal panel ===== */
+
+.steal-panel {
+  background: #1a1a22;
+  border: 1px solid #3a3a48;
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.steal-label {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #9a9aa8;
+}
+
+.steal-slot-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.steal-slot-btn {
+  text-align: left;
+  font-size: 0.85rem;
+}
+
+/* ===== Name guess inputs after Submit: read-only (disabled) look ===== */
+
+.player-name-input:disabled {
+  opacity: 0.6;
+  cursor: default;
+  background: #13131a;
+}
+
+/* ===== Override button (appears after reveal if name guess was wrong) ===== */
+
+.override-btn {
+  width: 100%;
+  box-sizing: border-box;
+  border-color: #f0b429;
+  color: #f0b429;
+  font-size: 0.875rem;
+  margin-top: 0;
+}
+
+.override-btn:hover {
+  background: rgba(240, 180, 41, 0.12);
+  border-color: #f0b429;
+}
+
+/* ===== Deck counter (below scan hint) ===== */
+
+.deck-counter {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #5a5a78;
+  letter-spacing: 0.03em;
+}
+
+.deck-icon {
+  color: #5a5a78;   /* same tone as the surrounding text */
+  font-size: 1rem;
+}
+
+#deck-count {
+  font-weight: 700;
+  color: #8a8aaa;
+}
+
+/* ===== "Now playing" ▶ indicator in the players panel ===== */
+
+.now-playing-icon {
+  color: #ff3d8b;
+  font-size: 0.65rem;
+  vertical-align: 0.05em;   /* fine-tuned to sit exactly mid-line of the name text */
+  margin-right: 5px;
+}
+
+/* ===== Token icon: light gold (✪ is a plain text char, takes CSS color directly) ===== */
+
+.token-icon,
+.player-token-icon {
+  color: #f0c040;
+  filter: none;
+}
+
+/* ===== Win screen: deck-empty note ===== */
+
+.win-deck-note {
+  margin: 0 0 4px 0;
+  font-size: 0.85rem;
+  color: #9a9aa8;
+  letter-spacing: 0.02em;
+}
+
+/* ===== Win screen: winner stats line ===== */
+
+.winner-stats {
+  margin: 4px 0 24px 0;
+  font-size: 1rem;
+  color: #9a9aa8;
+}
+
+/* ===== Win screen: final standings ranking ===== */
+
+.win-ranking {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.win-ranking-title {
+  margin: 0 0 6px 0;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #5a5a78;
+  text-align: left;
+}
+
+.win-rank-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #1a1a22;
+  border: 1px solid #2a2a36;
+  border-radius: 8px;
+  padding: 10px 14px;
+}
+
+.win-rank-row--winner {
+  border-color: #ffae3d;
+  background: #1e1c14;
+}
+
+.win-rank-pos {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #5a5a78;
+  min-width: 28px;
+  text-align: center;
+}
+
+.win-rank-row--winner .win-rank-pos {
+  color: #ffae3d;
+}
+
+.win-rank-name {
+  flex: 1;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #f0f0f0;
+}
+
+.win-rank-stats {
+  font-size: 0.85rem;
+  color: #9a9aa8;
+  white-space: nowrap;
+}
+
+/* ===== Non-interactive timeline slot (read-only timelines, post-resolve) ===== */
+/* Thinner, grey, no hover — purely visual divider between cards */
+
+.timeline-slot-static {
+  flex-shrink: 0;
+  width: 5px;
+  min-height: 72px;
+  background: #222230;
+  border-radius: 4px;
+}
+
+/* The slot where the active player placed their card — shown post-reveal on wrong placement */
+.timeline-slot-static.timeline-slot-chosen {
+  width: 20px;
+  background: #ffae3d;
+  box-shadow: 0 0 10px rgba(255, 174, 61, 0.6);
+}
+
+/* ===== Newly won card: glows gold, then settles back to normal ===== */
+
+.timeline-card--won {
+  animation: card-won-glow 3s ease forwards;
+}
+
+@keyframes card-won-glow {
+  0%   { box-shadow: 0 0 0 5px rgba(255, 200, 61, 1.0),
+                     0 0 40px 14px rgba(255, 174, 61, 0.85),
+                     0 0 80px 20px rgba(255, 140, 30, 0.4);
+         transform: scale(1.2); }
+  35%  { box-shadow: 0 0 0 4px rgba(255, 174, 61, 0.75),
+                     0 0 24px 8px rgba(255, 174, 61, 0.5);
+         transform: scale(1.1); }
+  100% { box-shadow: none; transform: scale(1); }
 }
 
 /* ===== Responsive: on wider screens, show QR + timeline side by side ===== */

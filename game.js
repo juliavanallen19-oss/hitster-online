@@ -69,8 +69,11 @@ class Game {
         // The card currently being placed (none until first turn starts)
         this.currentCard = null;
 
-        // Whose turn it is, set by the players in setup ---
+        // Whose turn it is, set by the players in setup
         this.currentPlayerIndex = startingPlayerIndex;
+
+        // Pending steal attempt for the current turn (null if no steal)
+        this.pendingSteal = null;
     }
 
     // Helper to get the Player object whose turn it is right now
@@ -208,13 +211,25 @@ function discardCard(game) {
 
 // =============================================================
 // TASK 3.9 — Check artist + song name guess (case-insensitive)
-// Returns true if BOTH artist AND title are correct.
+// Returns true only if BOTH artist AND title are correct.
 // =============================================================
 
 function checkNameGuess(card, guessedArtist, guessedTitle) {
     let artistCorrect = card.artist.toLowerCase().trim() === guessedArtist.toLowerCase().trim();
     let titleCorrect  = card.title.toLowerCase().trim()  === guessedTitle.toLowerCase().trim();
     return artistCorrect && titleCorrect;
+}
+
+
+// =============================================================
+// Helper — find the correct chronological position for a card
+// in a given timeline (same logic as buyPlacement).
+// =============================================================
+
+function findCorrectPosition(timeline, card) {
+    let pos = 0;
+    while (pos < timeline.length && timeline[pos].year <= card.year) pos++;
+    return pos;
 }
 
 
@@ -304,12 +319,12 @@ function placeCard(game, chosenPosition) {
 }
 
 // --- Step B: Attempt artist/title guess. OPTIONAL. ---
-// Only call this if placement was correct AND the player chose to attempt it.
+// Called BEFORE the card is revealed. Reads from game.currentCard
+// so it works whether the card has been inserted yet or not.
+// A token is earned for a correct guess regardless of placement outcome.
 function attemptNameGuess(game, guessedArtist, guessedTitle) {
     let activePlayer = game.getCurrentPlayer();
-    // Note: game.currentCard was already inserted into the timeline,
-    // so we read the card from the END of the player's timeline.
-    let card = activePlayer.timeline[activePlayer.timeline.length - 1];
+    let card = game.currentCard;
 
     let correct = checkNameGuess(card, guessedArtist, guessedTitle);
     if (correct) {
@@ -436,6 +451,83 @@ function buyPlacement(game) {
 
 
 // =============================================================
+// HITSTER! steal — challenger version
+// A non-active player pays 1 token to challenge the active player
+// by picking a DIFFERENT slot on the active player's own timeline.
+// Resolution happens later in resolveRound().
+// Only one steal attempt allowed per turn.
+// =============================================================
+
+function initiateSteal(game, stealerIndex, stealPosition) {
+    let stealer = game.players[stealerIndex];
+    if (stealer.tokens < 1) return { success: false };
+    if (game.pendingSteal !== null) return { success: false }; // already one steal this turn
+    stealer.tokens -= 1;
+    game.pendingSteal = { stealerIndex, stealPosition };
+    return { success: true, stealer };
+}
+
+
+// =============================================================
+// resolveRound — called when the active player clicks Submit
+//
+// Evaluates the active placement, any steal, and the name guess
+// all at once (since Submit triggers the reveal).
+//
+// activePosition — where the active player placed the card
+// nameGuess      — { artist, title } or null if skipped
+//
+// Returns a full result object for the UI to display.
+// =============================================================
+
+function resolveRound(game, activePosition, nameGuess) {
+    let activePlayer  = game.getCurrentPlayer();
+    let card          = game.currentCard;
+
+    // Placement must be checked before name-guess: bonus token only awarded if placement is also correct
+    let activeCorrect = isPlacementCorrect(activePlayer.timeline, card, activePosition);
+
+    let nameGuessCorrect = false;
+    if (nameGuess && activeCorrect) {
+        nameGuessCorrect = checkNameGuess(card, nameGuess.artist, nameGuess.title);
+        if (nameGuessCorrect) earnToken(activePlayer);
+    }
+    let stealResult   = null;
+
+    if (game.pendingSteal !== null) {
+        let { stealerIndex, stealPosition } = game.pendingSteal;
+        let stealer      = game.players[stealerIndex];
+        let stealCorrect = isPlacementCorrect(activePlayer.timeline, card, stealPosition);
+
+        if (activeCorrect) {
+            // Active player wins: card goes to active player's timeline
+            insertCardIntoTimeline(activePlayer, card, activePosition);
+            stealResult = { outcome: 'active_wins', stealer };
+        } else if (stealCorrect) {
+            // Stealer wins: card auto-placed on stealer's own timeline; token returned
+            stealer.tokens += 1;
+            let correctPos = findCorrectPosition(stealer.timeline, card);
+            insertCardIntoTimeline(stealer, card, correctPos);
+            stealResult = { outcome: 'steal_wins', stealer, card };
+        } else {
+            // Both wrong: card discarded, stealer already lost their token
+            stealResult = { outcome: 'both_wrong', stealer };
+        }
+        game.pendingSteal = null;
+
+    } else {
+        // No steal — normal flow
+        if (activeCorrect) {
+            insertCardIntoTimeline(activePlayer, card, activePosition);
+        }
+    }
+
+    game.currentCard = null;
+    return { activeCorrect, nameGuessCorrect, stealResult, card };
+}
+
+
+// =============================================================
 // START THE GAME — called by the UI when the player clicks "Start"
 // =============================================================
 
@@ -448,14 +540,5 @@ function startGame(playerNames, mode = "original", startingPlayerIndex = 0) {
     }
 
     game = new Game(playerNames, PLACEHOLDER_SONGS, mode, startingPlayerIndex);
-
-    // Draw the first card for the first player's turn
-    let firstCard = drawCard(game);
-    if (firstCard) {
-        generateQRCode(firstCard.spotify_url);
-    }
-
-    console.log("Game started!", game);
-    console.log("First card:", firstCard);
-    console.log("Current player:", game.getCurrentPlayer().name);
+    // ui.js beginTurn() draws the first card and generates the QR code
 }

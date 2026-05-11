@@ -539,6 +539,6 @@ function startGame(playerNames, mode = "original", startingPlayerIndex = 0) {
         return;
     }
 
-    game = new Game(playerNames, PLACEHOLDER_SONGS, mode, startingPlayerIndex);
+    game = new Game(playerNames, SONGS, mode, startingPlayerIndex);
     // ui.js beginTurn() draws the first card and generates the QR code
 }

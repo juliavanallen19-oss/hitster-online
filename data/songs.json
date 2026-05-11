@@ -1,1 +1,1202 @@
-[]
+[
+  {
+    "title": "It's Now or Never",
+    "artist": "Elvis Presley",
+    "year": 1960,
+    "spotify_url": "https://open.spotify.com/intl-de/track/0bzIxZJNst6iypVZpZt6GR?si=daf51b14bcf244d8"
+  },
+  {
+    "title": "Only the Lonely",
+    "artist": "Roy Orbison",
+    "year": 1960,
+    "spotify_url": "https://open.spotify.com/intl-de/track/0PkBTqRtN25z3oKasWoKlj?si=4a7c441ddcb042a8"
+  },
+  {
+    "title": "Chain Gang",
+    "artist": "Sam Cooke",
+    "year": 1960,
+    "spotify_url": "https://open.spotify.com/intl-de/track/1sK10Me7qS9em2QTx6dYRe?si=23b278fc0eef450d"
+  },
+  {
+    "title": "Runaway",
+    "artist": "Del Shannon",
+    "year": 1961,
+    "spotify_url": "https://open.spotify.com/intl-de/track/45Szkclj1lt4ubm7RFK68t?si=60256d58e9ae40f7"
+  },
+  {
+    "title": "Stand By Me",
+    "artist": "Ben E. King",
+    "year": 1961,
+    "spotify_url": "https://open.spotify.com/intl-de/track/3SdTKo2uVsxFblQjpScoHy?si=88fe9a609f064ddb"
+  },
+  {
+    "title": "Blue Moon",
+    "artist": "The Marcels",
+    "year": 1961,
+    "spotify_url": "https://open.spotify.com/intl-de/track/2AL2HSHGETT5cE2noOfKMN?si=fa4ced2561c448ee"
+  },
+  {
+    "title": "You've Really Got A Hold On Me",
+    "artist": "The Miracles",
+    "year": 1962,
+    "spotify_url": "https://open.spotify.com/intl-de/track/7wLRmjiDYI6flIVzboUqSV?si=eb706f71fd554a61"
+  },
+  {
+    "title": "I Can't Stop Loving You",
+    "artist": "Ray Charles",
+    "year": 1962,
+    "spotify_url": "https://open.spotify.com/intl-de/track/0OW5klw1G3VHc9QR7KRHAf?si=128bf2cbdf864d31"
+  },
+  {
+    "title": "Sherry",
+    "artist": "The Four Seasons",
+    "year": 1962,
+    "spotify_url": "https://open.spotify.com/intl-de/track/3asQPoVfuofjPhqPtq3KDp?si=1e9a7f1f58924c59"
+  },
+  {
+    "title": "Be My Baby",
+    "artist": "The Ronettes",
+    "year": 1963,
+    "spotify_url": "https://open.spotify.com/intl-de/track/2G2YzndIA6jeWFPBXhUjh5?si=a30f7be69b1f4f69"
+  },
+  {
+    "title": "Ring of Fire",
+    "artist": "Johnny Cash",
+    "year": 1963,
+    "spotify_url": "https://open.spotify.com/intl-de/track/5rDkA2TFOImbiVenmnE9r4?si=f4f732a3b6f74edd"
+  },
+  {
+    "title": "It's My Party",
+    "artist": "Lesley Gore",
+    "year": 1963,
+    "spotify_url": "https://open.spotify.com/intl-de/track/1Pq47iFLC5U7j8xeNiNcuS?si=41d6fd6788f44bfc"
+  },
+  {
+    "title": "My Girl",
+    "artist": "The Temptations",
+    "year": 1964,
+    "spotify_url": "https://open.spotify.com/intl-de/track/745H5CctFr12Mo7cqa1BMH?si=7af12bd5725d495c"
+  },
+  {
+    "title": "Oh, Pretty Woman",
+    "artist": "Roy Orbison",
+    "year": 1964,
+    "spotify_url": "https://open.spotify.com/intl-de/track/52HAHV1j93s5B8GoTNI7DJ?si=5010142885b54161"
+  },
+  {
+    "title": "House of the Rising Sun",
+    "artist": "The Animals",
+    "year": 1964,
+    "spotify_url": "https://open.spotify.com/intl-de/track/4mn2kNTqiGLwaUR8JdhJ1l?si=bc6e6f5ab7564e1e"
+  },
+  {
+    "title": "(I Can't Get No) Satisfaction",
+    "artist": "The Rolling Stones",
+    "year": 1965,
+    "spotify_url": "https://open.spotify.com/intl-de/track/2PzU4IB8Dr6mxV3lHuaG34?si=7fca5537522f4b7f"
+  },
+  {
+    "title": "In The Midnight Hour",
+    "artist": "Wilson Pickett",
+    "year": 1965,
+    "spotify_url": "https://open.spotify.com/intl-de/track/4NRQwaks9r58tTDvr4iEyv?si=cac3c1c576d041b8"
+  },
+  {
+    "title": "Like a Rolling Stone",
+    "artist": "Bob Dylan",
+    "year": 1965,
+    "spotify_url": "https://open.spotify.com/intl-de/track/3AhXZa8sUQht0UEdBJgpGc?si=590903d3223a441d"
+  },
+  {
+    "title": "Good Vibrations",
+    "artist": "The Beach Boys",
+    "year": 1966,
+    "spotify_url": "https://open.spotify.com/intl-de/track/7tf64lNC31lWlTsih0nfZf?si=300f5daef41941e1"
+  },
+  {
+    "title": "Paperback Writer",
+    "artist": "The Beatles",
+    "year": 1966,
+    "spotify_url": "https://open.spotify.com/intl-de/track/3OtsmzTZs50ahEnHKVvozC?si=eae308745572438b"
+  },
+  {
+    "title": "Monday, Monday",
+    "artist": "The Mamas & The Papas",
+    "year": 1966,
+    "spotify_url": "https://open.spotify.com/intl-de/track/3EFb1qDgIqf9MegIryKtDj?si=16b5d52e6e004677"
+  },
+  {
+    "title": "All You Need is Love",
+    "artist": "The Beatles",
+    "year": 1967,
+    "spotify_url": "https://open.spotify.com/intl-de/track/6KqiVlOLfDzJViJVAPym1p?si=9e02e2b31df54091"
+  },
+  {
+    "title": "Respect",
+    "artist": "Aretha Franklin",
+    "year": 1967,
+    "spotify_url": "https://open.spotify.com/intl-de/track/7s25THrKz86DM225dOYwnr?si=604c9751406345c3"
+  },
+  {
+    "title": "Light My Fire",
+    "artist": "The Doors",
+    "year": 1967,
+    "spotify_url": "https://open.spotify.com/intl-de/track/5uvosCdMlFdTXhoazkTI5R?si=f73c521f8c204927"
+  },
+  {
+    "title": "Hey Jude",
+    "artist": "The Beatles",
+    "year": 1968,
+    "spotify_url": "https://open.spotify.com/intl-de/track/0aym2LBJBk9DAYuHHutrIl?si=bb9cd064173846af"
+  },
+  {
+    "title": "(Sittin' On) The Dock of the Bay",
+    "artist": "Otis Redding",
+    "year": 1968,
+    "spotify_url": "https://open.spotify.com/intl-de/track/3zBhihYUHBmGd2bcQIobrF?si=9d0f57b4484841ce"
+  },
+  {
+    "title": "Jumpin' Jack Flash",
+    "artist": "The Rolling Stones",
+    "year": 1968,
+    "spotify_url": "https://open.spotify.com/intl-de/track/1uBsu3PbD2909UBIfEMLvK?si=6be8ef2817314a91"
+  },
+  {
+    "title": "Honky Tonk Women",
+    "artist": "The Rolling Stones",
+    "year": 1969,
+    "spotify_url": "https://open.spotify.com/intl-de/track/3fnPv1LRMxENr63afVhaz1?si=24fc5e75f27e447a"
+  },
+  {
+    "title": "Suspicious Minds",
+    "artist": "Elvis Presley",
+    "year": 1969,
+    "spotify_url": "https://open.spotify.com/intl-de/track/1H5IfYyIIAlgDX8zguUzns?si=7302d748141947f0"
+  },
+  {
+    "title": "Aquarius/Let the Sunshine In",
+    "artist": "The 5th Dimension",
+    "year": 1969,
+    "spotify_url": "https://open.spotify.com/intl-de/track/0HZlND4giwzgolBpaNIRGV?si=baa10a4b427d42d4"
+  },
+  {
+    "title": "Bridge Over Troubled Water",
+    "artist": "Simon & Garfunkel",
+    "year": 1970,
+    "spotify_url": "https://open.spotify.com/intl-de/track/6l8EbYRtQMgKOyc1gcDHF9?si=43905580456845fe"
+  },
+  {
+    "title": "Let It Be",
+    "artist": "The Beatles",
+    "year": 1970,
+    "spotify_url": "https://open.spotify.com/intl-de/track/7iN1s7xHE4ifF5povM6A48?si=e19db16b37014ec5"
+  },
+  {
+    "title": "American Woman",
+    "artist": "The Guess Who",
+    "year": 1970,
+    "spotify_url": "https://open.spotify.com/intl-de/track/3QKGkxQnLTo3FWUTNJZlYH?si=c80d64a0c53541b3"
+  },
+  {
+    "title": "Joy to the World",
+    "artist": "Three Dog Night",
+    "year": 1971,
+    "spotify_url": "https://open.spotify.com/intl-de/track/2ymeOsYijJz09LfKw3yM2x?si=20f42dd558224500"
+  },
+  {
+    "title": "Maggie May",
+    "artist": "Rod Stewart",
+    "year": 1971,
+    "spotify_url": "https://open.spotify.com/intl-de/track/6rovOdp3HgK1DeAMYDzoA7?si=ff6413f832774cde"
+  },
+  {
+    "title": "Just My Imagination",
+    "artist": "The Temptations",
+    "year": 1971,
+    "spotify_url": "https://open.spotify.com/intl-de/track/39Bd345OWEhRNyfayhp9gv?si=cf9a8087b5804b81"
+  },
+  {
+    "title": "American Pie",
+    "artist": "Don McLean",
+    "year": 1972,
+    "spotify_url": "https://open.spotify.com/intl-de/track/1fDsrQ23eTAVFElUMaf38X?si=62e961d34dac4333"
+  },
+  {
+    "title": "Rocket Man",
+    "artist": "Elton John",
+    "year": 1972,
+    "spotify_url": "https://open.spotify.com/intl-de/track/3gdewACMIVMEWVbyb8O9sY?si=661814d7fecb4672"
+  },
+  {
+    "title": "I'll Be Around",
+    "artist": "The Spinners",
+    "year": 1972,
+    "spotify_url": "https://open.spotify.com/intl-de/track/2vLaES21zwbX1Rnmj56Bbb?si=01b52d61371a4de7"
+  },
+  {
+    "title": "Tie a Yellow Ribbon",
+    "artist": "Tony Orlando & Dawn",
+    "year": 1973,
+    "spotify_url": "https://open.spotify.com/intl-de/track/12UzVR0M7asW2MHAZRJk0I?si=1c2ef31ce6de471a"
+  },
+  {
+    "title": "Killing Me Softly",
+    "artist": "Roberta Flack",
+    "year": 1973,
+    "spotify_url": "https://open.spotify.com/intl-de/track/3gsCAGsWr6pUm1Vy7CPPob?si=0c1f6906ad3d4fc4"
+  },
+  {
+    "title": "We're An American Band",
+    "artist": "Grand Funk Railroad",
+    "year": 1973,
+    "spotify_url": "https://open.spotify.com/intl-de/track/3XcjIvaZVUFAIdIYZqY9bd?si=058efcdbb915421e"
+  },
+  {
+    "title": "Waterloo",
+    "artist": "ABBA",
+    "year": 1974,
+    "spotify_url": "https://open.spotify.com/intl-de/track/3Dy4REq8O09IlgiwuHQ3sk?si=3fefb03e072441f8"
+  },
+  {
+    "title": "Kung Fu Fighting",
+    "artist": "Carl Douglas",
+    "year": 1974,
+    "spotify_url": "https://open.spotify.com/intl-de/track/7K8QsHbmUpSX37oOCL4e2g?si=32ba00ba93794b93"
+  },
+  {
+    "title": "Rock Your Baby",
+    "artist": "George McCrae",
+    "year": 1974,
+    "spotify_url": "https://open.spotify.com/intl-de/track/6pMHMzwTsWIxLigr54GGVm?si=3b9ceb6472f04a21"
+  },
+  {
+    "title": "Bohemian Rhapsody",
+    "artist": "Queen",
+    "year": 1975,
+    "spotify_url": "https://open.spotify.com/intl-de/track/3z8h0TU7ReDPLIbEnYhWZb?si=4504ea10a2294991"
+  },
+  {
+    "title": "Fame",
+    "artist": "David Bowie",
+    "year": 1975,
+    "spotify_url": "https://open.spotify.com/intl-de/track/1PehfITh0TTRx3LkDdV4h3?si=4fbe213faf99468d"
+  },
+  {
+    "title": "That's the Way (I Like It)",
+    "artist": "KC & The Sunshine Band",
+    "year": 1975,
+    "spotify_url": "https://open.spotify.com/intl-de/track/7s3FSodLpnKMzeMj17G5d0?si=cb52c33ab84a45d9"
+  },
+  {
+    "title": "Dancing Queen",
+    "artist": "ABBA",
+    "year": 1976,
+    "spotify_url": "https://open.spotify.com/intl-de/track/0GjEhVFGZW8afUYGChu3Rr?si=efa3e900e8bb4ecf"
+  },
+  {
+    "title": "Don't Go Breaking My Heart",
+    "artist": "Elton John ft. Kiki Dee",
+    "year": 1976,
+    "spotify_url": "https://open.spotify.com/intl-de/track/7HW5WIw7ZgZORCzUxv5gW5?si=0c3e165b12ec4db9"
+  },
+  {
+    "title": "Silly Love Songs",
+    "artist": "Wings",
+    "year": 1976,
+    "spotify_url": "https://open.spotify.com/intl-de/track/1FbXDASfb9R8jmDseaOuDB?si=d1e70cd4a77f42e3"
+  },
+  {
+    "title": "Hotel California",
+    "artist": "Eagles",
+    "year": 1977,
+    "spotify_url": "https://open.spotify.com/intl-de/track/40riOy7x9W7GXjyGp4pjAv?si=526a3d263a45492d"
+  },
+  {
+    "title": "Stayin' Alive",
+    "artist": "Bee Gees",
+    "year": 1977,
+    "spotify_url": "https://open.spotify.com/intl-de/track/5ubvP9oKmxLUVq506fgLhk?si=d2dad88561d044ba"
+  },
+  {
+    "title": "We Will Rock You",
+    "artist": "Queen",
+    "year": 1977,
+    "spotify_url": "https://open.spotify.com/intl-de/track/4pbJqGIASGPr0ZpGpnWkDn?si=609c6936c5894b46"
+  },
+  {
+    "title": "Grease",
+    "artist": "Frankie Valli",
+    "year": 1978,
+    "spotify_url": "https://open.spotify.com/intl-de/track/5Vrczz39CvlD3OGCa6utoA?si=9e8c17b23f964d2a"
+  },
+  {
+    "title": "Night Fever",
+    "artist": "Bee Gees",
+    "year": 1978,
+    "spotify_url": "https://open.spotify.com/intl-de/track/5KgbyD2lQQlIupAaPjgiXg?si=34ae539f8bfe4ec0"
+  },
+  {
+    "title": "September",
+    "artist": "Earth, Wind & Fire",
+    "year": 1978,
+    "spotify_url": "https://open.spotify.com/intl-de/track/2grjqo0Frpf2okIBiifQKs?si=cad283d23ced487d"
+  },
+  {
+    "title": "Heart of Glass",
+    "artist": "Blondie",
+    "year": 1979,
+    "spotify_url": "https://open.spotify.com/intl-de/track/41AE8ODX2JETBCa6muhSLY?si=33457717f2694c3e"
+  },
+  {
+    "title": "Don't Stop Me Now",
+    "artist": "Queen",
+    "year": 1979,
+    "spotify_url": "https://open.spotify.com/intl-de/track/5T8EDUDqKcs6OSOwEsfqG7?si=7b29753058014a51"
+  },
+  {
+    "title": "Ring My Bell",
+    "artist": "Anita Ward",
+    "year": 1979,
+    "spotify_url": "https://open.spotify.com/intl-de/track/7GK2KVYH8FrTC9zehmjVMd?si=f91cf21144074467"
+  },
+  {
+    "title": "Another One Bites the Dust",
+    "artist": "Queen",
+    "year": 1980,
+    "spotify_url": "https://open.spotify.com/intl-de/track/2k1yPYf9WGA4LiqcLVwtzn?si=5c1e7054bacc4e34"
+  },
+  {
+    "title": "Call Me",
+    "artist": "Blondie",
+    "year": 1980,
+    "spotify_url": "https://open.spotify.com/intl-de/track/7HKxTNVlkHsfMLhigmhC0I?si=39802afe8e114a89"
+  },
+  {
+    "title": "Upside Down",
+    "artist": "Diana Ross",
+    "year": 1980,
+    "spotify_url": "https://open.spotify.com/intl-de/track/3pbtBomO4Zt5gGiqsYeiBH?si=69df9c20f558476b"
+  },
+  {
+    "title": "Don't Stop Believin'",
+    "artist": "Journey",
+    "year": 1981,
+    "spotify_url": "https://open.spotify.com/intl-de/track/77NNZQSqzLNqh2A9JhLRkg?si=b8e6c9a4a16c4fc0"
+  },
+  {
+    "title": "Physical",
+    "artist": "Olivia Newton-John",
+    "year": 1981,
+    "spotify_url": "https://open.spotify.com/intl-de/track/0bB0aRsAB2CTYRCeoMOFHU?si=d32901996032403f"
+  },
+  {
+    "title": "Tainted Love",
+    "artist": "Soft Cell",
+    "year": 1981,
+    "spotify_url": "https://open.spotify.com/intl-de/track/2ADfheRRkK5P2f1t8si3Lj?si=3666b5865b1e4eb5"
+  },
+  {
+    "title": "Eye of the Tiger",
+    "artist": "Survivor",
+    "year": 1982,
+    "spotify_url": "https://open.spotify.com/intl-de/track/2KH16WveTQWT6KOG9Rg6e2?si=990319c09d464288"
+  },
+  {
+    "title": "Africa",
+    "artist": "TOTO",
+    "year": 1982,
+    "spotify_url": "https://open.spotify.com/intl-de/track/2374M0fQpWi3dLnB54qaLX?si=36e8c5df7459420d"
+  },
+  {
+    "title": "Come on Eileen",
+    "artist": "Dexys Midnight Runners",
+    "year": 1982,
+    "spotify_url": "https://open.spotify.com/intl-de/track/6nWcEzyxDozQcmxMoNJtYx?si=cdd61c2f755c44ea"
+  },
+  {
+    "title": "Billie Jean",
+    "artist": "Michael Jackson",
+    "year": 1983,
+    "spotify_url": "https://open.spotify.com/intl-de/track/7J1uxwnxfQLu4APicE5Rnj?si=f088092ad7834846"
+  },
+  {
+    "title": "Every Breath You Take",
+    "artist": "The Police",
+    "year": 1983,
+    "spotify_url": "https://open.spotify.com/intl-de/track/1JSTJqkT5qHq8MDJnJbRE1?si=be2f3d924ea9441c"
+  },
+  {
+    "title": "Total Eclipse of the Heart",
+    "artist": "Bonnie Tyler",
+    "year": 1983,
+    "spotify_url": "https://open.spotify.com/intl-de/track/63nyotHMEI8PrEZB2FL4DZ?si=92bcae279ea44cfd"
+  },
+  {
+    "title": "Wake Me Up Before You Go-Go",
+    "artist": "Wham!",
+    "year": 1984,
+    "spotify_url": "https://open.spotify.com/intl-de/track/0ikz6tENMONtK6qGkOrU3c?si=6535f03fea90479a"
+  },
+  {
+    "title": "Like a Virgin",
+    "artist": "Madonna",
+    "year": 1984,
+    "spotify_url": "https://open.spotify.com/intl-de/track/1ZPlNanZsJSPK5h9YZZFbZ?si=b78f918d9d104506"
+  },
+  {
+    "title": "When Doves Cry",
+    "artist": "Prince",
+    "year": 1984,
+    "spotify_url": "https://open.spotify.com/intl-de/track/6sby78fghipoXHQLeeZFFH?si=7687da730d094db0"
+  },
+  {
+    "title": "Running Up That Hill (A Deal with God)",
+    "artist": "Kate Bush",
+    "year": 1985,
+    "spotify_url": "https://open.spotify.com/intl-de/track/1PtQJZVZIdWIYdARpZRDFO?si=c5c59f39a62245f2"
+  },
+  {
+    "title": "We Are the World",
+    "artist": "U.S.A. for Africa",
+    "year": 1985,
+    "spotify_url": "https://open.spotify.com/intl-de/track/3Z2tPWiNiIpg8UMMoowHIk?si=09a274769bdc454e"
+  },
+  {
+    "title": "Everybody Wants to Rule the World",
+    "artist": "Tears for Fears",
+    "year": 1985,
+    "spotify_url": "https://open.spotify.com/intl-de/track/4RvWPyQ5RL0ao9LPZeSouE?si=c0126fb522934453"
+  },
+  {
+    "title": "Livin' on a Prayer",
+    "artist": "Bon Jovi",
+    "year": 1986,
+    "spotify_url": "https://open.spotify.com/intl-de/track/37ZJ0p5Jm13JPevGcx4SkF?si=7c29cfbcc494440d"
+  },
+  {
+    "title": "The Final Countdown",
+    "artist": "Europe",
+    "year": 1986,
+    "spotify_url": "https://open.spotify.com/intl-de/track/3MrRksHupTVEQ7YbA0FsZK?si=f0928aed8e2a49bb"
+  },
+  {
+    "title": "Walk This Way",
+    "artist": "Run-D.M.C. ft. Aerosmith",
+    "year": 1986,
+    "spotify_url": "https://open.spotify.com/intl-de/track/6qUEOWqOzu1rLPUPQ1ECpx?si=affdc3e950d14450"
+  },
+  {
+    "title": "I Wanna Dance with Somebody",
+    "artist": "Whitney Houston",
+    "year": 1987,
+    "spotify_url": "https://open.spotify.com/intl-de/track/2tUBqZG2AbRi7Q0BIrVrEj?si=0f56fe59a489490a"
+  },
+  {
+    "title": "Never Gonna Give You Up",
+    "artist": "Rick Astley",
+    "year": 1987,
+    "spotify_url": "https://open.spotify.com/intl-de/track/4PTG3Z6ehGkBFwjybzWkR8?si=94b03a68f0b443f3"
+  },
+  {
+    "title": "With or Without You",
+    "artist": "U2",
+    "year": 1987,
+    "spotify_url": "https://open.spotify.com/intl-de/track/4N0fzRX3T7QkOecp3pkWpp?si=abbcdc398d134052"
+  },
+  {
+    "title": "Don't Worry Be Happy",
+    "artist": "Bobby McFerrin",
+    "year": 1988,
+    "spotify_url": "https://open.spotify.com/intl-de/track/5YbgcwHjQhdT1BYQ4rxWlD?si=20bf848434f7494f"
+  },
+  {
+    "title": "Sweet Child O' Mine",
+    "artist": "Guns N' Roses",
+    "year": 1988,
+    "spotify_url": "https://open.spotify.com/intl-de/track/7snQQk1zcKl8gZ92AnueZW?si=ad087e61127249d2"
+  },
+  {
+    "title": "Fast Car",
+    "artist": "Tracy Chapman",
+    "year": 1988,
+    "spotify_url": "https://open.spotify.com/intl-de/track/2M9ro2krNb7nr7HSprkEgo?si=c27239b23bdc4c41"
+  },
+  {
+    "title": "Like a Prayer",
+    "artist": "Madonna",
+    "year": 1989,
+    "spotify_url": "https://open.spotify.com/intl-de/track/2v7ywbUzCgcVohHaKUcacV?si=33a3cc7bc7b04180"
+  },
+  {
+    "title": "Another Day in Paradise",
+    "artist": "Phil Collins",
+    "year": 1989,
+    "spotify_url": "https://open.spotify.com/intl-de/track/1NCuYqMc8hKMb4cpNTcJbD?si=e11f9c9025904a74"
+  },
+  {
+    "title": "Love Shack",
+    "artist": "The B-52's",
+    "year": 1989,
+    "spotify_url": "https://open.spotify.com/intl-de/track/4W4wYHtsrgDiivRASVOINL?si=66f4c003eeb348d0"
+  },
+  {
+    "title": "U Can't Touch This",
+    "artist": "MC Hammer",
+    "year": 1990,
+    "spotify_url": "https://open.spotify.com/intl-de/track/1B75hgRqe7A4fwee3g3Wmu?si=b3574a92e6214648"
+  },
+  {
+    "title": "Vogue",
+    "artist": "Madonna",
+    "year": 1990,
+    "spotify_url": "https://open.spotify.com/intl-de/track/3WFgRhgECxQYyy8Ldhk2PG?si=0d700ae2c44541ef"
+  },
+  {
+    "title": "Nothing Compares 2 U",
+    "artist": "Sinéad O'Connor",
+    "year": 1990,
+    "spotify_url": "https://open.spotify.com/intl-de/track/5GHY1DFWKz3Prg2V0Iodqo?si=d180727406a6400d"
+  },
+  {
+    "title": "Smells Like Teen Spirit",
+    "artist": "Nirvana",
+    "year": 1991,
+    "spotify_url": "https://open.spotify.com/intl-de/track/4CeeEOM32jQcH3eN9Q2dGj?si=4db3e0d3f6074c3a"
+  },
+  {
+    "title": "Everything I Do I Do It for You",
+    "artist": "Bryan Adams",
+    "year": 1991,
+    "spotify_url": "https://open.spotify.com/intl-de/track/1Eb90nmqTrxylKFhcUzW8P?si=d454e00e1b4e49f8"
+  },
+  {
+    "title": "Losing My Religion",
+    "artist": "R.E.M.",
+    "year": 1991,
+    "spotify_url": "https://open.spotify.com/intl-de/track/31AOj9sFz2gM0O3hMARRBx?si=a5ccc7c675e241e6"
+  },
+  {
+    "title": "I Will Always Love You",
+    "artist": "Whitney Houston",
+    "year": 1992,
+    "spotify_url": "https://open.spotify.com/intl-de/track/4eHbdreAnSOrDDsFfc4Fpm?si=4c96ae2b76544e6a"
+  },
+  {
+    "title": "Rhythm Is a Dancer",
+    "artist": "SNAP!",
+    "year": 1992,
+    "spotify_url": "https://open.spotify.com/intl-de/track/5uFYYOyT3EclOVhiFzPJSz?si=d1e15d4f52cc45fe"
+  },
+  {
+    "title": "It's My Life",
+    "artist": "Dr. Alban",
+    "year": 1992,
+    "spotify_url": "https://open.spotify.com/intl-de/track/4TOGkYS141L15SkVosAp7Z?si=736f1eae37524e71"
+  },
+  {
+    "title": "The Sign",
+    "artist": "Ace of Base",
+    "year": 1993,
+    "spotify_url": "https://open.spotify.com/intl-de/track/0hrBpAOgrt8RXigk83LLNE?si=baa0d87d883844ac"
+  },
+  {
+    "title": "What's Up",
+    "artist": "4 Non Blondes",
+    "year": 1993,
+    "spotify_url": "https://open.spotify.com/intl-de/track/0jWgAnTrNZmOGmqgvHhZEm?si=d0dc0322ea804b0a"
+  },
+  {
+    "title": "What Is Love",
+    "artist": "Haddaway",
+    "year": 1993,
+    "spotify_url": "https://open.spotify.com/intl-de/track/7JkZ2hQdDonRURJjlMuh8q?si=b5e884284d9a447a"
+  },
+  {
+    "title": "All I Want for Christmas Is You",
+    "artist": "Mariah Carey",
+    "year": 1994,
+    "spotify_url": "https://open.spotify.com/intl-de/track/0bYg9bo50gSsH3LtXe2SQn?si=cfb7747193014bb7"
+  },
+  {
+    "title": "Can You Feel the Love Tonight",
+    "artist": "Elton John",
+    "year": 1994,
+    "spotify_url": "https://open.spotify.com/intl-de/track/5vOy21AwtO4waMFLC8KFlP?si=dd37bfbf2ded4688"
+  },
+  {
+    "title": "I'll Make Love to You",
+    "artist": "Boyz II Men",
+    "year": 1994,
+    "spotify_url": "https://open.spotify.com/intl-de/track/7dfl9X38RhIvB3oSmmneq3?si=701418847dea4b81"
+  },
+  {
+    "title": "Gangsta's Paradise",
+    "artist": "Coolio ft. L.V.",
+    "year": 1995,
+    "spotify_url": "https://open.spotify.com/intl-de/track/1DIXPcTDzTj8ZMHt3PDt8p?si=eff55755b6de466d"
+  },
+  {
+    "title": "Wonderwall",
+    "artist": "Oasis",
+    "year": 1995,
+    "spotify_url": "https://open.spotify.com/intl-de/track/1qPbGZqppFwLwcBC1JQ6Vr?si=8538633af28b41aa"
+  },
+  {
+    "title": "Waterfalls",
+    "artist": "TLC",
+    "year": 1995,
+    "spotify_url": "https://open.spotify.com/intl-de/track/6qspW4YKycviDFjHBOaqUY?si=8034b2ca142e436a"
+  },
+  {
+    "title": "Wannabe",
+    "artist": "Spice Girls",
+    "year": 1996,
+    "spotify_url": "https://open.spotify.com/intl-de/track/1Je1IMUlBXcx1Fz0WE7oPT?si=cd1470daf0ba4eba"
+  },
+  {
+    "title": "Un-Break My Heart",
+    "artist": "Toni Braxton",
+    "year": 1996,
+    "spotify_url": "https://open.spotify.com/intl-de/track/5Ihd9HrPvOADyVoonH9ZjB?si=d80ba3e8bcb14164"
+  },
+  {
+    "title": "Killing Me Softly with His Song",
+    "artist": "Fugees",
+    "year": 1996,
+    "spotify_url": "https://open.spotify.com/intl-de/track/0Q0IVlqMV64kNLlwjPj0Hl?si=b67d7d79443e46c8"
+  },
+  {
+    "title": "My Heart Will Go On",
+    "artist": "Céline Dion",
+    "year": 1997,
+    "spotify_url": "https://open.spotify.com/intl-de/track/33LC84JgLvK2KuW43MfaNq?si=7f8f417ce70f4d29"
+  },
+  {
+    "title": "Barbie Girl",
+    "artist": "Aqua",
+    "year": 1997,
+    "spotify_url": "https://open.spotify.com/intl-de/track/5ZrDlcxIDZyjOzHdYW1ydr?si=ecd7d43ec01d4ec6"
+  },
+  {
+    "title": "Bitter Sweet Symphony",
+    "artist": "The Verve",
+    "year": 1997,
+    "spotify_url": "https://open.spotify.com/intl-de/track/0Dmao2oWlAZzIBX2Q1B5AH?si=68c241bbf055407a"
+  },
+  {
+    "title": "Believe",
+    "artist": "Cher",
+    "year": 1998,
+    "spotify_url": "https://open.spotify.com/intl-de/track/2goLsvvODILDzeeiT4dAoR?si=cf3d44c065a04796"
+  },
+  {
+    "title": "...Baby One More Time",
+    "artist": "Britney Spears",
+    "year": 1998,
+    "spotify_url": "https://open.spotify.com/intl-de/track/3MjUtNVVq3C8Fn0MP3zhXa?si=ad85c25fdf4a4bd6"
+  },
+  {
+    "title": "I Don't Want to Miss a Thing",
+    "artist": "Aerosmith",
+    "year": 1998,
+    "spotify_url": "https://open.spotify.com/intl-de/track/225xvV8r1yKMHErSWivnow?si=150921f562a94216"
+  },
+  {
+    "title": "Livin' la Vida Loca",
+    "artist": "Ricky Martin",
+    "year": 1999,
+    "spotify_url": "https://open.spotify.com/intl-de/track/0Ph6L4l8dYUuXFmb71Ajnd?si=8f05ecf812ca4d5c"
+  },
+  {
+    "title": "Mambo No. 5 (A Little Bit of...)",
+    "artist": "Lou Bega",
+    "year": 1999,
+    "spotify_url": "https://open.spotify.com/intl-de/track/6x4tKaOzfNJpEJHySoiJcs?si=b357b813f6a7410a"
+  },
+  {
+    "title": "I Want It That Way",
+    "artist": "Backstreet Boys",
+    "year": 1999,
+    "spotify_url": "https://open.spotify.com/intl-de/track/47BBI51FKFwOMlIiX6m8ya?si=23dff77ac9224b0e"
+  },
+  {
+    "title": "The Real Slim Shady",
+    "artist": "Eminem",
+    "year": 2000,
+    "spotify_url": "https://open.spotify.com/intl-de/track/3yfqSUWxFvZELEM4PmlwIR?si=0ba9862ab31f4a89"
+  },
+  {
+    "title": "Yellow",
+    "artist": "Coldplay",
+    "year": 2000,
+    "spotify_url": "https://open.spotify.com/intl-de/track/3AJwUDP919kvQ9QcozQPxg?si=387c9261802f4bed"
+  },
+  {
+    "title": "Music",
+    "artist": "Madonna",
+    "year": 2000,
+    "spotify_url": "https://open.spotify.com/intl-de/track/2fzykVsO2Di5jnofUNX3YE?si=909d8f73860d4e72"
+  },
+  {
+    "title": "Whenever, Wherever",
+    "artist": "Shakira",
+    "year": 2001,
+    "spotify_url": "https://open.spotify.com/intl-de/track/2lnzGkdtDj5mtlcOW2yRtG?si=b6dfc68a8e9d4bdf"
+  },
+  {
+    "title": "Fallin'",
+    "artist": "Alicia Keys",
+    "year": 2001,
+    "spotify_url": "https://open.spotify.com/intl-de/track/0KQx6HOpJueiSkztcS0r7D?si=5f99bd2ffda84379"
+  },
+  {
+    "title": "Can't Get You Out of My Head",
+    "artist": "Kylie Minogue",
+    "year": 2001,
+    "spotify_url": "https://open.spotify.com/intl-de/track/3E7ZwUMJFqpsDOJzEkBrQ7?si=034030f9a59943dc"
+  },
+  {
+    "title": "Lose Yourself",
+    "artist": "Eminem",
+    "year": 2002,
+    "spotify_url": "https://open.spotify.com/intl-de/track/5Z01UMMf7V1o0MzF86s6WJ?si=206decf408ee4150"
+  },
+  {
+    "title": "Hot in Herre",
+    "artist": "Nelly",
+    "year": 2002,
+    "spotify_url": "https://open.spotify.com/intl-de/track/04KTF78FFg8sOHC1BADqbY?si=e694352f7e274468"
+  },
+  {
+    "title": "Complicated",
+    "artist": "Avril Lavigne",
+    "year": 2002,
+    "spotify_url": "https://open.spotify.com/intl-de/track/5xEM5hIgJ1jjgcEBfpkt2F?si=2a467a9f15ba44ec"
+  },
+  {
+    "title": "Crazy in Love",
+    "artist": "Beyoncé ft. Jay-Z",
+    "year": 2003,
+    "spotify_url": "https://open.spotify.com/intl-de/track/0TwBtDAWpkpM3srywFVOV5?si=2aee0b028edf4777"
+  },
+  {
+    "title": "Hey Ya!",
+    "artist": "OutKast",
+    "year": 2003,
+    "spotify_url": "https://open.spotify.com/intl-de/track/2PpruBYCo4H7WOBJ7Q2EwM?si=0456c14cdcc443ff"
+  },
+  {
+    "title": "In da Club",
+    "artist": "50 Cent",
+    "year": 2003,
+    "spotify_url": "https://open.spotify.com/intl-de/track/7iL6o9tox1zgHpKUfh9vuC?si=d0553b6893ef49c8"
+  },
+  {
+    "title": "Yeah!",
+    "artist": "Usher ft. Lil Jon & Ludacris",
+    "year": 2004,
+    "spotify_url": "https://open.spotify.com/intl-de/track/5rb9QrpfcKFHM1EUbSIurX?si=8461e1c4d39d48a7"
+  },
+  {
+    "title": "Since U Been Gone",
+    "artist": "Kelly Clarkson",
+    "year": 2004,
+    "spotify_url": "https://open.spotify.com/intl-de/track/6JY1IdkZGeIcPegKxjSKeb?si=eb9cba53074d42b3"
+  },
+  {
+    "title": "She Will Be Loved",
+    "artist": "Maroon 5",
+    "year": 2004,
+    "spotify_url": "https://open.spotify.com/intl-de/track/7sapKrjDij2fpDVj0GxP66?si=1b1954970bca498a"
+  },
+  {
+    "title": "We Belong Together",
+    "artist": "Mariah Carey",
+    "year": 2005,
+    "spotify_url": "https://open.spotify.com/intl-de/track/4EI8VuxUuIHKfafU72emqz?si=1f3688e1061a483c"
+  },
+  {
+    "title": "Gold Digger",
+    "artist": "Kanye West ft. Jamie Foxx",
+    "year": 2005,
+    "spotify_url": "https://open.spotify.com/intl-de/track/1PS1QMdUqOal0ai3Gt7sDQ?si=c9475788d3d44e27"
+  },
+  {
+    "title": "Feel Good Inc.",
+    "artist": "Gorillaz ft. De La Soul",
+    "year": 2005,
+    "spotify_url": "https://open.spotify.com/intl-de/track/0d28khcov6AiegSCpG5TuT?si=ee78110e387a400a"
+  },
+  {
+    "title": "Hips Don't Lie",
+    "artist": "Shakira ft. Wyclef Jean",
+    "year": 2006,
+    "spotify_url": "https://open.spotify.com/intl-de/track/3d0WouFnFmr0K3kjeza3fF?si=244d4a6095484212"
+  },
+  {
+    "title": "SexyBack",
+    "artist": "Justin Timberlake ft. Timbaland",
+    "year": 2006,
+    "spotify_url": "https://open.spotify.com/intl-de/track/0O45fw2L5vsWpdsOdXwNAR?si=3ca0450e0ec64ea5"
+  },
+  {
+    "title": "Rehab",
+    "artist": "Amy Winehouse",
+    "year": 2006,
+    "spotify_url": "https://open.spotify.com/intl-de/track/1L5tZi0izXsi5Kk5OJf4W0?si=8011752e1b174c69"
+  },
+  {
+    "title": "Umbrella",
+    "artist": "Rihanna, Jay-Z",
+    "year": 2007,
+    "spotify_url": "https://open.spotify.com/intl-de/track/49FYlytm3dAAraYgpoJZux?si=c2c7921eb0c5423c"
+  },
+  {
+    "title": "Stronger",
+    "artist": "Kanye West",
+    "year": 2007,
+    "spotify_url": "https://open.spotify.com/intl-de/track/0j2T0R9dR9qdJYsB7ciXhf?si=7f6e81f6d2764f1b"
+  },
+  {
+    "title": "Low",
+    "artist": "Flo Rida ft. T-Pain",
+    "year": 2007,
+    "spotify_url": "https://open.spotify.com/intl-de/track/0CAfXk7DXMnon4gLudAp7J?si=9e5f18e43a1941d7"
+  },
+  {
+    "title": "I Kissed a Girl",
+    "artist": "Katy Perry",
+    "year": 2008,
+    "spotify_url": "https://open.spotify.com/intl-de/track/14iN3o8ptQ8cFVZTEmyQRV?si=c1d9063da6ae409e"
+  },
+  {
+    "title": "Viva la Vida",
+    "artist": "Coldplay",
+    "year": 2008,
+    "spotify_url": "https://open.spotify.com/intl-de/track/3Fcfwhm8oRrBvBZ8KGhtea?si=080bb775f4ec474e"
+  },
+  {
+    "title": "Poker Face",
+    "artist": "Lady Gaga",
+    "year": 2008,
+    "spotify_url": "https://open.spotify.com/intl-de/track/1QV6tiMFM6fSOKOGLMHYYg?si=a73ec7e7fe32445b"
+  },
+  {
+    "title": "Boom Boom Pow",
+    "artist": "Black Eyed Peas",
+    "year": 2009,
+    "spotify_url": "https://open.spotify.com/intl-de/track/3oDFtOhcN08qeDPAK6MEQG?si=628f4b61395c48a1"
+  },
+  {
+    "title": "Right Round",
+    "artist": "Flo Rida ft. Kesha",
+    "year": 2009,
+    "spotify_url": "https://open.spotify.com/intl-de/track/0wruS6JEQCGeYrvsCIdG0Z?si=232ab38a37684cf9"
+  },
+  {
+    "title": "Party in the U.S.A.",
+    "artist": "Miley Cyrus",
+    "year": 2009,
+    "spotify_url": "https://open.spotify.com/intl-de/track/3E7dfMvvCLUddWissuqMwr?si=37008af128954f05"
+  },
+  {
+    "title": "Love the Way You Lie",
+    "artist": "Eminem ft. Rihanna",
+    "year": 2010,
+    "spotify_url": "https://open.spotify.com/intl-de/track/15JINEqzVMv3SvJTAXAKED?si=454c28fae90f4dba"
+  },
+  {
+    "title": "Just the Way You Are",
+    "artist": "Bruno Mars",
+    "year": 2010,
+    "spotify_url": "https://open.spotify.com/intl-de/track/47Slg6LuqLaX0VodpSCvPt?si=d6987f07bd114ca1"
+  },
+  {
+    "title": "Rolling in the Deep",
+    "artist": "Adele",
+    "year": 2010,
+    "spotify_url": "https://open.spotify.com/intl-de/track/4OSBTYWVwsQhGLF9NHvIbR?si=0d757ed08a12442c"
+  },
+  {
+    "title": "Give Me Everything",
+    "artist": "Pitbull, AFROJACK, ft. Ne-Yo, Nayer",
+    "year": 2011,
+    "spotify_url": "https://open.spotify.com/intl-de/track/4QNpBfC0zvjKqPJcyqBy9W?si=9c6ffefe7a2d43fa"
+  },
+  {
+    "title": "Super Bass",
+    "artist": "Nicki Minaj",
+    "year": 2011,
+    "spotify_url": "https://open.spotify.com/intl-de/track/3hlksXnvbKogFdPbpO9vel?si=d394f40b33664cf6"
+  },
+  {
+    "title": "Call Me Maybe",
+    "artist": "Carly Rae Jepsen",
+    "year": 2011,
+    "spotify_url": "https://open.spotify.com/intl-de/track/20I6sIOMTCkB6w7ryavxtO?si=45e58d2e5100463f"
+  },
+  {
+    "title": "Gangnam Style",
+    "artist": "Psy",
+    "year": 2012,
+    "spotify_url": "https://open.spotify.com/intl-de/track/03UrZgTINDqvnUMbbIMhql?si=fffbe613c69a445f"
+  },
+  {
+    "title": "Scream",
+    "artist": "Usher",
+    "year": 2012,
+    "spotify_url": "https://open.spotify.com/intl-de/track/12eMQUn2GzfsfsQLH53M19?si=25cefa53bcf04835"
+  },
+  {
+    "title": "Ho Hey",
+    "artist": "The Lumineers",
+    "year": 2012,
+    "spotify_url": "https://open.spotify.com/intl-de/track/0DwClY2t9YAWHBROMIgrXb?si=723d5dd9ce8241b4"
+  },
+  {
+    "title": "Blurred Lines",
+    "artist": "Robin Thicke ft. T.I. & Pharrell Williams",
+    "year": 2013,
+    "spotify_url": "https://open.spotify.com/intl-de/track/0n4bITAu0Y0nigrz3MFJMb?si=43d7967edb1b4ded"
+  },
+  {
+    "title": "Wrecking Ball",
+    "artist": "Miley Cyrus",
+    "year": 2013,
+    "spotify_url": "https://open.spotify.com/intl-de/track/2vwlzO0Qp8kfEtzTsCXfyE?si=c52892de79bc4457"
+  },
+  {
+    "title": "Happy",
+    "artist": "Pharrell Williams",
+    "year": 2013,
+    "spotify_url": "https://open.spotify.com/intl-de/track/0eMxgAHmuvoqpLyYQrbKvQ?si=51e61e21a8ce49ea"
+  },
+  {
+    "title": "Shake It Off",
+    "artist": "Taylor Swift",
+    "year": 2014,
+    "spotify_url": "https://open.spotify.com/intl-de/track/0cqRj7pUJDkTCEsJkx8snD?si=171754c991504217"
+  },
+  {
+    "title": "Uptown Funk",
+    "artist": "Mark Ronson ft. Bruno Mars",
+    "year": 2014,
+    "spotify_url": "https://open.spotify.com/intl-de/track/32OlwWuMpZ6b0aN2RZOeMS?si=fdc50205e39e4bad"
+  },
+  {
+    "title": "Thinking Out Loud",
+    "artist": "Ed Sheeran",
+    "year": 2014,
+    "spotify_url": "https://open.spotify.com/intl-de/track/34gCuhDGsG4bRPIf9bb02f?si=786dd869d9594c5e"
+  },
+  {
+    "title": "Can't Feel My Face",
+    "artist": "The Weeknd",
+    "year": 2015,
+    "spotify_url": "https://open.spotify.com/intl-de/track/22VdIZQfgXJea34mQxlt81?si=aca080bc5cfa475b"
+  },
+  {
+    "title": "Sorry",
+    "artist": "Justin Bieber",
+    "year": 2015,
+    "spotify_url": "https://open.spotify.com/intl-de/track/09CtPGIpYB4BrO8qb1RGsF?si=fce367741ebd4dcc"
+  },
+  {
+    "title": "See You Again",
+    "artist": "Wiz Khalifa ft. Charlie Puth",
+    "year": 2015,
+    "spotify_url": "https://open.spotify.com/intl-de/track/2JzZzZUQj3Qff7wapcbKjc?si=4a2952710fa0449a"
+  },
+  {
+    "title": "One Dance",
+    "artist": "Drake, Wizkid, Kyla",
+    "year": 2016,
+    "spotify_url": "https://open.spotify.com/intl-de/track/1zi7xx7UVEFkmKfv06H8x0?si=6d83009c60324a3f"
+  },
+  {
+    "title": "Work",
+    "artist": "Rihanna ft. Drake",
+    "year": 2016,
+    "spotify_url": "https://open.spotify.com/intl-de/track/72TFWvU3wUYdUuxejTTIzt?si=7cab8ae0ef0f4bb1"
+  },
+  {
+    "title": "Don't Let Me Down",
+    "artist": "The Chainsmokers ft. Daya",
+    "year": 2016,
+    "spotify_url": "https://open.spotify.com/intl-de/track/1i1fxkWeaMmKEB4T7zqbzK?si=15b189db5d284f29"
+  },
+  {
+    "title": "Shape of You",
+    "artist": "Ed Sheeran",
+    "year": 2017,
+    "spotify_url": "https://open.spotify.com/intl-de/track/7qiZfU4dY1lWllzX7mPBI3?si=426885e7244c4ec2"
+  },
+  {
+    "title": "Despacito",
+    "artist": "Luis Fonsi ft. Daddy Yankee",
+    "year": 2017,
+    "spotify_url": "https://open.spotify.com/intl-de/track/6habFhsOp2NvshLv26DqMb?si=691bcc10871241a9"
+  },
+  {
+    "title": "rockstar",
+    "artist": "Post Malone ft. 21 Savage",
+    "year": 2017,
+    "spotify_url": "https://open.spotify.com/intl-de/track/0e7ipj03S05BNilyu5bRzt?si=da17d1d8c1864c4b"
+  },
+  {
+    "title": "God is a Woman",
+    "artist": "Ariana Grande",
+    "year": 2018,
+    "spotify_url": "https://open.spotify.com/intl-de/track/5OCJzvD7sykQEKHH7qAC3C?si=438cd4f9ad5041ce"
+  },
+  {
+    "title": "I Like It",
+    "artist": "Cardi B ft. Bad Bunny & J Balvin",
+    "year": 2018,
+    "spotify_url": "https://open.spotify.com/intl-de/track/58q2HKrzhC3ozto2nDdN4z?si=4ecbacc08fc04147"
+  },
+  {
+    "title": "Old Town Road",
+    "artist": "Lil Nas X",
+    "year": 2018,
+    "spotify_url": "https://open.spotify.com/intl-de/track/0F7FA14euOIX8KcbEturGH?si=75afecb12e4e4459"
+  },
+  {
+    "title": "bad guy",
+    "artist": "Billie Eilish",
+    "year": 2019,
+    "spotify_url": "https://open.spotify.com/intl-de/track/2Fxmhks0bxGSBdJ92vM42m?si=4e26063a2a3141f2"
+  },
+  {
+    "title": "Blinding Lights",
+    "artist": "The Weeknd",
+    "year": 2019,
+    "spotify_url": "https://open.spotify.com/intl-de/track/0VjIjW4GlUZAMYd2vXMi3b?si=62f441b50c0641ae"
+  },
+  {
+    "title": "Don't Start Now",
+    "artist": "Dua Lipa",
+    "year": 2019,
+    "spotify_url": "https://open.spotify.com/intl-de/track/2ThsBNtjuUEERqcpXQEoYR?si=1883ec0c202d49fa"
+  },
+  {
+    "title": "Watermelon Sugar",
+    "artist": "Harry Styles",
+    "year": 2020,
+    "spotify_url": "https://open.spotify.com/intl-de/track/6UelLqGlWMcVH1E5c4H7lY?si=203973fbd63044f9"
+  },
+  {
+    "title": "WAP",
+    "artist": "Cardi B ft. Megan Thee Stallion",
+    "year": 2020,
+    "spotify_url": "https://open.spotify.com/intl-de/track/4Oun2ylbjFKMPTiaSbbCih?si=a3bf331467104f7f"
+  },
+  {
+    "title": "Savage Love",
+    "artist": "Jawsh 685 and Jason Derulo",
+    "year": 2020,
+    "spotify_url": "https://open.spotify.com/intl-de/track/1xQ6trAsedVPCdbtDAmk0c?si=72e97147e08d458f"
+  },
+  {
+    "title": "drivers license",
+    "artist": "Olivia Rodrigo",
+    "year": 2021,
+    "spotify_url": "https://open.spotify.com/intl-de/track/5wANPM4fQCJwkGd4rN57mH?si=43862c3f792c4757"
+  },
+  {
+    "title": "Kiss Me More",
+    "artist": "Doja Cat",
+    "year": 2021,
+    "spotify_url": "https://open.spotify.com/intl-de/track/47362Yh7VtOwx9jSpNssds?si=817ec971f78b40a5"
+  },
+  {
+    "title": "Butter",
+    "artist": "BTS",
+    "year": 2021,
+    "spotify_url": "https://open.spotify.com/intl-de/track/1mWdTewIgB3gtBM3TOSFhB?si=68e8dcce62e243ea"
+  },
+  {
+    "title": "As It Was",
+    "artist": "Harry Styles",
+    "year": 2022,
+    "spotify_url": "https://open.spotify.com/intl-de/track/4Dvkj6JhhA12EX05fT7y2e?si=b720997624ca48dd"
+  },
+  {
+    "title": "Me Porto Bonito",
+    "artist": "Bad Bunny ft. Chencho Corleone",
+    "year": 2022,
+    "spotify_url": "https://open.spotify.com/intl-de/track/6Sq7ltF9Qa7SNFBsV5Cogx?si=62c7a1565d874234"
+  },
+  {
+    "title": "BREAK MY SOUL",
+    "artist": "Beyoncé",
+    "year": 2022,
+    "spotify_url": "https://open.spotify.com/intl-de/track/2KukL7UlQ8TdvpaA7bY3ZJ?si=c76b899c60fa4b34"
+  },
+  {
+    "title": "Flowers",
+    "artist": "Miley Cyrus",
+    "year": 2023,
+    "spotify_url": "https://open.spotify.com/intl-de/track/7DSAEUvxU8FajXtRloy8M0?si=30291945c44e4466"
+  },
+  {
+    "title": "Paint the Town Red",
+    "artist": "Doja Cat ft. SZA",
+    "year": 2023,
+    "spotify_url": "https://open.spotify.com/intl-de/track/2IGMVunIBsBLtEQyoI1Mu7?si=10ac58cbff0d40a3"
+  },
+  {
+    "title": "Seven",
+    "artist": "Jung Kook ft. Latto",
+    "year": 2023,
+    "spotify_url": "https://open.spotify.com/intl-de/track/2HRgqmZQC0MC7GeNuDIXHN?si=54762272fa12477c"
+  },
+  {
+    "title": "Espresso",
+    "artist": "Sabrina Carpenter",
+    "year": 2024,
+    "spotify_url": "https://open.spotify.com/intl-de/track/1vLqigPHwiFnXsfrLMehV1?si=968f1bc13c834b31"
+  },
+  {
+    "title": "Not Like Us",
+    "artist": "Kendrick Lamar",
+    "year": 2024,
+    "spotify_url": "https://open.spotify.com/intl-de/track/6AI3ezQ4o3HUoP6Dhudph3?si=6549d9b563864595"
+  },
+  {
+    "title": "Birds of a Feather",
+    "artist": "Billie Eilish",
+    "year": 2024,
+    "spotify_url": "https://open.spotify.com/intl-de/track/7D4bglfWu6vp2XzFd3o8tW?si=5d5d7af487a74d82"
+  },
+  {
+    "title": "Abracadabra",
+    "artist": "Lady Gaga",
+    "year": 2025,
+    "spotify_url": "https://open.spotify.com/intl-de/track/5ZLUm9eab8y3tqQ1OhQSHI?si=1ee506e3855b42e7"
+  },
+  {
+    "title": "Manchild",
+    "artist": "Sabrina Carpenter",
+    "year": 2025,
+    "spotify_url": "https://open.spotify.com/intl-de/track/2BwO5K8Q7EPAJSGze3AAh9?si=65ea1d5294b94fa8"
+  },
+  {
+    "title": "Ordinary",
+    "artist": "Alex Warren",
+    "year": 2025,
+    "spotify_url": "https://open.spotify.com/intl-de/track/2RkZ5LkEzeHGRsmDqKwmaJ?si=285ac1490a744509"
+  },
+  {
+    "title": "I Just Might",
+    "artist": "Bruno Mars",
+    "year": 2026,
+    "spotify_url": "https://open.spotify.com/track/12bYYQaLqHliSXvRIYlq8G?si=t2jUgQnxQkqtCkSwAe-h7w"
+  },
+  {
+    "title": "Catharina",
+    "artist": "Martin Garrix",
+    "year": 2026,
+    "spotify_url": "https://open.spotify.com/intl-de/track/0axM6rXe76kVZ5H3vbb8pi?si=a53b41ca2fe742d7"
+  }
+]

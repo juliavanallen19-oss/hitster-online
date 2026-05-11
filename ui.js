@@ -294,6 +294,7 @@ async function flyCardToTimeline(containerId) {
     clone.style.borderRadius = '8px';
 
     await sleep(550);
+    soundCardLand(); // soft click as the clone arrives
     clone.remove();
 
     // Reveal the real card and trigger the glow animation
@@ -424,6 +425,7 @@ function onSlotClick(position) {
 // =============================================================
 
 function showWinScreen(winners, reason = null) {
+    soundWin();
     const list = Array.isArray(winners) ? winners : [winners];
 
     // Context note above the headline
@@ -674,6 +676,7 @@ el('submit-btn').addEventListener('click', async () => {
 
     // Flip the card (QR → song info); hide the scan hint since the QR is no longer visible
     el('flip-card-inner').classList.add('flipped');
+    soundCardFlip();
     el('scan-hint').classList.add('hidden');
     el('steal-btn').classList.add('hidden');
     el('steal-panel').classList.add('hidden');
@@ -713,12 +716,15 @@ el('submit-btn').addEventListener('click', async () => {
         el('stealer-timeline-label').textContent = `🎉 ${stealer.name} steals the card!`;
         el('stealer-timeline-section').classList.remove('hidden');
 
+        soundStealWins(); // heist flourish plays while the card flies across
         await flyCardToTimeline('stealer-timeline-container');
         await sleep(1800); // wait for the 1.5s glow to finish, then a short buffer before the message
         showRevealMessage(`🎉 ${stealer.name} stole the card! Their token was returned.`, 'success');
 
     } else if (result.activeCorrect) {
         await flyCardToTimeline('timeline-container');
+        soundCorrectPlacement(); // arpeggio fires the moment the glow starts
+        if (result.nameGuessCorrect) setTimeout(soundTokenEarned, 350); // sparkle after arpeggio
         await sleep(1800); // wait for the 1.5s glow to finish, then a short buffer before the message
 
         if (result.stealResult) {
@@ -740,8 +746,10 @@ el('submit-btn').addEventListener('click', async () => {
 
     } else if (result.stealResult?.outcome === 'both_wrong') {
         const sName = result.stealResult.stealer.name;
+        soundWrongPlacement();
         showRevealMessage(`Both positions were wrong — card discarded. ${sName} loses their token.`, 'error');
     } else {
+        soundWrongPlacement();
         showRevealMessage('Wrong position — card discarded. Better luck next turn!', 'error');
     }
 
@@ -783,6 +791,7 @@ el('skip-btn').addEventListener('click', () => {
         lastPlayedCard   = result.card;
         selectedPosition = null;
         activePosition   = null;
+        soundSkipCard();
         updateTokenDisplay();
         renderAllPlayers();
         if (result.card) {
@@ -812,7 +821,9 @@ el('buy-btn').addEventListener('click', async () => {
         renderTimelineInto(el('timeline-container'), game.getCurrentPlayer().timeline, null, null, false);
 
         showSongInfo(card);
+        soundBuyPlacement(); // three coin-pings for spending 3 tokens
         el('flip-card-inner').classList.add('flipped');
+        soundCardFlip();
         el('scan-hint').classList.add('hidden');
         el('place-btn').classList.add('hidden');
         el('skip-btn').classList.add('hidden');
@@ -821,6 +832,7 @@ el('buy-btn').addEventListener('click', async () => {
 
         await sleep(700);
         await flyCardToTimeline('timeline-container');
+        soundCorrectPlacement(); // arpeggio as the glow fires
         await sleep(1800); // wait for the 1.5s glow to finish, then a short buffer before the message
 
         showRevealMessage('Card automatically placed at the correct position! ✅', 'success');

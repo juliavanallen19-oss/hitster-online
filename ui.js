@@ -4,10 +4,11 @@
 // =============================================================
 
 // --- UI state ---
-let selectedPosition = null; // slot the active player clicked (index into timeline gaps)
-let activePosition   = null; // confirmed after Place Here is clicked (used in resolveRound)
-let lastPlayedCard   = null; // stored for reveal display
-let justWonCard      = null; // card that was just added to a timeline (gets glow animation)
+let selectedPosition     = null; // slot the active player clicked (index into timeline gaps)
+let activePosition       = null; // confirmed after Place Here is clicked (used in resolveRound)
+let lastPlayedCard       = null; // stored for reveal display
+let justWonCard          = null; // card that was just added to a timeline (gets glow animation)
+let stealModeStealerIndex = null; // when set, timeline slot clicks are steal position choices
 
 // --- Shorthand helper ---
 function el(id) { return document.getElementById(id); }
@@ -53,21 +54,35 @@ function initSetupScreen() {
     el('player-inputs').addEventListener('click', onDeletePlayer);
     el('start-game-btn').addEventListener('click', onStartGame);
     updateDeleteButtons();
+    updateAddPlayerButton();
     updateStartingPlayerDropdown();
+}
+
+// Shows/hides the "Add player" button based on current count
+function updateAddPlayerButton() {
+    const rows = document.querySelectorAll('.player-input-row');
+    el('add-player-btn').classList.toggle('hidden', rows.length >= 6);
+}
+
+// Reassigns every row's placeholder to "Player 1 name", "Player 2 name", … sequentially
+function renumberPlayerInputs() {
+    document.querySelectorAll('.player-input-row').forEach((row, i) => {
+        const input = row.querySelector('.player-name-input');
+        if (input) input.placeholder = `Player ${i + 1} name`;
+    });
 }
 
 function addPlayerInput() {
     const rows = document.querySelectorAll('.player-input-row');
-    if (rows.length >= 6) {
-        showMessage('Maximum 6 players reached.');
-        return;
-    }
+    if (rows.length >= 6) return; // button is hidden anyway, but guard just in case
     const row = document.createElement('div');
     row.className = 'player-input-row';
     row.innerHTML = `<input type="text" class="player-name-input" placeholder="Player ${rows.length + 1} name" maxlength="20">
                      <button type="button" class="delete-player-btn" aria-label="Remove player">×</button>`;
     el('player-inputs').appendChild(row);
     updateDeleteButtons();
+    updateAddPlayerButton();
+    renumberPlayerInputs();
     updateStartingPlayerDropdown();
 }
 
@@ -78,6 +93,8 @@ function onDeletePlayer(e) {
     if (rows.length <= 2) return;
     e.target.closest('.player-input-row').remove();
     updateDeleteButtons();
+    updateAddPlayerButton();
+    renumberPlayerInputs(); // re-sequence after deletion so numbering stays gapless
     updateStartingPlayerDropdown();
 }
 
@@ -149,8 +166,9 @@ function decadeClass(year) {
 // pendingPos: if not null, shows a face-down card at that slot index.
 // stealPos:   if not null, shows a steal token marker at that slot index.
 // interactive: if true, slots are clickable (used for active player's timeline).
-// chosenPos: slot index to keep highlighted (orange) after reveal on wrong placement
-function renderTimelineInto(container, timeline, pendingPos, stealPos, interactive, chosenPos = null) {
+// chosenPos:   slot index to keep highlighted (orange) after reveal on wrong placement
+// stealerName: when set, steal marker uses this name (for post-reveal display after pendingSteal is cleared)
+function renderTimelineInto(container, timeline, pendingPos, stealPos, interactive, chosenPos = null, stealerName = null) {
     container.innerHTML = '';
 
     for (let i = 0; i <= timeline.length; i++) {
@@ -164,7 +182,7 @@ function renderTimelineInto(container, timeline, pendingPos, stealPos, interacti
         } else if (i === stealPos) {
             // Steal token marker
             slot.className = 'steal-token-marker';
-            slot.innerHTML = `✪<br>${game.players[game.pendingSteal ? game.pendingSteal.stealerIndex : 0].name}`;
+            slot.innerHTML = `✪<br>${stealerName ?? (game.pendingSteal ? game.players[game.pendingSteal.stealerIndex].name : '?')}`;
         } else if (interactive) {
             // Interactive slots: hoverable, clickable, highlight when selected
             slot.className = 'timeline-slot' + (i === selectedPosition ? ' selected' : '');
@@ -263,10 +281,12 @@ function setButtonEnabled(btn, enabled) {
 // =============================================================
 
 function beginTurn() {
-    selectedPosition = null;
-    activePosition   = null;
-    lastPlayedCard   = null;
-    justWonCard      = null;
+    selectedPosition      = null;
+    activePosition        = null;
+    lastPlayedCard        = null;
+    justWonCard           = null;
+    stealModeStealerIndex = null;
+    el('timeline-container').classList.remove('steal-mode');
 
     // Reset all panels
     el('name-guess-form').classList.add('hidden');
@@ -307,9 +327,18 @@ function beginTurn() {
     updateButtonStates();
 }
 
-// Player clicks a slot in the timeline
+// Player clicks a slot in the timeline.
+// In steal mode the click selects the steal position; otherwise it selects a placement slot.
 function onSlotClick(position) {
-    if (activePosition !== null) return; // already placed — steal slots handled separately
+    if (stealModeStealerIndex !== null) {
+        if (position === activePosition) {
+            showMessage("That slot is already taken by the active player — pick a different one.", true);
+            return;
+        }
+        confirmSteal(stealModeStealerIndex, position);
+        return;
+    }
+    if (activePosition !== null) return; // already placed
     selectedPosition = position;
     el('message-bar').classList.add('hidden'); // clear any previous hint when a new slot is chosen
     renderTimeline();
@@ -432,8 +461,13 @@ function renderStealSlots(stealerIndex) {
     const stealer  = game.players[stealerIndex];
     const timeline = game.getCurrentPlayer().timeline;
 
+    // Activate steal mode: timeline slots now call confirmSteal instead of onSlotClick
+    stealModeStealerIndex = stealerIndex;
+    el('timeline-container').classList.add('steal-mode');
+    renderTimeline(); // re-render so the timeline reflects steal mode visually
+
     // Build slot list — same slots as active player's timeline, but skip the active player's chosen slot
-    let html = `<p class="steal-label">${stealer.name}: pick a DIFFERENT position on ${game.getCurrentPlayer().name}'s timeline</p>
+    let html = `<p class="steal-label">${stealer.name}: tap a slot directly on the timeline above, or pick from the list below</p>
                 <div class="steal-slot-buttons">`;
 
     for (let i = 0; i <= timeline.length; i++) {
@@ -466,6 +500,8 @@ function renderStealSlots(stealerIndex) {
     });
 
     el('cancel-steal-btn').addEventListener('click', () => {
+        stealModeStealerIndex = null;
+        el('timeline-container').classList.remove('steal-mode');
         el('steal-panel').classList.add('hidden');
         game.pendingSteal = null;
         renderTimeline();
@@ -474,6 +510,8 @@ function renderStealSlots(stealerIndex) {
 }
 
 function confirmSteal(stealerIndex, stealPosition) {
+    stealModeStealerIndex = null;
+    el('timeline-container').classList.remove('steal-mode');
     const result = initiateSteal(game, stealerIndex, stealPosition);
     if (!result.success) {
         showMessage('Could not register steal — try again.');
@@ -562,12 +600,17 @@ el('submit-btn').addEventListener('click', () => {
         return;
     }
 
+    // Save state before resolveRound clears pendingSteal and currentCard
+    const resolvedPosition = activePosition;
+    const savedSteal = game.pendingSteal ? {
+        position:    game.pendingSteal.stealPosition,
+        stealerName: game.players[game.pendingSteal.stealerIndex].name
+    } : null;
+
     const result = resolveRound(game, activePosition, nameGuess);
     lastPlayedCard = result.card;
 
-    // Save chosen position before clearing — used to keep the orange slot visible after wrong placement
-    const resolvedPosition = activePosition;
-    justWonCard  = result.activeCorrect ? result.card : null;
+    justWonCard    = result.activeCorrect ? result.card : null;
     activePosition = null; // clear so renderTimeline() no longer shows the ? face-down card
 
     // Show the revealed card info
@@ -587,9 +630,18 @@ el('submit-btn').addEventListener('click', () => {
     }
 
     updateTokenDisplay();
-    // Render non-interactive; wrong placement keeps the orange slot visible as feedback
+    // Render non-interactive; wrong placement keeps orange slot visible; wrong steal keeps steal marker
     const chosenHighlight = result.activeCorrect ? null : resolvedPosition;
-    renderTimelineInto(el('timeline-container'), game.getCurrentPlayer().timeline, null, null, false, chosenHighlight);
+    const keepSteal       = savedSteal && result.stealResult?.outcome !== 'steal_wins';
+    renderTimelineInto(
+        el('timeline-container'),
+        game.getCurrentPlayer().timeline,
+        null,
+        keepSteal ? savedSteal.position    : null,
+        false,
+        chosenHighlight,
+        keepSteal ? savedSteal.stealerName : null
+    );
     renderAllPlayers();
 
     // Handle steal outcome first (steal_wins returns early)

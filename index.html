@@ -90,19 +90,27 @@
         <button type="button" id="finish-game-btn" class="finish-game-btn">Finish game</button>
       </header>
 
-      <!-- ===== Song card: QR code + hidden info + name guess form ===== -->
-      <!-- game.js calls generateQRCode() which fills #qr-container    -->
-      <!-- JS toggles .hidden on each sub-section as the turn progresses -->
+      <!-- ===== Song card: flip card + name guess form ===== -->
       <section class="card-area">
-        <div class="song-card">
+        <div id="song-card" class="song-card">
 
-          <!-- QR code: visible from the start of every turn -->
-          <div id="qr-container" class="qr-container"></div>
+          <!-- Flip card: front = QR code, back = revealed year / artist / title -->
+          <div id="flip-card" class="flip-card">
+            <div id="flip-card-inner" class="flip-card-inner">
+              <div class="flip-card-front">
+                <div id="qr-container" class="qr-container"></div>
+              </div>
+              <div class="flip-card-back">
+                <p id="reveal-year" class="reveal-year">—</p>
+                <p id="reveal-artist" class="reveal-artist">—</p>
+                <p id="reveal-title" class="reveal-title">—</p>
+              </div>
+            </div>
+          </div>
           <p class="scan-hint">Scan to listen, then place the song on your timeline</p>
           <p id="deck-counter" class="deck-counter"><span class="deck-icon">♬</span> <span id="deck-count">—</span> songs left in the deck</p>
 
           <!-- Name guess + Submit: appears after Place Here is clicked (before reveal) -->
-          <!-- Filling in title/artist is optional — Submit is always required to continue -->
           <div id="name-guess-form" class="name-guess-form hidden">
             <p class="guess-label">Name BOTH the song title AND the artist for a bonus token (optional)</p>
             <input type="text" id="guess-title" class="player-name-input" placeholder="Song title" maxlength="60">
@@ -110,16 +118,10 @@
             <button type="button" id="submit-btn" class="primary-btn">Submit &amp; reveal</button>
           </div>
 
-          <!-- Song info: hidden until reveal (task 1.6) -->
-          <!-- JS removes .hidden when the player clicks Reveal -->
-          <div id="song-info" class="song-info hidden">
-            <p id="song-title" class="song-title">—</p>
-            <p id="song-artist" class="song-artist">—</p>
-            <p id="song-year" class="song-year">—</p>
-          </div>
+          <!-- Reveal outcome message — shown in the card area after the flip -->
+          <div id="reveal-message" class="reveal-message hidden"></div>
 
           <!-- Override button: appears after reveal if a name guess was wrong -->
-          <!-- Lets players correct the automatic check (e.g. slight typo) -->
           <button type="button" id="override-btn" class="secondary-btn override-btn hidden">
             ✏️ Override: artist &amp; title were actually correct
           </button>

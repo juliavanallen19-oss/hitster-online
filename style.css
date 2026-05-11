@@ -288,7 +288,7 @@ body {
   border-color: #ff3d8b;
 }
 
-/* ===== QR code area ===== */
+/* ===== QR code / flip-card area ===== */
 
 .card-area {
   display: flex;
@@ -297,15 +297,122 @@ body {
   gap: 14px;
 }
 
-.qr-container {
+/* ===== 3-D flip card ===== */
+
+.flip-card {
   width: 200px;
   height: 200px;
-  background: #ffffff;           /* QR codes need a white background to scan */
+  perspective: 800px;
+  flex-shrink: 0;
+}
+
+.flip-card-inner {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.6s ease;
+}
+
+.flip-card-inner.flipped {
+  transform: rotateY(180deg);
+}
+
+.flip-card-front,
+.flip-card-back {
+  position: absolute;
+  inset: 0;
   border-radius: 12px;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 16px;
+  box-sizing: border-box;
+}
+
+.flip-card-front {
+  background: #ffffff;
+  overflow: hidden;
+  padding: 0;
+}
+
+.flip-card-back {
+  background: #1a1a22;
+  border: 2px solid #ffae3d;
+  transform: rotateY(180deg);
+  text-align: center;
+}
+
+.qr-container {
+  width: 100%;
+  height: 100%;
+  background: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
+}
+
+/* Song info shown on the back of the flip card */
+
+.reveal-year {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 800;
+  background: linear-gradient(90deg, #ff3d8b, #ffae3d);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  line-height: 1.1;
+}
+
+.reveal-artist {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #9a9aa8;
+}
+
+.reveal-title {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #f0f0f0;
+}
+
+/* ===== Reveal outcome message (shown inside the song card after flip) ===== */
+
+.reveal-message {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  text-align: center;
+  border: 1px solid #3a3a48;
+  color: #f0f0f0;
+  background: #1a1a22;
+  animation: reveal-message-in 0.45s ease;
+}
+
+@keyframes reveal-message-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.reveal-message--success {
+  background: rgba(61, 210, 120, 0.1);
+  border-color: #3dd278;
+  color: #3dd278;
+}
+
+.reveal-message--error {
+  background: rgba(255, 61, 139, 0.1);
+  border-color: #ff3d8b;
+  color: #f0c0cc;
 }
 
 .scan-hint {
@@ -316,6 +423,28 @@ body {
 }
 
 /* ===== Timeline section ===== */
+
+/* Flex row that shows "1960" on the left, the scrollable track in the middle, "2026" on the right */
+.timeline-year-range {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* The scroll wrapper fills the remaining space between the two year labels */
+.timeline-year-range .timeline-scroll-wrapper {
+  flex: 1;
+  min-width: 0;   /* prevents flex children from overflowing */
+}
+
+.timeline-year-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #5a5a78;
+  white-space: nowrap;
+  flex-shrink: 0;
+  letter-spacing: 0.04em;
+}
 
 .section-label {
   font-size: 0.85rem;
@@ -456,40 +585,6 @@ body {
   text-align: center;
 }
 
-/* Song info revealed after player clicks Reveal (task 1.6) */
-.song-info {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  text-align: center;
-  width: 100%;
-  padding-top: 8px;
-  border-top: 1px solid #2a2a36;
-}
-
-.song-title {
-  margin: 0;
-  font-size: 1.2rem;
-  font-weight: 700;
-  color: #f0f0f0;
-}
-
-.song-artist {
-  margin: 0;
-  font-size: 1rem;
-  color: #9a9aa8;
-}
-
-.song-year {
-  margin: 0;
-  font-size: 1.4rem;
-  font-weight: 800;
-  background: linear-gradient(90deg, #ff3d8b, #ffae3d);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
 
 /* ===== Timeline enhancements (Task 1.7) ===== */
 
@@ -849,10 +944,41 @@ body {
   box-shadow: 0 0 10px rgba(255, 174, 61, 0.6);
 }
 
+/* ===== Steal mode: timeline slots turn gold on hover to signal "pick steal position" ===== */
+
+#timeline-container.steal-mode .timeline-slot {
+  cursor: crosshair;
+}
+
+#timeline-container.steal-mode .timeline-slot:hover {
+  background: #f0c040 !important;
+  width: 22px;
+  box-shadow: 0 0 10px rgba(240, 192, 64, 0.8);
+}
+
+/* ===== Timeline card: artist name (middle line) ===== */
+
+.timeline-card .card-artist {
+  font-size: 0.6rem;
+  color: #8a8a98;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  text-align: center;
+}
+
+/* ===== Newly won card: invisible placeholder while fly animation plays ===== */
+
+.timeline-card--won-pending {
+  opacity: 0;
+  pointer-events: none;
+}
+
 /* ===== Newly won card: glows gold, then settles back to normal ===== */
 
 .timeline-card--won {
-  animation: card-won-glow 3s ease forwards;
+  animation: card-won-glow 1.5s ease forwards;
 }
 
 @keyframes card-won-glow {
@@ -860,11 +986,12 @@ body {
                      0 0 40px 14px rgba(255, 174, 61, 0.85),
                      0 0 80px 20px rgba(255, 140, 30, 0.4);
          transform: scale(1.2); }
-  35%  { box-shadow: 0 0 0 4px rgba(255, 174, 61, 0.75),
+  30%  { box-shadow: 0 0 0 4px rgba(255, 174, 61, 0.75),
                      0 0 24px 8px rgba(255, 174, 61, 0.5);
-         transform: scale(1.1); }
+         transform: scale(1.08); }
   100% { box-shadow: none; transform: scale(1); }
 }
+
 
 /* ===== Responsive: on wider screens, show QR + timeline side by side ===== */
 @media (min-width: 560px) {

@@ -4,10 +4,11 @@
 // =============================================================
 
 // --- UI state ---
-let selectedPosition = null; // slot the active player clicked (index into timeline gaps)
-let activePosition   = null; // confirmed after Place Here is clicked (used in resolveRound)
-let lastPlayedCard   = null; // stored for reveal display
-let justWonCard      = null; // card that was just added to a timeline (gets glow animation)
+let selectedPosition      = null; // slot the active player clicked (index into timeline gaps)
+let activePosition        = null; // confirmed after Place Here is clicked (used in resolveRound)
+let lastPlayedCard        = null; // stored for reveal display
+let justWonCard           = null; // card that was just added to a timeline (gets glow animation)
+let stealModeStealerIndex = null; // when set, timeline slot clicks are steal position choices
 
 // --- Shorthand helper ---
 function el(id) { return document.getElementById(id); }
@@ -53,21 +54,35 @@ function initSetupScreen() {
     el('player-inputs').addEventListener('click', onDeletePlayer);
     el('start-game-btn').addEventListener('click', onStartGame);
     updateDeleteButtons();
+    updateAddPlayerButton();
     updateStartingPlayerDropdown();
+}
+
+// Shows/hides the "Add player" button based on current count
+function updateAddPlayerButton() {
+    const rows = document.querySelectorAll('.player-input-row');
+    el('add-player-btn').classList.toggle('hidden', rows.length >= 6);
+}
+
+// Reassigns every row's placeholder to "Player 1 name", "Player 2 name", … sequentially
+function renumberPlayerInputs() {
+    document.querySelectorAll('.player-input-row').forEach((row, i) => {
+        const input = row.querySelector('.player-name-input');
+        if (input) input.placeholder = `Player ${i + 1} name`;
+    });
 }
 
 function addPlayerInput() {
     const rows = document.querySelectorAll('.player-input-row');
-    if (rows.length >= 6) {
-        showMessage('Maximum 6 players reached.');
-        return;
-    }
+    if (rows.length >= 6) return; // button is hidden anyway, but guard just in case
     const row = document.createElement('div');
     row.className = 'player-input-row';
     row.innerHTML = `<input type="text" class="player-name-input" placeholder="Player ${rows.length + 1} name" maxlength="20">
                      <button type="button" class="delete-player-btn" aria-label="Remove player">×</button>`;
     el('player-inputs').appendChild(row);
     updateDeleteButtons();
+    updateAddPlayerButton();
+    renumberPlayerInputs();
     updateStartingPlayerDropdown();
 }
 
@@ -78,6 +93,8 @@ function onDeletePlayer(e) {
     if (rows.length <= 2) return;
     e.target.closest('.player-input-row').remove();
     updateDeleteButtons();
+    updateAddPlayerButton();
+    renumberPlayerInputs(); // re-sequence after deletion so numbering stays gapless
     updateStartingPlayerDropdown();
 }
 
@@ -146,11 +163,12 @@ function decadeClass(year) {
 }
 
 // Renders a timeline into a given container element.
-// pendingPos: if not null, shows a face-down card at that slot index.
-// stealPos:   if not null, shows a steal token marker at that slot index.
+// pendingPos:  if not null, shows a face-down card at that slot index.
+// stealPos:    if not null, shows a steal token marker at that slot index.
 // interactive: if true, slots are clickable (used for active player's timeline).
-// chosenPos: slot index to keep highlighted (orange) after reveal on wrong placement
-function renderTimelineInto(container, timeline, pendingPos, stealPos, interactive, chosenPos = null) {
+// chosenPos:   slot index to keep highlighted (orange) after reveal on wrong placement
+// stealerName: when set, steal marker uses this name (for post-reveal display after pendingSteal is cleared)
+function renderTimelineInto(container, timeline, pendingPos, stealPos, interactive, chosenPos = null, stealerName = null) {
     container.innerHTML = '';
 
     for (let i = 0; i <= timeline.length; i++) {
@@ -158,19 +176,14 @@ function renderTimelineInto(container, timeline, pendingPos, stealPos, interacti
         // ---- Slot ----
         const slot = document.createElement('div');
 
-        // Face-down card sits in the slot itself — replace the slot visually
         if (i === pendingPos) {
             slot.className = `timeline-card timeline-card--facedown ${i === selectedPosition ? 'selected' : ''}`;
         } else if (i === stealPos) {
-            // Steal token marker
             slot.className = 'steal-token-marker';
-            slot.innerHTML = `✪<br>${game.players[game.pendingSteal ? game.pendingSteal.stealerIndex : 0].name}`;
+            slot.innerHTML = `✪<br>${stealerName ?? (game.pendingSteal ? game.players[game.pendingSteal.stealerIndex].name : '?')}`;
         } else if (interactive) {
-            // Interactive slots: hoverable, clickable, highlight when selected
             slot.className = 'timeline-slot' + (i === selectedPosition ? ' selected' : '');
         } else {
-            // Non-interactive slots: thin grey divider, no hover effects
-            // Exception: chosenPos keeps the orange highlight to show a wrong placement
             slot.className = 'timeline-slot-static' + (i === chosenPos ? ' timeline-slot-chosen' : '');
         }
 
@@ -184,10 +197,18 @@ function renderTimelineInto(container, timeline, pendingPos, stealPos, interacti
         if (i < timeline.length) {
             const card   = timeline[i];
             const cardEl = document.createElement('div');
-            // Add glow class if this is the card that was just won this turn
-            const wonClass = (card === justWonCard) ? ' timeline-card--won' : '';
-            cardEl.className = `timeline-card ${decadeClass(card.year)}${wonClass}`;
+
+            const isJustWon = card === justWonCard;
+            if (isJustWon) {
+                // Invisible placeholder while fly animation plays; flyCardToTimeline switches it to --won
+                cardEl.className = `timeline-card ${decadeClass(card.year)} timeline-card--won-pending`;
+                cardEl.dataset.justWon = 'true';
+            } else {
+                cardEl.className = `timeline-card ${decadeClass(card.year)}`;
+            }
+
             cardEl.innerHTML = `<span class="card-year">${card.year}</span>
+                                <span class="card-artist">${card.artist}</span>
                                 <span class="card-title">${card.title}</span>`;
             container.appendChild(cardEl);
         }
@@ -216,11 +237,11 @@ function renderAllPlayers() {
     });
 }
 
+// Fills in the flip card back with the song's info (year / artist / title)
 function showSongInfo(card) {
-    el('song-title').textContent  = card.title;
-    el('song-artist').textContent = card.artist;
-    el('song-year').textContent   = card.year;
-    el('song-info').classList.remove('hidden');
+    el('reveal-year').textContent   = card.year;
+    el('reveal-artist').textContent = card.artist;
+    el('reveal-title').textContent  = card.title;
 }
 
 function updateTokenDisplay() {
@@ -228,6 +249,65 @@ function updateTokenDisplay() {
     document.querySelectorAll('.player-token-count').forEach((span, i) => {
         if (game.players[i]) span.textContent = game.players[i].tokens;
     });
+}
+
+// Resolves after `ms` milliseconds — used to sequence animations with await
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+// Creates a fixed-position clone of the flip card and smoothly flies it to the
+// [data-just-won] card inside the given container. After landing, removes the clone
+// and triggers the gold glow animation on the real card.
+async function flyCardToTimeline(containerId) {
+    const wonEl = document.querySelector(`#${containerId} [data-just-won]`);
+    if (!wonEl) return;
+
+    const src = el('flip-card').getBoundingClientRect();
+    const dst = wonEl.getBoundingClientRect();
+
+    const clone = document.createElement('div');
+    clone.style.cssText = `
+        position: fixed;
+        left: ${src.left}px; top: ${src.top}px;
+        width: ${src.width}px; height: ${src.height}px;
+        background: #1a1a22;
+        border: 2px solid #ffae3d;
+        border-radius: 12px;
+        z-index: 9999;
+        pointer-events: none;
+        transition: left 0.5s cubic-bezier(0.4,0,0.2,1),
+                    top 0.5s cubic-bezier(0.4,0,0.2,1),
+                    width 0.5s cubic-bezier(0.4,0,0.2,1),
+                    height 0.5s cubic-bezier(0.4,0,0.2,1),
+                    border-radius 0.5s ease;
+    `;
+    document.body.appendChild(clone);
+
+    // Force a reflow so the browser registers the starting position before animating
+    clone.getBoundingClientRect();
+
+    clone.style.left         = `${dst.left}px`;
+    clone.style.top          = `${dst.top}px`;
+    clone.style.width        = `${dst.width}px`;
+    clone.style.height       = `${dst.height}px`;
+    clone.style.borderRadius = '8px';
+
+    await sleep(550);
+    clone.remove();
+
+    // Reveal the real card and trigger the glow animation
+    wonEl.removeAttribute('data-just-won');
+    wonEl.classList.remove('timeline-card--won-pending');
+    wonEl.classList.add('timeline-card--won');
+}
+
+// Shows a result message inside the song card area (not the bottom message bar)
+function showRevealMessage(text, type = 'info') {
+    const msgEl = el('reveal-message');
+    msgEl.textContent = text;
+    msgEl.className   = `reveal-message reveal-message--${type}`;
+    msgEl.classList.remove('hidden');
 }
 
 
@@ -263,19 +343,28 @@ function setButtonEnabled(btn, enabled) {
 // =============================================================
 
 function beginTurn() {
-    selectedPosition = null;
-    activePosition   = null;
-    lastPlayedCard   = null;
-    justWonCard      = null;
+    selectedPosition      = null;
+    activePosition        = null;
+    lastPlayedCard        = null;
+    justWonCard           = null;
+    stealModeStealerIndex = null;
+    el('timeline-container').classList.remove('steal-mode');
+
+    // Reset the flip card instantly (no transition) so it snaps back to QR side
+    const inner = el('flip-card-inner');
+    inner.style.transition = 'none';
+    inner.classList.remove('flipped');
+    requestAnimationFrame(() => { inner.style.transition = ''; });
 
     // Reset all panels
     el('name-guess-form').classList.add('hidden');
-    el('song-info').classList.add('hidden');
+    el('reveal-message').classList.add('hidden');
     el('next-turn-btn').classList.add('hidden');
     el('message-bar').classList.add('hidden');
     el('steal-panel').classList.add('hidden');
     el('stealer-timeline-section').classList.add('hidden');
     el('override-btn').classList.add('hidden');
+    el('scan-hint').classList.remove('hidden');
     el('guess-artist').value    = '';
     el('guess-title').value     = '';
     el('guess-artist').disabled = false;
@@ -307,9 +396,18 @@ function beginTurn() {
     updateButtonStates();
 }
 
-// Player clicks a slot in the timeline
+// Player clicks a slot in the timeline.
+// In steal mode the click selects the steal position; otherwise it selects a placement slot.
 function onSlotClick(position) {
-    if (activePosition !== null) return; // already placed — steal slots handled separately
+    if (stealModeStealerIndex !== null) {
+        if (position === activePosition) {
+            showMessage("That slot is already taken by the active player — pick a different one.", true);
+            return;
+        }
+        confirmSteal(stealModeStealerIndex, position);
+        return;
+    }
+    if (activePosition !== null) return; // already placed
     selectedPosition = position;
     el('message-bar').classList.add('hidden'); // clear any previous hint when a new slot is chosen
     renderTimeline();
@@ -353,7 +451,6 @@ function showWinScreen(winners, reason = null) {
     if (list.length === 1) {
         statsText += `${list[0].tokens} token${list[0].tokens !== 1 ? 's' : ''} remaining`;
     } else {
-        // Multiple co-winners — show each person's token count
         statsText += list.map(p => `${p.name}: ${p.tokens} ✪`).join(' · ');
     }
     el('winner-stats').textContent = statsText;
@@ -367,7 +464,6 @@ function showWinScreen(winners, reason = null) {
 
     let rank = 1;
     sorted.forEach((player, i) => {
-        // Only increment rank when this player genuinely scored lower than the one above
         if (i > 0) {
             const prev = sorted[i - 1];
             if (prev.timeline.length !== player.timeline.length || prev.tokens !== player.tokens) {
@@ -432,8 +528,12 @@ function renderStealSlots(stealerIndex) {
     const stealer  = game.players[stealerIndex];
     const timeline = game.getCurrentPlayer().timeline;
 
-    // Build slot list — same slots as active player's timeline, but skip the active player's chosen slot
-    let html = `<p class="steal-label">${stealer.name}: pick a DIFFERENT position on ${game.getCurrentPlayer().name}'s timeline</p>
+    // Activate steal mode: timeline slots now call confirmSteal instead of onSlotClick
+    stealModeStealerIndex = stealerIndex;
+    el('timeline-container').classList.add('steal-mode');
+    renderTimeline(); // re-render so the timeline reflects steal mode visually
+
+    let html = `<p class="steal-label">${stealer.name}: tap a slot directly on the timeline above, or pick from the list below</p>
                 <div class="steal-slot-buttons">`;
 
     for (let i = 0; i <= timeline.length; i++) {
@@ -466,6 +566,8 @@ function renderStealSlots(stealerIndex) {
     });
 
     el('cancel-steal-btn').addEventListener('click', () => {
+        stealModeStealerIndex = null;
+        el('timeline-container').classList.remove('steal-mode');
         el('steal-panel').classList.add('hidden');
         game.pendingSteal = null;
         renderTimeline();
@@ -474,6 +576,8 @@ function renderStealSlots(stealerIndex) {
 }
 
 function confirmSteal(stealerIndex, stealPosition) {
+    stealModeStealerIndex = null;
+    el('timeline-container').classList.remove('steal-mode');
     const result = initiateSteal(game, stealerIndex, stealPosition);
     if (!result.success) {
         showMessage('Could not register steal — try again.');
@@ -485,22 +589,6 @@ function confirmSteal(stealerIndex, stealPosition) {
     renderTimeline(); // re-render with token marker visible
     updateButtonStates(); // disable steal button (one per turn)
     showMessage(`${result.stealer.name} has placed their token! Click "Submit & reveal" when ready.`, true);
-}
-
-
-// =============================================================
-// STEAL WIN VISUAL
-// Briefly shows the stealer's timeline with the newly won card,
-// then transitions to the next player's turn.
-// =============================================================
-
-function showStealerTimelineReveal(stealer, card) {
-    const section = el('stealer-timeline-section');
-    el('stealer-timeline-label').textContent = `🎉 ${stealer.name} steals the card!`;
-    renderTimelineInto(el('stealer-timeline-container'), stealer.timeline, null, null, false);
-    section.classList.remove('hidden');
-    // Stay visible until the group is ready — next-turn-btn handles endTurn + beginTurn
-    el('next-turn-btn').classList.remove('hidden');
 }
 
 
@@ -550,34 +638,46 @@ el('steal-btn').addEventListener('click', () => {
 });
 
 // --- Submit & reveal ---
-el('submit-btn').addEventListener('click', () => {
-    el('message-bar').classList.add('hidden'); // dismiss any previous message (e.g. "token placed")
+el('submit-btn').addEventListener('click', async () => {
+    el('message-bar').classList.add('hidden');
     const artist = el('guess-artist').value.trim();
     const title  = el('guess-title').value.trim();
 
-    // Name guess is optional — only pass it if the player filled in at least one field
     const nameGuess = (artist || title) ? { artist, title } : null;
     if (nameGuess && (!artist || !title)) {
         showMessage('Fill in BOTH artist name and song title, or leave both empty to skip the guess.');
         return;
     }
 
+    // Save state before resolveRound clears pendingSteal and currentCard
+    const resolvedPosition = activePosition;
+    const savedSteal = game.pendingSteal ? {
+        position:    game.pendingSteal.stealPosition,
+        stealerName: game.players[game.pendingSteal.stealerIndex].name
+    } : null;
+
     const result = resolveRound(game, activePosition, nameGuess);
     lastPlayedCard = result.card;
+    activePosition = null;
 
-    // Save chosen position before clearing — used to keep the orange slot visible after wrong placement
-    const resolvedPosition = activePosition;
-    justWonCard  = result.activeCorrect ? result.card : null;
-    activePosition = null; // clear so renderTimeline() no longer shows the ? face-down card
+    // Determine which card was won (must be set before rendering so --won-pending is applied)
+    if (result.stealResult?.outcome === 'steal_wins') {
+        justWonCard = result.card;
+    } else if (result.activeCorrect) {
+        justWonCard = result.card;
+    } else {
+        justWonCard = null;
+    }
 
-    // Show the revealed card info
+    // Populate the flip card back with the revealed song info
     showSongInfo(lastPlayedCard);
+
+    // Flip the card (QR → song info); hide the scan hint since the QR is no longer visible
+    el('flip-card-inner').classList.add('flipped');
+    el('scan-hint').classList.add('hidden');
     el('steal-btn').classList.add('hidden');
     el('steal-panel').classList.add('hidden');
 
-    // If the player typed a guess, keep the form visible (read-only) so they can
-    // compare what they typed against the revealed answer.
-    // If no guess was attempted, just hide the form.
     if (nameGuess) {
         el('guess-artist').disabled = true;
         el('guess-title').disabled  = true;
@@ -587,46 +687,65 @@ el('submit-btn').addEventListener('click', () => {
     }
 
     updateTokenDisplay();
-    // Render non-interactive; wrong placement keeps the orange slot visible as feedback
+
+    // Render active player's timeline (with --won-pending placeholder if they won)
     const chosenHighlight = result.activeCorrect ? null : resolvedPosition;
-    renderTimelineInto(el('timeline-container'), game.getCurrentPlayer().timeline, null, null, false, chosenHighlight);
+    const keepSteal       = savedSteal && result.stealResult?.outcome !== 'steal_wins';
+    renderTimelineInto(
+        el('timeline-container'),
+        game.getCurrentPlayer().timeline,
+        null,
+        keepSteal ? savedSteal.position    : null,
+        false,
+        chosenHighlight,
+        keepSteal ? savedSteal.stealerName : null
+    );
     renderAllPlayers();
 
-    // Handle steal outcome first (steal_wins returns early)
-    if (result.stealResult) {
-        const { outcome, stealer } = result.stealResult;
+    // Wait for the flip animation to finish before doing anything else
+    await sleep(700);
 
-        if (outcome === 'steal_wins') {
-            justWonCard = result.card; // override — card went to stealer's timeline, glow it there
-            showStealerTimelineReveal(stealer, result.card);
-            return; // showStealerTimelineReveal handles endTurn + beginTurn
-        } else if (outcome === 'both_wrong') {
-            showMessage(`Both positions were wrong — card discarded. ${stealer.name} loses their token.`, true);
-        } else {
-            // Active player's placement was correct, steal failed
+    // Handle each outcome
+    if (result.stealResult?.outcome === 'steal_wins') {
+        const stealer = result.stealResult.stealer;
+        // Render stealer's timeline (justWonCard is set, so card gets --won-pending)
+        renderTimelineInto(el('stealer-timeline-container'), stealer.timeline, null, null, false);
+        el('stealer-timeline-label').textContent = `🎉 ${stealer.name} steals the card!`;
+        el('stealer-timeline-section').classList.remove('hidden');
+
+        await flyCardToTimeline('stealer-timeline-container');
+        await sleep(1800); // wait for the 1.5s glow to finish, then a short buffer before the message
+        showRevealMessage(`🎉 ${stealer.name} stole the card! Their token was returned.`, 'success');
+
+    } else if (result.activeCorrect) {
+        await flyCardToTimeline('timeline-container');
+        await sleep(1800); // wait for the 1.5s glow to finish, then a short buffer before the message
+
+        if (result.stealResult) {
+            const sName = result.stealResult.stealer.name;
             if (result.nameGuessCorrect) {
-                showMessage(`Right placement ✅ Bonus token for artist & title! ✪ ${stealer.name}'s steal failed.`, true);
+                showRevealMessage(`Right placement ✅  Bonus token! ✪  ${sName}'s steal failed.`, 'success');
             } else if (nameGuess) {
-                showMessage(`Right placement ✅ But artist & title not quite — good try! ${stealer.name}'s steal failed.`, true);
+                showRevealMessage(`Right placement ✅  Artist & title not quite.  ${sName}'s steal failed.`, 'success');
             } else {
-                showMessage(`${game.getCurrentPlayer().name} was right! ✅ ${stealer.name}'s steal failed.`, true);
+                showRevealMessage(`${game.getCurrentPlayer().name} was right! ✅  ${sName}'s steal failed.`, 'success');
             }
-        }
-    } else if (!result.activeCorrect) {
-        showMessage('Wrong position — card discarded. Better luck next turn!', true);
-    } else {
-        // No steal, placement correct
-        if (result.nameGuessCorrect) {
-            showMessage('Correct placement! ✅ Bonus token for artist & title! ✪', true);
+        } else if (result.nameGuessCorrect) {
+            showRevealMessage('Correct placement! ✅  Bonus token for artist & title! ✪', 'success');
         } else if (nameGuess) {
-            showMessage('Right placement ✅ But artist & title not quite — good try!', true);
+            showRevealMessage('Correct placement! ✅  Artist & title not quite — good try!', 'success');
         } else {
-            showMessage('Correct placement! ✅', true);
+            showRevealMessage('Correct placement! ✅', 'success');
         }
+
+    } else if (result.stealResult?.outcome === 'both_wrong') {
+        const sName = result.stealResult.stealer.name;
+        showRevealMessage(`Both positions were wrong — card discarded. ${sName} loses their token.`, 'error');
+    } else {
+        showRevealMessage('Wrong position — card discarded. Better luck next turn!', 'error');
     }
 
     // Show override button if a name guess was attempted but the automatic check said wrong
-    // (lets the group correct a typo or a "close enough" answer)
     if (nameGuess && !result.nameGuessCorrect && result.activeCorrect) {
         el('override-btn').classList.remove('hidden');
     }
@@ -640,7 +759,7 @@ el('override-btn').addEventListener('click', () => {
     updateTokenDisplay();
     renderAllPlayers();
     el('override-btn').classList.add('hidden');
-    showMessage('Override accepted — bonus token awarded! ✪', true);
+    showRevealMessage('Override accepted — bonus token awarded! ✪', 'success');
 });
 
 // --- Next turn ---
@@ -678,24 +797,34 @@ el('skip-btn').addEventListener('click', () => {
 });
 
 // --- Buy placement ---
-el('buy-btn').addEventListener('click', () => {
+el('buy-btn').addEventListener('click', async () => {
     if (game.getCurrentPlayer().tokens < 3) {
         showMessage("You don't have enough tokens. Gain them first to use this feature.", true);
         return;
     }
     const card = game.currentCard;
+    justWonCard = card; // set before buyPlacement clears currentCard
     const result = buyPlacement(game);
     if (result.success) {
         updateTokenDisplay();
-        renderTimeline();
         renderAllPlayers();
+        // Render timeline with the newly placed card as a --won-pending placeholder
+        renderTimelineInto(el('timeline-container'), game.getCurrentPlayer().timeline, null, null, false);
+
         showSongInfo(card);
+        el('flip-card-inner').classList.add('flipped');
+        el('scan-hint').classList.add('hidden');
         el('place-btn').classList.add('hidden');
         el('skip-btn').classList.add('hidden');
         el('steal-btn').classList.add('hidden');
         el('buy-btn').classList.add('hidden');
+
+        await sleep(700);
+        await flyCardToTimeline('timeline-container');
+        await sleep(1800); // wait for the 1.5s glow to finish, then a short buffer before the message
+
+        showRevealMessage('Card automatically placed at the correct position! ✅', 'success');
         el('next-turn-btn').classList.remove('hidden');
-        showMessage('Card automatically placed at the correct position! ✅', true);
     }
 });
 

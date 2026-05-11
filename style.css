@@ -418,6 +418,28 @@ body {
 
 /* ===== Timeline section ===== */
 
+/* Flex row that shows "1960" on the left, the scrollable track in the middle, "2026" on the right */
+.timeline-year-range {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* The scroll wrapper fills the remaining space between the two year labels */
+.timeline-year-range .timeline-scroll-wrapper {
+  flex: 1;
+  min-width: 0;   /* prevents flex children from overflowing */
+}
+
+.timeline-year-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #5a5a78;
+  white-space: nowrap;
+  flex-shrink: 0;
+  letter-spacing: 0.04em;
+}
+
 .section-label {
   font-size: 0.85rem;
   font-weight: 600;

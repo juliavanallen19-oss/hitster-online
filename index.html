@@ -107,7 +107,7 @@
               </div>
             </div>
           </div>
-          <p class="scan-hint">Scan to listen, then place the song on your timeline</p>
+          <p id="scan-hint" class="scan-hint">Scan to listen, then place the song on your timeline</p>
           <p id="deck-counter" class="deck-counter"><span class="deck-icon">♬</span> <span id="deck-count">—</span> songs left in the deck</p>
 
           <!-- Name guess + Submit: appears after Place Here is clicked (before reveal) -->
@@ -132,19 +132,27 @@
       <!-- ===== Active player's timeline ===== -->
       <section class="timeline-section">
         <h2 class="section-label" id="timeline-label">Your timeline</h2>
-        <div class="timeline-scroll-wrapper">
-          <div id="timeline-container" class="timeline-track">
-            <!-- Timeline cards inserted by JS -->
+        <div class="timeline-year-range">
+          <span class="timeline-year-label">1960</span>
+          <div class="timeline-scroll-wrapper">
+            <div id="timeline-container" class="timeline-track">
+              <!-- Timeline cards inserted by JS -->
+            </div>
           </div>
+          <span class="timeline-year-label">2026</span>
         </div>
       </section>
 
       <!-- ===== Stealer's timeline (shown briefly when steal succeeds) ===== -->
       <section id="stealer-timeline-section" class="timeline-section hidden">
         <h2 class="section-label" id="stealer-timeline-label"></h2>
-        <div class="timeline-scroll-wrapper">
-          <div id="stealer-timeline-container" class="timeline-track">
+        <div class="timeline-year-range">
+          <span class="timeline-year-label">1960</span>
+          <div class="timeline-scroll-wrapper">
+            <div id="stealer-timeline-container" class="timeline-track">
+            </div>
           </div>
+          <span class="timeline-year-label">2026</span>
         </div>
       </section>
 

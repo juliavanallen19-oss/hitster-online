@@ -364,6 +364,7 @@ function beginTurn() {
     el('steal-panel').classList.add('hidden');
     el('stealer-timeline-section').classList.add('hidden');
     el('override-btn').classList.add('hidden');
+    el('scan-hint').classList.remove('hidden');
     el('guess-artist').value    = '';
     el('guess-title').value     = '';
     el('guess-artist').disabled = false;
@@ -671,8 +672,9 @@ el('submit-btn').addEventListener('click', async () => {
     // Populate the flip card back with the revealed song info
     showSongInfo(lastPlayedCard);
 
-    // Flip the card (QR → song info)
+    // Flip the card (QR → song info); hide the scan hint since the QR is no longer visible
     el('flip-card-inner').classList.add('flipped');
+    el('scan-hint').classList.add('hidden');
     el('steal-btn').classList.add('hidden');
     el('steal-panel').classList.add('hidden');
 
@@ -712,10 +714,12 @@ el('submit-btn').addEventListener('click', async () => {
         el('stealer-timeline-section').classList.remove('hidden');
 
         await flyCardToTimeline('stealer-timeline-container');
+        await sleep(1000); // let the glow settle before showing the message
         showRevealMessage(`🎉 ${stealer.name} stole the card! Their token was returned.`, 'success');
 
     } else if (result.activeCorrect) {
         await flyCardToTimeline('timeline-container');
+        await sleep(1000); // let the glow settle before showing the message
 
         if (result.stealResult) {
             const sName = result.stealResult.stealer.name;
@@ -809,6 +813,7 @@ el('buy-btn').addEventListener('click', async () => {
 
         showSongInfo(card);
         el('flip-card-inner').classList.add('flipped');
+        el('scan-hint').classList.add('hidden');
         el('place-btn').classList.add('hidden');
         el('skip-btn').classList.add('hidden');
         el('steal-btn').classList.add('hidden');
@@ -816,6 +821,7 @@ el('buy-btn').addEventListener('click', async () => {
 
         await sleep(700);
         await flyCardToTimeline('timeline-container');
+        await sleep(1000); // let the glow settle before showing the message
 
         showRevealMessage('Card automatically placed at the correct position! ✅', 'success');
         el('next-turn-btn').classList.remove('hidden');

@@ -714,12 +714,12 @@ el('submit-btn').addEventListener('click', async () => {
         el('stealer-timeline-section').classList.remove('hidden');
 
         await flyCardToTimeline('stealer-timeline-container');
-        await sleep(1000); // let the glow settle before showing the message
+        await sleep(1800); // wait for the 1.5s glow to finish, then a short buffer before the message
         showRevealMessage(`🎉 ${stealer.name} stole the card! Their token was returned.`, 'success');
 
     } else if (result.activeCorrect) {
         await flyCardToTimeline('timeline-container');
-        await sleep(1000); // let the glow settle before showing the message
+        await sleep(1800); // wait for the 1.5s glow to finish, then a short buffer before the message
 
         if (result.stealResult) {
             const sName = result.stealResult.stealer.name;
@@ -821,7 +821,7 @@ el('buy-btn').addEventListener('click', async () => {
 
         await sleep(700);
         await flyCardToTimeline('timeline-container');
-        await sleep(1000); // let the glow settle before showing the message
+        await sleep(1800); // wait for the 1.5s glow to finish, then a short buffer before the message
 
         showRevealMessage('Card automatically placed at the correct position! ✅', 'success');
         el('next-turn-btn').classList.remove('hidden');

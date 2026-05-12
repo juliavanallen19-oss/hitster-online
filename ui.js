@@ -53,6 +53,14 @@ function initSetupScreen() {
     // Delete buttons use event delegation so dynamic rows are covered too
     el('player-inputs').addEventListener('click', onDeletePlayer);
     el('start-game-btn').addEventListener('click', onStartGame);
+
+    // Validate the goal input as soon as focus leaves it
+    el('win-target-input').addEventListener('blur', validateWinTarget);
+    // Also re-validate on every keystroke after the first blur (touched flag)
+    el('win-target-input').addEventListener('input', () => {
+        if (el('win-target-input').dataset.touched) validateWinTarget();
+    });
+
     updateDeleteButtons();
     updateAddPlayerButton();
     updateStartingPlayerDropdown();
@@ -109,7 +117,7 @@ function updateDeleteButtons() {
 
 // "Who goes first?" dropdown — only shows players who have typed a name (fix #2)
 function updateStartingPlayerDropdown() {
-    const inputs  = document.querySelectorAll('.player-name-input');
+    const inputs  = document.querySelectorAll('.player-name-input:not(#win-target-input)');
     const select  = el('starting-player-select');
     const current = select.value;
     select.innerHTML = '';
@@ -124,6 +132,16 @@ function updateStartingPlayerDropdown() {
     if (current) select.value = current; // restore previous selection if still present
 }
 
+function validateWinTarget() {
+    const input    = el('win-target-input');
+    const errorEl  = el('win-target-error');
+    input.dataset.touched = 'true';
+    const val = parseInt(input.value.trim(), 10);
+    const invalid = !input.value.trim() || isNaN(val) || val < 1 || val > 20;
+    errorEl.classList.toggle('hidden', !invalid);
+    return !invalid;
+}
+
 function onStartGame() {
     const inputs = document.querySelectorAll('.player-name-input:not(#win-target-input)');
     const names  = Array.from(inputs).map(i => i.value.trim()).filter(n => n.length > 0);
@@ -132,15 +150,11 @@ function onStartGame() {
         return;
     }
 
-    const winTargetRaw = el('win-target-input').value.trim();
-    const winTarget    = parseInt(winTargetRaw, 10);
-    const errorEl      = el('win-target-error');
-    if (!winTargetRaw || isNaN(winTarget) || winTarget < 1 || winTarget > 20) {
-        errorEl.classList.remove('hidden');
+    if (!validateWinTarget()) {
         el('win-target-input').focus();
         return;
     }
-    errorEl.classList.add('hidden');
+    const winTarget = parseInt(el('win-target-input').value.trim(), 10);
 
     const startingName  = el('starting-player-select').value;
     const startingIndex = names.indexOf(startingName);

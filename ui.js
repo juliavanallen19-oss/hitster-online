@@ -722,12 +722,11 @@ el('submit-btn').addEventListener('click', async () => {
 
     // When the active player's card was correctly inserted at resolvedPosition, the timeline
     // gained one card — every slot at or after resolvedPosition shifts right by 1.
-    // Adjust the saved steal position so the token stays at its original visual location.
+    // Only adjust when activeCorrect: for both_wrong no card is inserted so no shift happens.
     let stealPosToShow = null;
     if (keepSteal) {
-        stealPosToShow = savedSteal.position >= resolvedPosition
-            ? savedSteal.position + 1
-            : savedSteal.position;
+        const shift = result.activeCorrect && savedSteal.position >= resolvedPosition ? 1 : 0;
+        stealPosToShow = savedSteal.position + shift;
     }
 
     renderTimelineInto(

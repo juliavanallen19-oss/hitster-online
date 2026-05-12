@@ -125,16 +125,27 @@ function updateStartingPlayerDropdown() {
 }
 
 function onStartGame() {
-    const inputs = document.querySelectorAll('.player-name-input');
+    const inputs = document.querySelectorAll('.player-name-input:not(#win-target-input)');
     const names  = Array.from(inputs).map(i => i.value.trim()).filter(n => n.length > 0);
     if (names.length < 2) {
         showMessage('Please enter at least 2 player names.');
         return;
     }
+
+    const winTargetRaw = el('win-target-input').value.trim();
+    const winTarget    = parseInt(winTargetRaw, 10);
+    const errorEl      = el('win-target-error');
+    if (!winTargetRaw || isNaN(winTarget) || winTarget < 1 || winTarget > 20) {
+        errorEl.classList.remove('hidden');
+        el('win-target-input').focus();
+        return;
+    }
+    errorEl.classList.add('hidden');
+
     const startingName  = el('starting-player-select').value;
     const startingIndex = names.indexOf(startingName);
     const mode          = el('mode-select').value;
-    startGame(names, mode, startingIndex >= 0 ? startingIndex : 0);
+    startGame(names, mode, startingIndex >= 0 ? startingIndex : 0, winTarget);
     showScreen('game-screen');
     beginTurn();
 }

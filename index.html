@@ -26,6 +26,22 @@
     <h1>Hitster Online</h1>
     <p class="tagline">Build your timeline. Guess the year. Win the game.</p>
 
+    <!-- ===== How to Play collapsible ===== -->
+    <details class="how-to-play">
+      <summary class="how-to-play-toggle">📖 How to play</summary>
+      <div class="how-to-play-body">
+        <ul>
+          <li><strong>Draw a card</strong> — scan the QR code with your phone to listen to the song.</li>
+          <li><strong>Place it</strong> — tap a slot on your timeline where you think the song belongs chronologically (oldest on the left, newest on the right).</li>
+          <li><strong>Correct?</strong> The card stays. Wrong? It's discarded.</li>
+          <li><strong>Bonus token ✪</strong> — guess both the artist and song title correctly to earn an extra token.</li>
+          <li><strong>Spend tokens</strong> — Skip a card (1✪), attempt a HITSTER! steal (1✪), or buy a guaranteed placement without a year check (3✪). Max 5 tokens per player.</li>
+          <li><strong>HITSTER! steal</strong> — before the card is revealed, any other player can pay 1✪ to try placing it on their own timeline. Correct → they keep it. Wrong → active player keeps the card.</li>
+          <li><strong>Win</strong> — first to reach the goal number of cards wins!</li>
+        </ul>
+      </div>
+    </details>
+
     <!-- ===== Player names section ===== -->
     <section class="setup-section">
       <h2>Players</h2>
@@ -51,6 +67,14 @@
     <select id="mode-select" class="hidden">
       <option value="original">Original</option>
     </select>
+
+    <!-- ===== Goal: winning card count ===== -->
+    <section class="setup-section">
+      <h2>Goal</h2>
+      <p class="hint">First to collect this many cards wins. (1–20)</p>
+      <input type="number" id="win-target-input" class="player-name-input win-target-input" value="10" min="1" max="20">
+      <p id="win-target-error" class="win-target-error hidden">Please enter a number between 1 and 20.</p>
+    </section>
 
     <!-- ===== Starting player section ===== -->
     <section class="setup-section">

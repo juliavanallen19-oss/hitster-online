@@ -34,9 +34,10 @@ class Game {
     // songs        — full list of songs (loaded from songs.json later)
     // mode         — "original", "pro", "expert", or "cooperative"
     // startingPlayerIndex — which player goes first (0 = first in list)
-    constructor(playerNames, songs, mode = "original", startingPlayerIndex = 0) {
+    constructor(playerNames, songs, mode = "original", startingPlayerIndex = 0, winTarget = 10) {
 
         this.mode = mode;
+        this.winTarget = winTarget;
 
         // --- Set starting tokens based on mode (CHANGE #1) ---
         // Original = 2 tokens (so players can steal from turn 1)
@@ -275,7 +276,7 @@ function nextTurn(game) {
 
 function checkWinCondition(game) {
     for (let player of game.players) {
-        if (player.timeline.length >= 10) {
+        if (player.timeline.length >= game.winTarget) {
             return player;
         }
     }
@@ -533,12 +534,12 @@ function resolveRound(game, activePosition, nameGuess) {
 
 let game = null; // Global — holds the active game
 
-function startGame(playerNames, mode = "original", startingPlayerIndex = 0) {
+function startGame(playerNames, mode = "original", startingPlayerIndex = 0, winTarget = 10) {
     if (playerNames.length < 2) {
         alert("You need at least 2 players to start!");
         return;
     }
 
-    game = new Game(playerNames, SONGS, mode, startingPlayerIndex);
+    game = new Game(playerNames, SONGS, mode, startingPlayerIndex, winTarget);
     // ui.js beginTurn() draws the first card and generates the QR code
 }

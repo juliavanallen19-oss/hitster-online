@@ -125,6 +125,13 @@ function soundStealWins() {
     note(784,  'triangle',     0.20, 0.30, 0.54);   // G5 — held to finish
 }
 
+// Token cap — a gentle "blocked" sound: a dull thud + short descending note
+// Plays when a player would have earned a token but is already at 5
+function soundTokenCapped() {
+    sweep(220, 140, 'sine', 0.18, 0.25);     // brief descending fall
+    note(110,  'sine', 0.14, 0.20, 0.10);    // dull low thud underneath
+}
+
 // Win screen fanfare — triumphant ascending arpeggio with a sustained chord
 function soundWin() {
     note(523,  'sine', 0.26, 0.20, 0.00);   // C5

@@ -63,10 +63,31 @@
       <button type="button" id="add-player-btn" class="secondary-btn">+ Add player</button>
     </section>
 
-    <!-- Game mode selector: hidden until a second mode is implemented -->
-    <select id="mode-select" class="hidden">
-      <option value="original">Original</option>
-    </select>
+    <!-- ===== Game mode ===== -->
+    <section class="setup-section">
+      <h2>Game mode</h2>
+
+      <div class="mode-cards" id="mode-cards">
+        <button type="button" class="mode-card mode-card--active" data-mode="original">
+          <span class="mode-card-name">🎵 Original</span>
+          <span class="mode-card-desc">2 tokens to start. Place the card correctly to keep it. Guess both artist &amp; title for a bonus token.</span>
+        </button>
+        <button type="button" class="mode-card" data-mode="chill">
+          <span class="mode-card-name">😎 Chill</span>
+          <span class="mode-card-desc">3 tokens to start. Easier name guess — either the artist OR the title is enough for a bonus token.</span>
+        </button>
+        <button type="button" class="mode-card" data-mode="pro">
+          <span class="mode-card-name">🔥 PRO</span>
+          <span class="mode-card-desc">5 tokens to start. You must name both artist &amp; title correctly to keep the card. Stealers must too — but they get their token back if they succeed.</span>
+        </button>
+      </div>
+      <!-- Hidden select keeps the selected value for onStartGame() to read -->
+      <select id="mode-select" class="hidden">
+        <option value="original">Original</option>
+        <option value="chill">Chill</option>
+        <option value="pro">PRO</option>
+      </select>
+    </section>
 
     <!-- ===== Goal: winning card count ===== -->
     <section class="setup-section">
@@ -135,6 +156,7 @@
           <p id="deck-counter" class="deck-counter"><span class="deck-icon">♬</span> <span id="deck-count">—</span> songs left in the deck</p>
 
           <!-- Name guess: toggle button visible from start of turn; fields expand on click -->
+          <!-- PRO mode: JS hides the toggle button and auto-expands the form (mandatory) -->
           <div id="name-guess-area" class="name-guess-area hidden">
             <button type="button" id="name-guess-toggle-btn" class="secondary-btn name-guess-toggle-btn">
               🎵 Name song &amp; artist for a bonus token ✪
@@ -151,6 +173,10 @@
           <!-- Override button: appears after reveal if a name guess was wrong -->
           <button type="button" id="override-btn" class="secondary-btn override-btn hidden">
             ✏️ Override: artist &amp; title were actually correct
+          </button>
+          <!-- PRO steal override: appears when stealer had the right year but wrong name -->
+          <button type="button" id="steal-override-btn" class="secondary-btn override-btn steal-override-btn hidden">
+            ✏️ Override steal: artist &amp; title were actually correct
           </button>
 
         </div>

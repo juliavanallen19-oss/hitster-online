@@ -228,9 +228,13 @@ function checkNameGuess(card, guessedArtist, guessedTitle) {
 // =============================================================
 
 function checkNameGuessChill(card, guessedArtist, guessedTitle) {
-    let artistCorrect = card.artist.toLowerCase().trim() === guessedArtist.toLowerCase().trim();
-    let titleCorrect  = card.title.toLowerCase().trim()  === guessedTitle.toLowerCase().trim();
-    return artistCorrect || titleCorrect; // either one is enough in Chill mode
+    // An empty field counts as "not attempted", not as a wrong answer
+    const ga = guessedArtist.trim();
+    const gt = guessedTitle.trim();
+    const artistCorrect = ga !== '' && card.artist.toLowerCase() === ga.toLowerCase();
+    const titleCorrect  = gt !== '' && card.title.toLowerCase()  === gt.toLowerCase();
+    // Returns an object so the UI can tell the player exactly which field was right
+    return { correct: artistCorrect || titleCorrect, artistCorrect, titleCorrect };
 }
 
 
@@ -253,7 +257,9 @@ function findCorrectPosition(timeline, card) {
 function earnToken(player) {
     if (player.tokens < 5) {
         player.tokens += 1;
+        return true;  // token was actually added
     }
+    return false;     // already at cap — token was NOT added
 }
 
 
@@ -503,16 +509,19 @@ function resolveRound(game, activePosition, nameGuess) {
 
     // Name guess — evaluated regardless of placement correctness (fix for original rules)
     let nameGuessCorrect = false;
+    let nameGuessDetail  = null;   // { artistCorrect, titleCorrect } — Chill mode only
+    let tokenEarned      = false;  // true only when a token was actually added (not capped)
     if (nameGuess) {
         if (mode === "chill") {
-            nameGuessCorrect = checkNameGuessChill(card, nameGuess.artist, nameGuess.title);
+            const chillResult = checkNameGuessChill(card, nameGuess.artist, nameGuess.title);
+            nameGuessCorrect = chillResult.correct;
+            nameGuessDetail  = chillResult;
         } else {
             nameGuessCorrect = checkNameGuess(card, nameGuess.artist, nameGuess.title);
         }
-        // Original & Chill: correct name = bonus token
-        // PRO: no bonus token — naming correctly is just what you must do to keep the card
+        // Original & Chill: correct name = bonus token (not in PRO — naming is mandatory there)
         if (mode !== "pro" && nameGuessCorrect) {
-            earnToken(activePlayer);
+            tokenEarned = earnToken(activePlayer);
         }
     }
 
@@ -548,7 +557,7 @@ function resolveRound(game, activePosition, nameGuess) {
             stealResult = { outcome: 'steal_wins', stealer, card };
         } else {
             // Both fail — card discarded, stealer already lost their token
-            stealResult = { outcome: 'both_wrong', stealer, activeCorrect };
+            stealResult = { outcome: 'both_wrong', stealer, activeCorrect, stealPositionCorrect: stealCorrect };
         }
         game.pendingSteal = null;
 
@@ -560,7 +569,7 @@ function resolveRound(game, activePosition, nameGuess) {
     }
 
     game.currentCard = null;
-    return { activeCorrect, activeKeepsCard, nameGuessCorrect, stealResult, card };
+    return { activeCorrect, activeKeepsCard, nameGuessCorrect, nameGuessDetail, tokenEarned, stealResult, card };
 }
 
 

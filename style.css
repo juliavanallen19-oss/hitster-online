@@ -1089,6 +1089,33 @@ body {
 }
 
 
+/* ===== Token badge: flash when player tries to earn a token but is already at max (5) ===== */
+
+@keyframes token-capped-pulse {
+    0%   { color: #f0c040; transform: scale(1); }
+    25%  { color: #ff3d8b; transform: scale(1.35); }
+    75%  { color: #ff3d8b; transform: scale(1.35); }
+    100% { color: #f0c040; transform: scale(1); }
+}
+
+.token-count--capped {
+    display: inline-block;
+    animation: token-capped-pulse 0.55s ease 2;
+}
+
+/* ===== PRO steal override button — blue tint to distinguish from active player's override ===== */
+
+.steal-override-btn {
+    border-color: #3dd2ff;
+    color: #3dd2ff;
+    margin-top: 6px;
+}
+
+.steal-override-btn:hover {
+    background: rgba(61, 210, 255, 0.1);
+    border-color: #3dd2ff;
+}
+
 /* ===== Mode selector cards (setup screen) ===== */
 
 .mode-cards {

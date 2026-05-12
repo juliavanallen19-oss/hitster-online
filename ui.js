@@ -383,7 +383,9 @@ function beginTurn() {
     requestAnimationFrame(() => { inner.style.transition = ''; });
 
     // Reset all panels
+    el('name-guess-area').classList.add('hidden');
     el('name-guess-form').classList.add('hidden');
+    el('name-guess-toggle-btn').textContent = '🎵 Name song & artist for a bonus token ✪';
     el('reveal-message').classList.add('hidden');
     el('next-turn-btn').classList.add('hidden');
     el('message-bar').classList.add('hidden');
@@ -395,13 +397,13 @@ function beginTurn() {
     el('guess-title').value     = '';
     el('guess-artist').disabled = false;
     el('guess-title').disabled  = false;
-    el('submit-btn').classList.remove('hidden');
 
-    // Show action buttons
+    // Show action buttons; submit only appears after Place here
     el('place-btn').classList.remove('hidden');
     el('skip-btn').classList.remove('hidden');
     el('steal-btn').classList.remove('hidden');
     el('buy-btn').classList.remove('hidden');
+    el('submit-btn').classList.add('hidden');
     el('next-turn-btn').classList.add('hidden');
 
     // Draw a card if none is in play
@@ -623,6 +625,17 @@ function confirmSteal(stealerIndex, stealPosition) {
 // EVENT LISTENERS
 // =============================================================
 
+// --- Name guess toggle ---
+el('name-guess-toggle-btn').addEventListener('click', () => {
+    const form = el('name-guess-form');
+    const btn  = el('name-guess-toggle-btn');
+    const open = form.classList.toggle('hidden');
+    // open is true when we just ADDED 'hidden' (i.e. collapsed)
+    btn.textContent = open
+        ? '🎵 Name song & artist for a bonus token ✪'
+        : '▲ Hide';
+});
+
 // --- Place Here ---
 el('place-btn').addEventListener('click', () => {
     if (selectedPosition === null) {
@@ -639,9 +652,10 @@ el('place-btn').addEventListener('click', () => {
     el('skip-btn').classList.add('hidden');
     el('buy-btn').classList.add('hidden');
 
-    // Show steal button + name guess form + submit
+    // Show steal button, name guess toggle area, and submit
     el('steal-btn').classList.remove('hidden');
-    el('name-guess-form').classList.remove('hidden');
+    el('name-guess-area').classList.remove('hidden');
+    el('submit-btn').classList.remove('hidden');
     updateButtonStates();
 });
 
@@ -670,11 +684,16 @@ el('submit-btn').addEventListener('click', async () => {
     const artist = el('guess-artist').value.trim();
     const title  = el('guess-title').value.trim();
 
-    const nameGuess = (artist || title) ? { artist, title } : null;
-    if (nameGuess && (!artist || !title)) {
-        showMessage('Fill in BOTH artist name and song title, or leave both empty to skip the guess.');
+    // Partial entry: one field filled but not the other
+    if ((artist && !title) || (!artist && title)) {
+        // Auto-expand the form so the player can see what's missing
+        el('name-guess-form').classList.remove('hidden');
+        el('name-guess-toggle-btn').textContent = '▲ Hide';
+        showMessage('Fill in BOTH song title and artist name, or leave both empty to skip the guess.');
         return;
     }
+
+    const nameGuess = (artist && title) ? { artist, title } : null;
 
     // Save state before resolveRound clears pendingSteal and currentCard
     const resolvedPosition = activePosition;
@@ -699,20 +718,14 @@ el('submit-btn').addEventListener('click', async () => {
     // Populate the flip card back with the revealed song info
     showSongInfo(lastPlayedCard);
 
-    // Flip the card (QR → song info); hide the scan hint since the QR is no longer visible
+    // Flip the card (QR → song info); hide inputs and scan hint
     el('flip-card-inner').classList.add('flipped');
     soundCardFlip();
     el('scan-hint').classList.add('hidden');
     el('steal-btn').classList.add('hidden');
     el('steal-panel').classList.add('hidden');
-
-    if (nameGuess) {
-        el('guess-artist').disabled = true;
-        el('guess-title').disabled  = true;
-        el('submit-btn').classList.add('hidden');
-    } else {
-        el('name-guess-form').classList.add('hidden');
-    }
+    el('submit-btn').classList.add('hidden');
+    el('name-guess-area').classList.add('hidden');
 
     updateTokenDisplay();
 
@@ -720,9 +733,8 @@ el('submit-btn').addEventListener('click', async () => {
     const chosenHighlight = result.activeCorrect ? null : resolvedPosition;
     const keepSteal       = savedSteal && result.stealResult?.outcome !== 'steal_wins';
 
-    // When the active player's card was correctly inserted at resolvedPosition, the timeline
-    // gained one card — every slot at or after resolvedPosition shifts right by 1.
-    // Only adjust when activeCorrect: for both_wrong no card is inserted so no shift happens.
+    // Only adjust the steal token index when a card was actually inserted (activeCorrect);
+    // for both_wrong no card is inserted so no slot index shift occurs.
     let stealPosToShow = null;
     if (keepSteal) {
         const shift = result.activeCorrect && savedSteal.position >= resolvedPosition ? 1 : 0;
@@ -743,53 +755,73 @@ el('submit-btn').addEventListener('click', async () => {
     // Wait for the flip animation to finish before doing anything else
     await sleep(700);
 
-    // Handle each outcome
-    if (result.stealResult?.outcome === 'steal_wins') {
+    // Build the outcome message from the two independent results:
+    // (1) what happened to the card, (2) whether the name guess was correct
+    const stealOutcome = result.stealResult?.outcome ?? null;
+    const sName        = result.stealResult?.stealer.name ?? null;
+    const ng           = result.nameGuessCorrect;
+    const ngAttempted  = nameGuess !== null;
+
+    if (stealOutcome === 'steal_wins') {
         const stealer = result.stealResult.stealer;
-        // Render stealer's timeline (justWonCard is set, so card gets --won-pending)
         renderTimelineInto(el('stealer-timeline-container'), stealer.timeline, null, null, false);
         el('stealer-timeline-label').textContent = `🎉 ${stealer.name} steals the card!`;
         el('stealer-timeline-section').classList.remove('hidden');
 
-        soundStealWins(); // heist flourish plays while the card flies across
+        soundStealWins();
+        if (ng) setTimeout(soundTokenEarned, 900); // sparkle after heist flourish settles
         await flyCardToTimeline('stealer-timeline-container');
-        await sleep(1800); // wait for the 1.5s glow to finish, then a short buffer before the message
-        showRevealMessage(`🎉 ${stealer.name} stole the card! Their token was returned.`, 'success');
+        await sleep(1800);
+
+        if (ng) {
+            showRevealMessage(`🎉 ${sName} stole the card! But you got a bonus token for title & artist! ✪`, 'success');
+        } else if (ngAttempted) {
+            showRevealMessage(`🎉 ${sName} stole the card! Artist & title not quite. Better luck next turn!`, 'error');
+        } else {
+            showRevealMessage(`🎉 ${sName} stole the card!`, 'error');
+        }
 
     } else if (result.activeCorrect) {
         await flyCardToTimeline('timeline-container');
-        soundCorrectPlacement(); // arpeggio fires the moment the glow starts
-        if (result.nameGuessCorrect) setTimeout(soundTokenEarned, 350); // sparkle after arpeggio
-        await sleep(1800); // wait for the 1.5s glow to finish, then a short buffer before the message
+        soundCorrectPlacement();
+        if (ng) setTimeout(soundTokenEarned, 350);
+        await sleep(1800);
 
-        if (result.stealResult) {
-            const sName = result.stealResult.stealer.name;
-            if (result.nameGuessCorrect) {
-                showRevealMessage(`Right placement ✅  Bonus token! ✪  ${sName}'s steal failed.`, 'success');
-            } else if (nameGuess) {
-                showRevealMessage(`Right placement ✅  Artist & title not quite.  ${sName}'s steal failed.`, 'success');
-            } else {
-                showRevealMessage(`${game.getCurrentPlayer().name} was right! ✅  ${sName}'s steal failed.`, 'success');
-            }
-        } else if (result.nameGuessCorrect) {
-            showRevealMessage('Correct placement! ✅  Bonus token for artist & title! ✪', 'success');
-        } else if (nameGuess) {
-            showRevealMessage('Correct placement! ✅  Artist & title not quite — good try!', 'success');
+        const stealSuffix = sName ? ` ${sName}'s steal failed.` : '';
+        if (ng) {
+            showRevealMessage(`Correct placement! ✅ Bonus token for artist & title! ✪${stealSuffix}`, 'success');
+        } else if (ngAttempted) {
+            showRevealMessage(`Correct placement! ✅ Artist & title not quite — good try!${stealSuffix}`, 'success');
         } else {
-            showRevealMessage('Correct placement! ✅', 'success');
+            showRevealMessage(`Correct placement! ✅${stealSuffix}`, 'success');
         }
 
-    } else if (result.stealResult?.outcome === 'both_wrong') {
-        const sName = result.stealResult.stealer.name;
+    } else if (stealOutcome === 'both_wrong') {
         soundWrongPlacement();
-        showRevealMessage(`Both positions were wrong — card discarded. ${sName} loses their token.`, 'error');
+        if (ng) setTimeout(soundTokenEarned, 500);
+        if (ng) {
+            showRevealMessage(`Wrong position — card discarded. ${sName}'s steal also failed. But you got a bonus token for title & artist! ✪`, 'error');
+        } else if (ngAttempted) {
+            showRevealMessage(`Wrong position — card discarded. Also artist & title not quite. ${sName}'s steal also failed. Better luck next turn!`, 'error');
+        } else {
+            showRevealMessage(`Wrong position — card discarded. ${sName}'s steal also failed. Better luck next turn!`, 'error');
+        }
+
     } else {
+        // Wrong placement, no steal
         soundWrongPlacement();
-        showRevealMessage('Wrong position — card discarded. Better luck next turn!', 'error');
+        if (ng) setTimeout(soundTokenEarned, 500);
+        if (ng) {
+            showRevealMessage('Wrong position — card discarded. Better luck next turn! But you got a bonus token for title & artist! ✪', 'error');
+        } else if (ngAttempted) {
+            showRevealMessage('Wrong position — card discarded. Also artist & title not quite. Better luck next turn!', 'error');
+        } else {
+            showRevealMessage('Wrong position — card discarded. Better luck next turn!', 'error');
+        }
     }
 
-    // Show override button if a name guess was attempted but the automatic check said wrong
-    if (nameGuess && !result.nameGuessCorrect && result.activeCorrect) {
+    // Show override button whenever a name guess was attempted but the automatic check said wrong
+    if (ngAttempted && !ng) {
         el('override-btn').classList.remove('hidden');
     }
 

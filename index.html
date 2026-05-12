@@ -134,12 +134,15 @@
           <p id="scan-hint" class="scan-hint">Scan to listen, then place the song on your timeline</p>
           <p id="deck-counter" class="deck-counter"><span class="deck-icon">♬</span> <span id="deck-count">—</span> songs left in the deck</p>
 
-          <!-- Name guess + Submit: appears after Place Here is clicked (before reveal) -->
-          <div id="name-guess-form" class="name-guess-form hidden">
-            <p class="guess-label">Name BOTH the song title AND the artist for a bonus token (optional)</p>
-            <input type="text" id="guess-title" class="player-name-input" placeholder="Song title" maxlength="60">
-            <input type="text" id="guess-artist" class="player-name-input" placeholder="Artist name" maxlength="60">
-            <button type="button" id="submit-btn" class="primary-btn">Submit &amp; reveal</button>
+          <!-- Name guess: toggle button visible from start of turn; fields expand on click -->
+          <div id="name-guess-area" class="name-guess-area hidden">
+            <button type="button" id="name-guess-toggle-btn" class="secondary-btn name-guess-toggle-btn">
+              🎵 Name song &amp; artist for a bonus token ✪
+            </button>
+            <div id="name-guess-form" class="name-guess-form hidden">
+              <input type="text" id="guess-title" class="player-name-input" placeholder="Song title" maxlength="60">
+              <input type="text" id="guess-artist" class="player-name-input" placeholder="Artist name" maxlength="60">
+            </div>
           </div>
 
           <!-- Reveal outcome message — shown in the card area after the flip -->
@@ -188,6 +191,7 @@
         <button type="button" id="place-btn" class="primary-btn">Place here ✓</button>
         <button type="button" id="skip-btn" class="secondary-btn">Skip card (costs 1 ✪)</button>
         <button type="button" id="steal-btn" class="secondary-btn">HITSTER! steal (costs 1 ✪)</button>
+        <button type="button" id="submit-btn" class="primary-btn hidden">Submit &amp; reveal</button>
         <button type="button" id="buy-btn" class="secondary-btn">Buy placement (costs 3 ✪)</button>
         <button type="button" id="next-turn-btn" class="primary-btn hidden">Next turn →</button>
       </section>

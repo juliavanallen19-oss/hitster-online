@@ -485,11 +485,11 @@ function resolveRound(game, activePosition, nameGuess) {
     let activePlayer  = game.getCurrentPlayer();
     let card          = game.currentCard;
 
-    // Placement must be checked before name-guess: bonus token only awarded if placement is also correct
     let activeCorrect = isPlacementCorrect(activePlayer.timeline, card, activePosition);
 
+    // Name guess earns a token regardless of placement outcome
     let nameGuessCorrect = false;
-    if (nameGuess && activeCorrect) {
+    if (nameGuess) {
         nameGuessCorrect = checkNameGuess(card, nameGuess.artist, nameGuess.title);
         if (nameGuessCorrect) earnToken(activePlayer);
     }
@@ -505,8 +505,7 @@ function resolveRound(game, activePosition, nameGuess) {
             insertCardIntoTimeline(activePlayer, card, activePosition);
             stealResult = { outcome: 'active_wins', stealer };
         } else if (stealCorrect) {
-            // Stealer wins: card auto-placed on stealer's own timeline; token returned
-            stealer.tokens += 1;
+            // Stealer wins: card auto-placed on stealer's own timeline; token is NOT returned
             let correctPos = findCorrectPosition(stealer.timeline, card);
             insertCardIntoTimeline(stealer, card, correctPos);
             stealResult = { outcome: 'steal_wins', stealer, card };

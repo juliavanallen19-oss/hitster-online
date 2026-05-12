@@ -661,18 +661,24 @@ body {
 }
 
 /* Name guess form (task 1.10) */
+.name-guess-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+
+.name-guess-toggle-btn {
+  width: 100%;
+  font-size: 0.85rem;
+}
+
 .name-guess-form {
   display: flex;
   flex-direction: column;
   gap: 10px;
   width: 100%;
-}
-
-.guess-label {
-  margin: 0;
-  font-size: 0.8rem;
-  color: #9a9aa8;
-  text-align: center;
 }
 
 

@@ -43,6 +43,7 @@ class Game {
         // Original = 2 tokens (so players can steal from turn 1)
         // Pro = 5, Expert = 3, Cooperative = 3 (shared, but stored per-player for now)
         let startingTokens = 2; // default for Original mode
+        if (mode === "chill") startingTokens = 3;
         if (mode === "pro") startingTokens = 5;
         if (mode === "expert") startingTokens = 3;
         if (mode === "cooperative") startingTokens = 3;
@@ -219,6 +220,17 @@ function checkNameGuess(card, guessedArtist, guessedTitle) {
     let artistCorrect = card.artist.toLowerCase().trim() === guessedArtist.toLowerCase().trim();
     let titleCorrect  = card.title.toLowerCase().trim()  === guessedTitle.toLowerCase().trim();
     return artistCorrect && titleCorrect;
+}
+
+
+// =============================================================
+// CHILL MODE — relaxed name-guess check: either field alone is enough
+// =============================================================
+
+function checkNameGuessChill(card, guessedArtist, guessedTitle) {
+    let artistCorrect = card.artist.toLowerCase().trim() === guessedArtist.toLowerCase().trim();
+    let titleCorrect  = card.title.toLowerCase().trim()  === guessedTitle.toLowerCase().trim();
+    return artistCorrect || titleCorrect; // either one is enough in Chill mode
 }
 
 
@@ -459,12 +471,12 @@ function buyPlacement(game) {
 // Only one steal attempt allowed per turn.
 // =============================================================
 
-function initiateSteal(game, stealerIndex, stealPosition) {
+function initiateSteal(game, stealerIndex, stealPosition, stealNameGuess = null) {
     let stealer = game.players[stealerIndex];
     if (stealer.tokens < 1) return { success: false };
     if (game.pendingSteal !== null) return { success: false }; // already one steal this turn
     stealer.tokens -= 1;
-    game.pendingSteal = { stealerIndex, stealPosition };
+    game.pendingSteal = { stealerIndex, stealPosition, stealNameGuess };
     return { success: true, stealer };
 }
 
@@ -482,48 +494,73 @@ function initiateSteal(game, stealerIndex, stealPosition) {
 // =============================================================
 
 function resolveRound(game, activePosition, nameGuess) {
-    let activePlayer  = game.getCurrentPlayer();
-    let card          = game.currentCard;
+    let activePlayer = game.getCurrentPlayer();
+    let card         = game.currentCard;
+    let mode         = game.mode;
 
+    // Did the active player place the card in the right position?
     let activeCorrect = isPlacementCorrect(activePlayer.timeline, card, activePosition);
 
-    // Name guess earns a token regardless of placement outcome
+    // Name guess — evaluated regardless of placement correctness (fix for original rules)
     let nameGuessCorrect = false;
     if (nameGuess) {
-        nameGuessCorrect = checkNameGuess(card, nameGuess.artist, nameGuess.title);
-        if (nameGuessCorrect) earnToken(activePlayer);
+        if (mode === "chill") {
+            nameGuessCorrect = checkNameGuessChill(card, nameGuess.artist, nameGuess.title);
+        } else {
+            nameGuessCorrect = checkNameGuess(card, nameGuess.artist, nameGuess.title);
+        }
+        // Original & Chill: correct name = bonus token
+        // PRO: no bonus token — naming correctly is just what you must do to keep the card
+        if (mode !== "pro" && nameGuessCorrect) {
+            earnToken(activePlayer);
+        }
     }
-    let stealResult   = null;
+
+    // Does the active player actually keep the card?
+    // Original/Chill: position correct is enough.
+    // PRO: position AND name must both be correct.
+    let activeKeepsCard = mode === "pro" ? (activeCorrect && nameGuessCorrect) : activeCorrect;
+
+    let stealResult = null;
 
     if (game.pendingSteal !== null) {
-        let { stealerIndex, stealPosition } = game.pendingSteal;
+        let { stealerIndex, stealPosition, stealNameGuess } = game.pendingSteal;
         let stealer      = game.players[stealerIndex];
         let stealCorrect = isPlacementCorrect(activePlayer.timeline, card, stealPosition);
 
-        if (activeCorrect) {
-            // Active player wins: card goes to active player's timeline
+        // PRO: stealer must also name correctly; Original/Chill: position alone is enough
+        let stealNameCorrect = false;
+        if (mode === "pro" && stealNameGuess) {
+            stealNameCorrect = checkNameGuess(card, stealNameGuess.artist, stealNameGuess.title);
+        }
+        let stealerKeepsCard = mode === "pro" ? (stealCorrect && stealNameCorrect) : stealCorrect;
+
+        if (activeKeepsCard) {
+            // Active player wins — their card, their win
             insertCardIntoTimeline(activePlayer, card, activePosition);
             stealResult = { outcome: 'active_wins', stealer };
-        } else if (stealCorrect) {
-            // Stealer wins: card auto-placed on stealer's own timeline; token is NOT returned
+        } else if (stealerKeepsCard) {
+            // Stealer wins — card auto-placed on the stealer's own timeline
+            // PRO: token returned to stealer (earning-a-steal is the reward itself)
+            if (mode === "pro") stealer.tokens += 1;
             let correctPos = findCorrectPosition(stealer.timeline, card);
             insertCardIntoTimeline(stealer, card, correctPos);
             stealResult = { outcome: 'steal_wins', stealer, card };
         } else {
-            // Both wrong: card discarded, stealer already lost their token
-            stealResult = { outcome: 'both_wrong', stealer };
+            // Both fail — card discarded, stealer already lost their token
+            stealResult = { outcome: 'both_wrong', stealer, activeCorrect };
         }
         game.pendingSteal = null;
 
     } else {
         // No steal — normal flow
-        if (activeCorrect) {
+        if (activeKeepsCard) {
             insertCardIntoTimeline(activePlayer, card, activePosition);
         }
     }
 
     game.currentCard = null;
-    return { activeCorrect, nameGuessCorrect, stealResult, card };
+    return { activeCorrect, activeKeepsCard, nameGuessCorrect, stealResult, card };
 }
 
 

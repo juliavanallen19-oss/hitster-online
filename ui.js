@@ -719,11 +719,22 @@ el('submit-btn').addEventListener('click', async () => {
     // Render active player's timeline (with --won-pending placeholder if they won)
     const chosenHighlight = result.activeCorrect ? null : resolvedPosition;
     const keepSteal       = savedSteal && result.stealResult?.outcome !== 'steal_wins';
+
+    // When the active player's card was correctly inserted at resolvedPosition, the timeline
+    // gained one card — every slot at or after resolvedPosition shifts right by 1.
+    // Adjust the saved steal position so the token stays at its original visual location.
+    let stealPosToShow = null;
+    if (keepSteal) {
+        stealPosToShow = savedSteal.position >= resolvedPosition
+            ? savedSteal.position + 1
+            : savedSteal.position;
+    }
+
     renderTimelineInto(
         el('timeline-container'),
         game.getCurrentPlayer().timeline,
         null,
-        keepSteal ? savedSteal.position    : null,
+        stealPosToShow,
         false,
         chosenHighlight,
         keepSteal ? savedSteal.stealerName : null

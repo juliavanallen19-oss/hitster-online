@@ -406,6 +406,9 @@ function beginTurn() {
     el('submit-btn').classList.add('hidden');
     el('next-turn-btn').classList.add('hidden');
 
+    // Name guess toggle is visible from the very start of the turn
+    el('name-guess-area').classList.remove('hidden');
+
     // Draw a card if none is in play
     if (!game.currentCard) {
         const card = drawCard(game);
@@ -652,9 +655,8 @@ el('place-btn').addEventListener('click', () => {
     el('skip-btn').classList.add('hidden');
     el('buy-btn').classList.add('hidden');
 
-    // Show steal button, name guess toggle area, and submit
+    // Show steal button and submit (name guess area already visible from turn start)
     el('steal-btn').classList.remove('hidden');
-    el('name-guess-area').classList.remove('hidden');
     el('submit-btn').classList.remove('hidden');
     updateButtonStates();
 });

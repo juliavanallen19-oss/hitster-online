@@ -378,6 +378,11 @@ body {
   border-color: #ff3d8b;
 }
 
+.finish-game-btn--confirm {
+  color: #ffae3d;
+  border-color: #ffae3d;
+}
+
 /* ===== QR code / flip-card area ===== */
 
 .card-area {
@@ -840,6 +845,10 @@ body {
   font-size: 0.875rem;
   color: #f0f0f0;
   text-align: center;
+}
+
+.setup-message-bar {
+  margin-bottom: 12px;
 }
 
 /* ===== Selected timeline slot (task 5.4) ===== */

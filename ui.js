@@ -261,14 +261,14 @@ function renderAllPlayers() {
     list.innerHTML = '';
     game.players.forEach((player, i) => {
         const isActive = i === game.currentPlayerIndex;
-        const row      = document.createElement('div');
-        row.className  = 'player-row' + (isActive ? ' active-turn' : '');
-        row.innerHTML  = `
-            <span class="player-row-name">${isActive ? '<span class="now-playing-icon">▶</span>' : ''}${player.name}</span>
-            <span class="player-row-tokens"><span class="player-token-icon">✪</span> <span class="player-token-count">${player.tokens}</span></span>
-            <span class="player-row-cards">${player.timeline.length} cards</span>
+        const pill     = document.createElement('div');
+        pill.className = 'player-pill' + (isActive ? ' player-pill--active' : '');
+        pill.innerHTML = `
+            <span class="player-pill-name">${player.name}</span>
+            <span class="player-pill-stat" title="Tokens"><span class="player-token-icon">✪</span><span class="player-token-count">${player.tokens}</span></span>
+            <span class="player-pill-stat" title="Cards on timeline"><span class="player-pill-card-icon">🎴</span>${player.timeline.length}</span>
         `;
-        list.appendChild(row);
+        list.appendChild(pill);
     });
 }
 
@@ -363,6 +363,32 @@ function updateButtonStates() {
     setButtonEnabled(el('steal-btn'),  placed && game.pendingSteal === null && anyoneCanSteal);
     setButtonEnabled(el('skip-btn'),   !placed && player.tokens >= 1);
     setButtonEnabled(el('buy-btn'),    !placed && player.tokens >= 3);
+
+    updatePhasePrompt({ hasSlot, placed });
+}
+
+// Sets the big "what should I do now?" text above the timeline based on phase.
+function updatePhasePrompt({ hasSlot, placed }) {
+    const promptEl = el('phase-prompt');
+    if (!promptEl) return;
+    // If a steal is in progress / steal panel is open, defer to its own UI
+    if (!el('steal-panel').classList.contains('hidden')) {
+        promptEl.textContent = '🎯 Anyone want to challenge this placement?';
+        return;
+    }
+    if (!el('next-turn-btn').classList.contains('hidden')) {
+        promptEl.textContent = '✨ Round complete. Continue to the next turn.';
+        return;
+    }
+    if (placed) {
+        promptEl.textContent = '🎵 Submit to reveal the year — or let opponents steal first.';
+        return;
+    }
+    if (hasSlot) {
+        promptEl.textContent = '✅ Slot selected. Tap "Place card here" to commit.';
+        return;
+    }
+    promptEl.textContent = '🎧 Scan the QR with your phone, then tap a slot where you think the song belongs.';
 }
 
 function setButtonEnabled(btn, enabled) {
@@ -392,11 +418,11 @@ function beginTurn() {
     inner.classList.remove('flipped');
     requestAnimationFrame(() => { inner.style.transition = ''; });
 
-    // Reset all panels
+    // Reset all panels — name-guess form is always visible (no toggle), so just clear & enable it
     el('name-guess-area').classList.add('hidden');
-    el('name-guess-form').classList.add('hidden');
+    el('name-guess-form').classList.remove('hidden');
     el('name-guess-form').classList.remove('name-guess-form--required');
-    el('name-guess-toggle-btn').classList.remove('hidden');
+    el('name-guess-toggle-btn').classList.add('hidden'); // legacy toggle is never shown
     el('reveal-message').classList.add('hidden');
     el('next-turn-btn').classList.add('hidden');
     el('message-bar').classList.add('hidden');
@@ -411,19 +437,19 @@ function beginTurn() {
     el('guess-artist').disabled = false;
     el('guess-title').disabled  = false;
 
-    // Mode-specific name-guess setup (toggle text + PRO mandatory form)
+    // Mode-specific name-guess hint text
     const isPro   = game.mode === "pro";
     const isChill = game.mode === "chill";
+    const hintEl  = document.getElementById('name-guess-hint');
 
     if (isPro) {
-        // PRO: form always visible and mandatory — no toggle needed
-        el('name-guess-toggle-btn').classList.add('hidden');
-        el('name-guess-form').classList.remove('hidden');
+        // PRO: form is REQUIRED to keep the card (visual emphasis via .name-guess-form--required)
         el('name-guess-form').classList.add('name-guess-form--required');
+        if (hintEl) hintEl.textContent = '🔥 PRO: name BOTH the title and artist or lose the card';
     } else if (isChill) {
-        el('name-guess-toggle-btn').textContent = '😎 Name artist OR title for a bonus token ✪';
+        if (hintEl) hintEl.textContent = '😎 Name the title OR artist for a bonus ✪';
     } else {
-        el('name-guess-toggle-btn').textContent = '🎵 Name song & artist for a bonus token ✪';
+        if (hintEl) hintEl.textContent = '🎵 Name both the title and artist for a bonus ✪';
     }
 
     // Show action buttons; submit only appears after Place here
@@ -730,6 +756,7 @@ el('steal-btn').addEventListener('click', () => {
     }
     renderStealPanel();
     el('steal-panel').classList.remove('hidden');
+    updatePhasePrompt({ hasSlot: selectedPosition !== null, placed: activePosition !== null });
 });
 
 // --- Submit & reveal ---
@@ -951,6 +978,8 @@ el('submit-btn').addEventListener('click', async () => {
     }
 
     el('next-turn-btn').classList.remove('hidden');
+    // Reflect the new "round complete" phase in the prompt
+    updatePhasePrompt({ hasSlot: selectedPosition !== null, placed: activePosition !== null });
 });
 
 // --- Override: group decides the name guess was actually correct ---
@@ -1084,6 +1113,7 @@ el('buy-btn').addEventListener('click', async () => {
 
         showRevealMessage('Card automatically placed at the correct position! ✅', 'success');
         el('next-turn-btn').classList.remove('hidden');
+        updatePhasePrompt({ hasSlot: selectedPosition !== null, placed: activePosition !== null });
     }
 });
 

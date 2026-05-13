@@ -36,7 +36,7 @@
           <li><strong>Correct?</strong> The card stays. Wrong? It's discarded.</li>
           <li><strong>Bonus token ✪</strong> — guess both the artist and song title correctly to earn an extra token.</li>
           <li><strong>Spend tokens</strong> — Skip a card (1✪), attempt a HITSTER! steal (1✪), or buy a guaranteed placement without a year check (3✪). Max 5 tokens per player.</li>
-          <li><strong>HITSTER! steal</strong> — before the card is revealed, any other player can pay 1✪ to try placing it on their own timeline. Correct → they keep it. Wrong → active player keeps the card.</li>
+          <li><strong>HITSTER! steal</strong> — after the active player chooses a slot, one challenger can pay 1✪ to pick a different slot on the active player's timeline. If the challenger is right and the active player is wrong, the challenger steals the card.</li>
           <li><strong>Win</strong> — first to reach the goal number of cards wins!</li>
         </ul>
       </div>
@@ -92,9 +92,9 @@
     <!-- ===== Goal: winning card count ===== -->
     <section class="setup-section">
       <h2>Goal</h2>
-      <p class="hint">First to collect this many cards wins (1–20).</p>
-      <input type="number" id="win-target-input" class="player-name-input win-target-input" value="10" min="1" max="20">
-      <p id="win-target-error" class="win-target-error hidden">Please enter a number between 1 and 20.</p>
+      <p class="hint">First to collect this many cards wins (2–20).</p>
+      <input type="number" id="win-target-input" class="player-name-input win-target-input" value="10" min="2" max="20">
+      <p id="win-target-error" class="win-target-error hidden">Please enter a number between 2 and 20.</p>
     </section>
 
     <!-- ===== Starting player section ===== -->
@@ -106,6 +106,8 @@
         <option value="0">Player 1</option>
       </select>
     </section>
+
+    <div id="setup-message-bar" class="message-bar setup-message-bar hidden" role="alert"></div>
 
     <!-- ===== Start button ===== -->
     <button type="button" id="start-game-btn" class="primary-btn">Start Game</button>
@@ -165,7 +167,7 @@
               <div class="flip-card-front">
                 <div id="qr-container" class="qr-container"></div>
               </div>
-              <div class="flip-card-back">
+              <div class="flip-card-back" aria-hidden="true">
                 <p id="reveal-year" class="reveal-year">—</p>
                 <p id="reveal-artist" class="reveal-artist">—</p>
                 <p id="reveal-title" class="reveal-title">—</p>
@@ -236,7 +238,7 @@
       </section>
 
       <!-- ===== Feedback message bar ===== -->
-      <div id="message-bar" class="message-bar hidden"></div>
+      <div id="message-bar" class="message-bar hidden" role="alert"></div>
 
       <!-- ===== Action buttons ===== -->
       <section class="action-area">

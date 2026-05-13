@@ -10,9 +10,37 @@ let lastPlayedCard        = null; // stored for reveal display
 let justWonCard           = null; // card that was just added to a timeline (gets glow animation)
 let stealModeStealerIndex = null; // when set, timeline slot clicks are steal position choices
 let stealerForOverride    = null; // stealer Player object held for the steal-override-btn click
+let finishConfirmTimer    = null; // temporary second-click confirmation for finishing early
 
 // --- Shorthand helper ---
 function el(id) { return document.getElementById(id); }
+
+function createEl(tag, className = '', text = '') {
+    const node = document.createElement(tag);
+    if (className) node.className = className;
+    if (text) node.textContent = text;
+    return node;
+}
+
+function createButton(text, className, onClick) {
+    const btn = createEl('button', className, text);
+    btn.type = 'button';
+    btn.addEventListener('click', onClick);
+    return btn;
+}
+
+function createPlayerInputRow(index) {
+    const row = createEl('div', 'player-input-row');
+    const input = createEl('input', 'player-name-input');
+    input.type = 'text';
+    input.placeholder = `Player ${index} name`;
+    input.maxLength = 20;
+    const btn = createEl('button', 'delete-player-btn', '×');
+    btn.type = 'button';
+    btn.setAttribute('aria-label', 'Remove player');
+    row.append(input, btn);
+    return row;
+}
 
 
 // =============================================================
@@ -33,11 +61,27 @@ function showScreen(id) {
 
 let messageTimer = null;
 
+function activeMessageBar() {
+    const setupBar = el('setup-message-bar');
+    if (setupBar && el('setup-screen').classList.contains('active')) {
+        return setupBar;
+    }
+    return el('message-bar');
+}
+
+function hideMessageBars() {
+    clearTimeout(messageTimer);
+    ['setup-message-bar', 'message-bar'].forEach(id => {
+        const bar = el(id);
+        if (bar) bar.classList.add('hidden');
+    });
+}
+
 function showMessage(text, persistent = false) {
-    const bar = el('message-bar');
+    const bar = activeMessageBar();
+    hideMessageBars();
     bar.textContent = text;
     bar.classList.remove('hidden');
-    clearTimeout(messageTimer);
     if (!persistent) {
         messageTimer = setTimeout(() => bar.classList.add('hidden'), 3500);
     }
@@ -93,11 +137,7 @@ function renumberPlayerInputs() {
 function addPlayerInput() {
     const rows = document.querySelectorAll('.player-input-row');
     if (rows.length >= 6) return; // button is hidden anyway, but guard just in case
-    const row = document.createElement('div');
-    row.className = 'player-input-row';
-    row.innerHTML = `<input type="text" class="player-name-input" placeholder="Player ${rows.length + 1} name" maxlength="20">
-                     <button type="button" class="delete-player-btn" aria-label="Remove player">×</button>`;
-    el('player-inputs').appendChild(row);
+    el('player-inputs').appendChild(createPlayerInputRow(rows.length + 1));
     updateDeleteButtons();
     updateAddPlayerButton();
     renumberPlayerInputs();
@@ -147,7 +187,7 @@ function validateWinTarget() {
     const errorEl  = el('win-target-error');
     input.dataset.touched = 'true';
     const val = parseInt(input.value.trim(), 10);
-    const invalid = !input.value.trim() || isNaN(val) || val < 1 || val > 20;
+    const invalid = !input.value.trim() || isNaN(val) || val < 2 || val > 20;
     errorEl.classList.toggle('hidden', !invalid);
     return !invalid;
 }
@@ -156,7 +196,12 @@ function onStartGame() {
     const inputs = document.querySelectorAll('.player-name-input:not(#win-target-input)');
     const names  = Array.from(inputs).map(i => i.value.trim()).filter(n => n.length > 0);
     if (names.length < 2) {
-        showMessage('Please enter at least 2 player names.');
+        showMessage('Please enter at least 2 player names.', true);
+        return;
+    }
+    const normalizedNames = names.map(n => n.toLocaleLowerCase());
+    if (new Set(normalizedNames).size !== names.length) {
+        showMessage('Please use unique player names so turns and steals are clear.', true);
         return;
     }
 
@@ -215,7 +260,8 @@ function renderTimelineInto(container, timeline, pendingPos, stealPos, interacti
             slot.className = `timeline-card timeline-card--facedown ${i === selectedPosition ? 'selected' : ''}`;
         } else if (i === stealPos) {
             slot.className = 'steal-token-marker';
-            slot.innerHTML = `✪<br>${stealerName ?? (game.pendingSteal ? game.players[game.pendingSteal.stealerIndex].name : '?')}`;
+            const name = stealerName ?? (game.pendingSteal ? game.players[game.pendingSteal.stealerIndex].name : '?');
+            slot.append(document.createTextNode('✪'), document.createElement('br'), document.createTextNode(name));
         } else if (interactive) {
             slot.className = 'timeline-slot' + (i === selectedPosition ? ' selected' : '');
         } else {
@@ -242,9 +288,11 @@ function renderTimelineInto(container, timeline, pendingPos, stealPos, interacti
                 cardEl.className = `timeline-card ${decadeClass(card.year)}`;
             }
 
-            cardEl.innerHTML = `<span class="card-year">${card.year}</span>
-                                <span class="card-artist">${card.artist}</span>
-                                <span class="card-title">${card.title}</span>`;
+            cardEl.append(
+                createEl('span', 'card-year', String(card.year)),
+                createEl('span', 'card-artist', card.artist),
+                createEl('span', 'card-title', card.title)
+            );
             container.appendChild(cardEl);
         }
     }
@@ -261,13 +309,26 @@ function renderAllPlayers() {
     list.innerHTML = '';
     game.players.forEach((player, i) => {
         const isActive = i === game.currentPlayerIndex;
-        const pill     = document.createElement('div');
-        pill.className = 'player-pill' + (isActive ? ' player-pill--active' : '');
-        pill.innerHTML = `
-            <span class="player-pill-name">${player.name}</span>
-            <span class="player-pill-stat" title="Tokens"><span class="player-token-icon">✪</span><span class="player-token-count">${player.tokens}</span></span>
-            <span class="player-pill-stat" title="Cards on timeline"><span class="player-pill-card-icon">🎴</span>${player.timeline.length}</span>
-        `;
+        const pill = createEl('div', 'player-pill' + (isActive ? ' player-pill--active' : ''));
+
+        pill.appendChild(createEl('span', 'player-pill-name', player.name));
+
+        const tokens = createEl('span', 'player-pill-stat');
+        tokens.title = 'Tokens';
+        tokens.append(
+            createEl('span', 'player-token-icon', '✪'),
+            createEl('span', 'player-token-count', String(player.tokens))
+        );
+        pill.appendChild(tokens);
+
+        const cards = createEl('span', 'player-pill-stat');
+        cards.title = 'Cards on timeline';
+        cards.append(
+            createEl('span', 'player-pill-card-icon', '🎴'),
+            document.createTextNode(String(player.timeline.length))
+        );
+        pill.appendChild(cards);
+
         list.appendChild(pill);
     });
 }
@@ -277,6 +338,14 @@ function showSongInfo(card) {
     el('reveal-year').textContent   = card.year;
     el('reveal-artist').textContent = card.artist;
     el('reveal-title').textContent  = card.title;
+    document.querySelector('.flip-card-back')?.setAttribute('aria-hidden', 'false');
+}
+
+function hideSongInfo() {
+    el('reveal-year').textContent   = '—';
+    el('reveal-artist').textContent = '—';
+    el('reveal-title').textContent  = '—';
+    document.querySelector('.flip-card-back')?.setAttribute('aria-hidden', 'true');
 }
 
 function updateTokenDisplay() {
@@ -392,11 +461,19 @@ function updatePhasePrompt({ hasSlot, placed }) {
 }
 
 function setButtonEnabled(btn, enabled) {
+    btn.dataset.inactive = String(!enabled);
     if (enabled) {
         btn.classList.remove('btn-disabled');
     } else {
         btn.classList.add('btn-disabled');
     }
+}
+
+function resetFinishButton() {
+    clearTimeout(finishConfirmTimer);
+    const btn = el('finish-game-btn');
+    btn.classList.remove('finish-game-btn--confirm');
+    btn.textContent = 'Finish game';
 }
 
 
@@ -411,12 +488,14 @@ function beginTurn() {
     justWonCard           = null;
     stealModeStealerIndex = null;
     el('timeline-container').classList.remove('steal-mode');
+    resetFinishButton();
 
     // Reset the flip card instantly (no transition) so it snaps back to QR side
     const inner = el('flip-card-inner');
     inner.style.transition = 'none';
     inner.classList.remove('flipped');
     requestAnimationFrame(() => { inner.style.transition = ''; });
+    hideSongInfo();
 
     // Reset all panels — name-guess form is always visible (no toggle), so just clear & enable it
     el('name-guess-area').classList.add('hidden');
@@ -425,7 +504,7 @@ function beginTurn() {
     el('name-guess-toggle-btn').classList.add('hidden'); // legacy toggle is never shown
     el('reveal-message').classList.add('hidden');
     el('next-turn-btn').classList.add('hidden');
-    el('message-bar').classList.add('hidden');
+    hideMessageBars();
     el('steal-panel').classList.add('hidden');
     el('stealer-timeline-section').classList.add('hidden');
     el('override-btn').classList.add('hidden');
@@ -494,7 +573,7 @@ function onSlotClick(position) {
     }
     if (activePosition !== null) return; // already placed
     selectedPosition = position;
-    el('message-bar').classList.add('hidden'); // clear any previous hint when a new slot is chosen
+    hideMessageBars(); // clear any previous hint when a new slot is chosen
     renderTimeline();
     updateButtonStates();
 }
@@ -546,7 +625,8 @@ function showWinScreen(winners, reason = null) {
         (a, b) => b.timeline.length - a.timeline.length || b.tokens - a.tokens
     );
     const rankEl = el('win-ranking');
-    rankEl.innerHTML = '<h3 class="win-ranking-title">Final standings</h3>';
+    rankEl.innerHTML = '';
+    rankEl.appendChild(createEl('h3', 'win-ranking-title', 'Final standings'));
 
     let rank = 1;
     sorted.forEach((player, i) => {
@@ -559,11 +639,12 @@ function showWinScreen(winners, reason = null) {
         const isWinner = list.some(w => w === player);
         const row = document.createElement('div');
         row.className = 'win-rank-row' + (isWinner ? ' win-rank-row--winner' : '');
-        row.innerHTML = `
-            <span class="win-rank-pos">${isWinner ? '🏆' : '#' + rank}</span>
-            <span class="win-rank-name">${player.name}</span>
-            <span class="win-rank-stats">${player.timeline.length} card${player.timeline.length !== 1 ? 's' : ''} · ${player.tokens} ✪</span>
-        `;
+        const cardText = `${player.timeline.length} card${player.timeline.length !== 1 ? 's' : ''} · ${player.tokens} ✪`;
+        row.append(
+            createEl('span', 'win-rank-pos', isWinner ? '🏆' : `#${rank}`),
+            createEl('span', 'win-rank-name', player.name),
+            createEl('span', 'win-rank-stats', cardText)
+        );
         rankEl.appendChild(row);
     });
 
@@ -583,30 +664,26 @@ function renderStealPanel() {
         .map((p, i) => ({ player: p, index: i }))
         .filter(({ player, index }) => index !== game.currentPlayerIndex && player.tokens >= 1);
 
-    let html = '<p class="steal-label">Who wants to challenge? (costs 1 ✪ token)</p>';
+    panel.innerHTML = '';
+    panel.appendChild(createEl('p', 'steal-label', 'Who wants to challenge? (costs 1 ✪ token)'));
     nonActive.forEach(({ player, index }) => {
-        html += `<button class="secondary-btn steal-player-btn"
-                         data-player-index="${index}">
-                   ${player.name} — ${player.tokens} token${player.tokens !== 1 ? 's' : ''}
-                 </button>`;
-    });
-    html += '<button id="cancel-steal-btn" class="secondary-btn">Cancel</button>';
-    panel.innerHTML = html;
-
-    panel.querySelectorAll('.steal-player-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const idx = parseInt(btn.dataset.playerIndex);
-            if (game.players[idx].tokens < 1) {
-                showMessage(`${game.players[idx].name} doesn't have enough tokens to steal.`);
+        const label = `${player.name} — ${player.tokens} token${player.tokens !== 1 ? 's' : ''}`;
+        const btn = createButton(label, 'secondary-btn steal-player-btn', () => {
+            if (game.players[index].tokens < 1) {
+                showMessage(`${game.players[index].name} doesn't have enough tokens to steal.`);
                 return;
             }
-            renderStealSlots(idx);
+            renderStealSlots(index);
         });
+        btn.dataset.playerIndex = index;
+        panel.appendChild(btn);
     });
 
-    el('cancel-steal-btn').addEventListener('click', () => {
+    const cancel = createButton('Cancel', 'secondary-btn', () => {
         el('steal-panel').classList.add('hidden');
     });
+    cancel.id = 'cancel-steal-btn';
+    panel.appendChild(cancel);
 }
 
 function renderStealSlots(stealerIndex) {
@@ -620,8 +697,9 @@ function renderStealSlots(stealerIndex) {
     el('timeline-container').classList.add('steal-mode');
     renderTimeline(); // re-render so the timeline reflects steal mode visually
 
-    let html = `<p class="steal-label">${stealer.name}: tap a slot directly on the timeline above, or pick from the list below</p>
-                <div class="steal-slot-buttons">`;
+    panel.innerHTML = '';
+    panel.appendChild(createEl('p', 'steal-label', `${stealer.name}: tap a slot directly on the timeline above, or pick from the list below`));
+    const slotButtons = createEl('div', 'steal-slot-buttons');
 
     for (let i = 0; i <= timeline.length; i++) {
         if (i === activePosition) continue; // skip the slot the active player already chose
@@ -637,33 +715,35 @@ function renderStealSlots(stealerIndex) {
             label = `Between ${timeline[i - 1].year} and ${timeline[i].year}`;
         }
 
-        html += `<button class="secondary-btn steal-slot-btn"
-                         data-position="${i}"
-                         data-stealer="${stealerIndex}">${label}</button>`;
+        const pos = i;
+        const btn = createButton(label, 'secondary-btn steal-slot-btn', () => {
+            confirmSteal(stealerIndex, pos);
+        });
+        btn.dataset.position = pos;
+        btn.dataset.stealer = stealerIndex;
+        slotButtons.appendChild(btn);
     }
-    html += '</div>';
+    panel.appendChild(slotButtons);
 
     // PRO mode: stealer must also name artist + title
     if (isPro) {
-        html += `<div class="steal-name-guess">
-                   <p class="steal-name-guess-label">🔥 PRO: ${stealer.name} must also name artist &amp; title to win the steal</p>
-                   <input type="text" id="steal-guess-title" class="player-name-input" placeholder="Song title" maxlength="60">
-                   <input type="text" id="steal-guess-artist" class="player-name-input" placeholder="Artist name" maxlength="60">
-                 </div>`;
+        const guess = createEl('div', 'steal-name-guess');
+        guess.appendChild(createEl('p', 'steal-name-guess-label', `🔥 PRO: ${stealer.name} must also name artist & title to win the steal`));
+        const titleInput = createEl('input', 'player-name-input');
+        titleInput.type = 'text';
+        titleInput.id = 'steal-guess-title';
+        titleInput.placeholder = 'Song title';
+        titleInput.maxLength = 60;
+        const artistInput = createEl('input', 'player-name-input');
+        artistInput.type = 'text';
+        artistInput.id = 'steal-guess-artist';
+        artistInput.placeholder = 'Artist name';
+        artistInput.maxLength = 60;
+        guess.append(titleInput, artistInput);
+        panel.appendChild(guess);
     }
 
-    html += '<button id="cancel-steal-btn" class="secondary-btn">Cancel</button>';
-    panel.innerHTML = html;
-
-    panel.querySelectorAll('.steal-slot-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const pos    = parseInt(btn.dataset.position);
-            const steIdx = parseInt(btn.dataset.stealer);
-            confirmSteal(steIdx, pos);
-        });
-    });
-
-    el('cancel-steal-btn').addEventListener('click', () => {
+    const cancel = createButton('Cancel', 'secondary-btn', () => {
         stealModeStealerIndex = null;
         el('timeline-container').classList.remove('steal-mode');
         el('steal-panel').classList.add('hidden');
@@ -671,6 +751,8 @@ function renderStealSlots(stealerIndex) {
         renderTimeline();
         updateButtonStates();
     });
+    cancel.id = 'cancel-steal-btn';
+    panel.appendChild(cancel);
 }
 
 function confirmSteal(stealerIndex, stealPosition) {
@@ -761,7 +843,7 @@ el('steal-btn').addEventListener('click', () => {
 
 // --- Submit & reveal ---
 el('submit-btn').addEventListener('click', async () => {
-    el('message-bar').classList.add('hidden');
+    hideMessageBars();
     const artist  = el('guess-artist').value.trim();
     const title   = el('guess-title').value.trim();
     const isPro   = game.mode === "pro";
@@ -1067,12 +1149,13 @@ el('skip-btn').addEventListener('click', () => {
         lastPlayedCard   = result.card;
         selectedPosition = null;
         activePosition   = null;
+        hideSongInfo();
         soundSkipCard();
-        updateTokenDisplay();
-        renderAllPlayers();
         if (result.card) {
             generateQRCode(result.card.spotify_url);
+            renderPlayerHeader();
             renderTimeline();
+            renderAllPlayers();
             updateButtonStates();
             showMessage('Skipped! New card ready — scan the QR code again to hear your next song.', true);
         } else {
@@ -1120,6 +1203,15 @@ el('buy-btn').addEventListener('click', async () => {
 // --- Finish game early ---
 el('finish-game-btn').addEventListener('click', () => {
     if (!game) return;
+    const btn = el('finish-game-btn');
+    if (!btn.classList.contains('finish-game-btn--confirm')) {
+        btn.classList.add('finish-game-btn--confirm');
+        btn.textContent = 'Click again to finish';
+        clearTimeout(finishConfirmTimer);
+        finishConfirmTimer = setTimeout(resetFinishButton, 3500);
+        return;
+    }
+    resetFinishButton();
     showWinScreen(handleEmptyDeck(game), 'finished-early');
 });
 
@@ -1129,17 +1221,23 @@ el('play-again-btn').addEventListener('click', () => {
     selectedPosition = null;
     activePosition   = null;
     lastPlayedCard   = null;
-    el('player-inputs').innerHTML = `
-        <div class="player-input-row">
-            <input type="text" class="player-name-input" placeholder="Player 1 name" maxlength="20">
-            <button type="button" class="delete-player-btn" aria-label="Remove player">×</button>
-        </div>
-        <div class="player-input-row">
-            <input type="text" class="player-name-input" placeholder="Player 2 name" maxlength="20">
-            <button type="button" class="delete-player-btn" aria-label="Remove player">×</button>
-        </div>
-    `;
+    justWonCard      = null;
+    stealModeStealerIndex = null;
+    stealerForOverride    = null;
+    resetFinishButton();
+    hideSongInfo();
+    hideMessageBars();
+    el('player-inputs').innerHTML = '';
+    el('player-inputs').append(createPlayerInputRow(1), createPlayerInputRow(2));
+    el('win-target-input').value = '10';
+    delete el('win-target-input').dataset.touched;
+    el('win-target-error').classList.add('hidden');
+    el('mode-select').value = 'original';
+    document.querySelectorAll('.mode-card').forEach(btn => {
+        btn.classList.toggle('mode-card--active', btn.dataset.mode === 'original');
+    });
     updateDeleteButtons();
+    updateAddPlayerButton();
     updateStartingPlayerDropdown();
     showScreen('setup-screen');
 });

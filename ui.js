@@ -595,6 +595,9 @@ function beginTurn() {
     el('stealer-timeline-section').classList.add('hidden');
     el('override-btn').classList.add('hidden');
     el('steal-override-btn').classList.add('hidden');
+    el('steal-guess-review').classList.add('hidden');
+    el('steal-review-title').value  = '';
+    el('steal-review-artist').value = '';
     stealerForOverride = null;
     el('scan-hint').classList.remove('hidden');
     el('guess-artist').value    = '';
@@ -990,8 +993,9 @@ el('submit-btn').addEventListener('click', async () => {
     // Save state before resolveTurn clears pendingSteal and currentCard
     const resolvedPosition = activePosition;
     const savedSteal = game.pendingSteal ? {
-        position:    game.pendingSteal.stealPosition,
-        stealerName: game.players[game.pendingSteal.stealerIndex].name
+        position:       game.pendingSteal.stealPosition,
+        stealerName:    game.players[game.pendingSteal.stealerIndex].name,
+        stealNameGuess: game.pendingSteal.stealNameGuess
     } : null;
 
     const result      = resolveTurn(game, activePosition, nameGuess);
@@ -1159,8 +1163,10 @@ el('submit-btn').addEventListener('click', async () => {
         if (result.tokenEarned) setTimeout(animateTokenEarned, 500);
         if (isPro && result.activeCorrect) {
             showRevealMessage(`Right position, but artist & title incorrect — card discarded. ${sName}'s challenge also failed — token lost.`, 'error');
+        } else if (isPro && result.stealResult.stealPositionCorrect) {
+            showRevealMessage(`Wrong position for you. ${sName} was correct time-wise but artist & title were wrong — challenge failed, token lost.`, 'error');
         } else if (isPro) {
-            showRevealMessage(`Wrong position — card discarded. ${sName}'s challenge also failed — token lost.`, 'error');
+            showRevealMessage(`Wrong position for you and ${sName} — card discarded. Their challenge failed — token lost.`, 'error');
         } else if (ngAttempted) {
             showRevealMessage(`Wrong position — card discarded. ${nameGuessFeedback}. ${sName}'s steal also failed — token lost.`, 'error');
         } else {
@@ -1223,6 +1229,13 @@ el('submit-btn').addEventListener('click', async () => {
     if (result.stealResult?.outcome === 'both_wrong' && result.stealResult?.stealPositionCorrect) {
         stealerForOverride = result.stealResult.stealer;
         el('steal-override-btn').classList.remove('hidden');
+        // Show what the stealer typed so players can compare with the revealed answer
+        if (savedSteal?.stealNameGuess) {
+            el('steal-review-title').value  = savedSteal.stealNameGuess.title;
+            el('steal-review-artist').value = savedSteal.stealNameGuess.artist;
+            el('steal-guess-review-label').textContent = `${savedSteal.stealerName} typed:`;
+            el('steal-guess-review').classList.remove('hidden');
+        }
     }
 
     el('next-turn-btn').classList.remove('hidden');
@@ -1233,7 +1246,9 @@ el('submit-btn').addEventListener('click', async () => {
 
 // --- Override: group decides the name guess was actually correct ---
 el('override-btn').addEventListener('click', async () => {
+    el('next-turn-btn').classList.add('hidden'); // prevent beginTurn() firing mid-animation
     el('steal-override-btn').classList.add('hidden'); // only one override can apply
+    el('steal-guess-review').classList.add('hidden');
     stealerForOverride = null;
 
     el('name-guess-area').classList.add('hidden'); // no longer needed for review
@@ -1254,8 +1269,6 @@ el('override-btn').addEventListener('click', async () => {
         showRevealMessage('Override accepted — card won! ✅', 'success');
         updateTokenDisplay();
         renderAllPlayers();
-
-        updateNextTurnButton();
     } else {
         // Original/Chill: just grant the bonus token for the correct guess
         overrideAndGrantToken(game);
@@ -1265,14 +1278,19 @@ el('override-btn').addEventListener('click', async () => {
         animateTokenEarned();
         showRevealMessage('Override accepted — bonus token awarded! ✪', 'success');
     }
+
+    el('next-turn-btn').classList.remove('hidden');
+    updateNextTurnButton();
 });
 
 // --- Steal override: stealer had right position but wrong name (PRO) ---
 el('steal-override-btn').addEventListener('click', async () => {
     if (!stealerForOverride) return;
+    el('next-turn-btn').classList.add('hidden'); // prevent beginTurn() firing mid-animation
     const stealer = stealerForOverride;
     el('override-btn').classList.add('hidden'); // only one override can apply
     el('steal-override-btn').classList.add('hidden');
+    el('steal-guess-review').classList.add('hidden');
     stealerForOverride = null;
 
     el('name-guess-area').classList.add('hidden'); // no longer needed for review
@@ -1295,6 +1313,7 @@ el('steal-override-btn').addEventListener('click', async () => {
 
     showRevealMessage(`Override accepted — ${stealer.name} wins the card! Token returned. ✅`, 'success');
 
+    el('next-turn-btn').classList.remove('hidden');
     updateNextTurnButton();
 });
 

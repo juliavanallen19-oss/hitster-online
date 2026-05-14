@@ -1430,6 +1430,28 @@ body {
     animation: token-capped-pulse 0.55s ease 2;
 }
 
+/* ===== PRO steal-guess review panel — shown below the steal-override button ===== */
+
+.steal-guess-review {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 6px;
+    padding: 10px 12px;
+    background: rgba(61, 210, 255, 0.06);
+    border: 1px solid rgba(61, 210, 255, 0.25);
+    border-radius: 8px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.steal-guess-review-label {
+    margin: 0;
+    font-size: 0.8rem;
+    color: #3dd2ff;
+    letter-spacing: 0.01em;
+}
+
 /* ===== PRO steal override button — blue tint to distinguish from active player's override ===== */
 
 .steal-override-btn {

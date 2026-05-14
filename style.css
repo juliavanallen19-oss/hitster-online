@@ -1727,22 +1727,24 @@ body {
 }
 
 @keyframes token-spawn {
-  0%   { opacity: 0; transform: translate(-50%, -50%) scale(0)    rotate(0deg);   }
-  55%  { opacity: 1; transform: translate(-50%, -50%) scale(1.22) rotate(200deg); }
-  78%  { opacity: 1; transform: translate(-50%, -50%) scale(0.92) rotate(330deg); }
+  0%   { opacity: 0; transform: translate(-50%, -50%) scale(0)    rotate(-15deg); }
+  35%  { opacity: 1; transform: translate(-50%, -50%) scale(1.28) rotate(160deg); }
+  58%  { opacity: 1; transform: translate(-50%, -50%) scale(0.94) rotate(310deg); }
+  78%  { opacity: 1; transform: translate(-50%, -50%) scale(1.06) rotate(345deg); }
   100% { opacity: 1; transform: translate(-50%, -50%) scale(1)    rotate(360deg); }
 }
 
 @keyframes token-badge-bump {
   0%   { transform: scale(1);    }
-  22%  { transform: scale(1.42); }
-  48%  { transform: scale(0.88); }
-  72%  { transform: scale(1.12); }
+  22%  { transform: scale(1.45); }
+  45%  { transform: scale(0.86); }
+  68%  { transform: scale(1.14); }
+  85%  { transform: scale(0.97); }
   100% { transform: scale(1);    }
 }
 
 .token-badge--bump {
-  animation: token-badge-bump 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  animation: token-badge-bump 0.55s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 /* =============================================================

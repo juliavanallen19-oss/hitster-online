@@ -132,11 +132,14 @@ function soundTokenCapped() {
     note(110,  'sine', 0.14, 0.20, 0.10);    // dull low thud underneath
 }
 
-// Coin lands on other coins — sharp metallic ping with a decaying ring
+// Coin lands on other coins — hard metallic impact with stacked ringing harmonics
 function soundCoinLands() {
-    note(2100, 'sine', 0.22, 0.04, 0.00);   // sharp initial hit
-    note(1550, 'sine', 0.16, 0.20, 0.03);   // first ring
-    note(1100, 'sine', 0.09, 0.38, 0.09);   // settling resonance
+    note(3500, 'triangle', 0.18, 0.03, 0.00);  // hard impact transient
+    note(2800, 'sine',     0.22, 0.06, 0.00);  // bright metallic clang
+    note(2100, 'sine',     0.16, 0.14, 0.02);  // primary ring
+    note(3100, 'sine',     0.07, 0.10, 0.03);  // overtone shimmer
+    note(1650, 'sine',     0.13, 0.24, 0.04);  // second harmonic
+    note(1100, 'sine',     0.09, 0.44, 0.10);  // settling resonance
 }
 
 // Win screen fanfare — triumphant ascending arpeggio with a sustained chord

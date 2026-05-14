@@ -475,32 +475,26 @@ function setButtonEnabled(btn, enabled) {
 // Spawns a ✪ token in the center of the screen, spins it, flies it to the
 // token badge in the header, then plays a coin-landing sound and bumps the badge.
 async function animateTokenEarned() {
-    const countEl  = el('active-player-token-count');
-    const newCount = parseInt(countEl.textContent, 10);
-    countEl.textContent = String(newCount - 1); // show old count during flight
-
     const token = document.createElement('div');
     token.className = 'token-fly';
     token.textContent = '✪';
     document.body.appendChild(token);
 
     token.style.left      = `${window.innerWidth  / 2}px`;
-    token.style.top       = `${window.innerHeight * 0.52}px`;
-    token.style.animation = 'token-spawn 0.45s ease forwards';
+    token.style.top       = `${window.innerHeight * 0.50}px`;
+    token.style.animation = 'token-spawn 0.55s cubic-bezier(0.34,1.56,0.64,1) forwards';
 
-    await sleep(450);
+    await sleep(530);
 
     const badge = el('active-player-tokens');
     const r     = badge.getBoundingClientRect();
-    token.style.transition = 'left 0.5s cubic-bezier(0.25,0.46,0.45,0.94), top 0.5s cubic-bezier(0.25,0.46,0.45,0.94), transform 0.5s ease, opacity 0.15s ease 0.38s';
+    token.style.transition = 'left 0.55s cubic-bezier(0.4,0,0.2,1), top 0.55s cubic-bezier(0.4,0,0.2,1), transform 0.55s ease, opacity 0.1s ease 0.47s';
     token.style.left       = `${r.left + r.width  / 2}px`;
     token.style.top        = `${r.top  + r.height / 2}px`;
-    token.style.transform  = 'translate(-50%,-50%) scale(0.2) rotate(1080deg)';
+    token.style.transform  = 'translate(-50%,-50%) scale(0.15) rotate(720deg)';
 
-    await sleep(500);
+    await sleep(570);
 
-    // Land: restore correct count, play coin sound, bump the badge
-    countEl.textContent = String(newCount);
     soundCoinLands();
     token.style.opacity = '0';
 

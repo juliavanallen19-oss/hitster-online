@@ -484,22 +484,29 @@ function resetFinishButton() {
 function updateNextTurnButton() {
     const btn = el('next-turn-btn');
     const winner = checkWinCondition(game);
+    const n = game.players.length;
+
     if (!game.finalRound && winner) {
-        const n = game.players.length;
         const remaining = (game.startingPlayerIndex - game.currentPlayerIndex - 1 + n) % n;
         if (remaining === 0) {
             btn.textContent = 'Show Winners';
         } else {
-            btn.textContent = 'Final Round →';
             showMessage(
                 `🏆 ${winner.name} reached ${game.winTarget} cards! ${remaining} more player${remaining > 1 ? 's' : ''} still get a turn.`,
                 true
             );
+            btn.textContent = remaining === 1 ? 'Final Turn →' : 'Continue to next turn →';
         }
     } else if (game.finalRound) {
-        const n = game.players.length;
+        const lastPlayerIdx = (game.startingPlayerIndex - 1 + n) % n;
         const nextIdx = (game.currentPlayerIndex + 1) % n;
-        btn.textContent = nextIdx === game.startingPlayerIndex ? 'Show Winners' : 'Final Round →';
+        if (nextIdx === game.startingPlayerIndex) {
+            btn.textContent = 'Show Winners';
+        } else if (nextIdx === lastPlayerIdx) {
+            btn.textContent = 'Final Turn →';
+        } else {
+            btn.textContent = 'Continue to next turn →';
+        }
     } else {
         btn.textContent = 'Continue to next turn →';
     }

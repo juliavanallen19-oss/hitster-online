@@ -1066,6 +1066,18 @@ el('submit-btn').addEventListener('click', async () => {
     } else {
         // Original/Chill: override appears when a name guess was tried but wrong
         if (ngAttempted && !ng) {
+            // Label reflects exactly what was typed (Chill: per-field; Original: generic)
+            if (isChill) {
+                if (artist && title) {
+                    el('override-btn').textContent = '✏️ Actually, the artist &/or title were correct';
+                } else if (artist) {
+                    el('override-btn').textContent = '✏️ Actually, the artist was correct';
+                } else {
+                    el('override-btn').textContent = '✏️ Actually, the song title was correct';
+                }
+            } else {
+                el('override-btn').textContent = '✏️ Override: artist & title were actually correct';
+            }
             el('override-btn').classList.remove('hidden');
         }
     }

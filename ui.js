@@ -1067,7 +1067,7 @@ el('submit-btn').addEventListener('click', async () => {
                 tokenNote = result.tokenEarned ? 'Artist & title correct — token granted ✪'
                                                : 'Artist & title correct — already at max tokens';
             }
-            showRevealMessage(`Wrong position — card discarded. ${tokenNote}. Better luck next turn!`, 'error');
+            showRevealMessage(`Wrong position — card discarded. Better luck next turn! ${tokenNote}.`, 'error');
         } else if (ngAttempted) {
             showRevealMessage(`Wrong position — card discarded. ${nameGuessFeedback}. Better luck next turn!`, 'error');
         } else {

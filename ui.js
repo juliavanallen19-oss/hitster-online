@@ -5,7 +5,7 @@
 
 // --- UI state ---
 let selectedPosition      = null; // slot the active player clicked (index into timeline gaps)
-let activePosition        = null; // confirmed after Place Here is clicked (used in resolveRound)
+let activePosition        = null; // confirmed after Place Here is clicked (used in resolveTurn)
 let lastPlayedCard        = null; // stored for reveal display
 let justWonCard           = null; // card that was just added to a timeline (gets glow animation)
 let stealModeStealerIndex = null; // when set, timeline slot clicks are steal position choices
@@ -446,7 +446,7 @@ function updatePhasePrompt({ hasSlot, placed }) {
         return;
     }
     if (!el('next-turn-btn').classList.contains('hidden')) {
-        promptEl.textContent = '✨ Round complete. Continue to the next turn.';
+        promptEl.textContent = '✨ Turn complete. Continue to the next turn.';
         return;
     }
     if (placed) {
@@ -875,14 +875,14 @@ el('submit-btn').addEventListener('click', async () => {
     const nameGuess = isChill ? ((artist || title) ? { artist, title } : null)
                               : ((artist && title) ? { artist, title } : null);
 
-    // Save state before resolveRound clears pendingSteal and currentCard
+    // Save state before resolveTurn clears pendingSteal and currentCard
     const resolvedPosition = activePosition;
     const savedSteal = game.pendingSteal ? {
         position:    game.pendingSteal.stealPosition,
         stealerName: game.players[game.pendingSteal.stealerIndex].name
     } : null;
 
-    const result      = resolveRound(game, activePosition, nameGuess);
+    const result      = resolveTurn(game, activePosition, nameGuess);
     lastPlayedCard    = result.card;
     activePosition    = null;
     const ng          = result.nameGuessCorrect;
@@ -1067,7 +1067,7 @@ el('submit-btn').addEventListener('click', async () => {
     }
 
     el('next-turn-btn').classList.remove('hidden');
-    // Reflect the new "round complete" phase in the prompt
+    // Reflect the new "turn complete" phase in the prompt
     updatePhasePrompt({ hasSlot: selectedPosition !== null, placed: activePosition !== null });
 });
 

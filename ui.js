@@ -446,7 +446,10 @@ function updatePhasePrompt({ hasSlot, placed }) {
         return;
     }
     if (!el('next-turn-btn').classList.contains('hidden')) {
-        promptEl.textContent = '✨ Round complete. Continue to the next turn.';
+        const isShowWinners = el('next-turn-btn').textContent.trim() === 'Show Winners';
+        promptEl.textContent = isShowWinners
+            ? '🏆 Round complete. Continue to see who wins!'
+            : '✨ Round complete. Continue to the next turn.';
         return;
     }
     if (placed) {

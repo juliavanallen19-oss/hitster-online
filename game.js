@@ -508,7 +508,7 @@ function buyPlacement(game) {
 // HITSTER! steal — challenger version
 // A non-active player pays 1 token to challenge the active player
 // by picking a DIFFERENT slot on the active player's own timeline.
-// Resolution happens later in resolveRound().
+// Resolution happens later in resolveTurn().
 // Only one steal attempt allowed per turn.
 // =============================================================
 
@@ -523,7 +523,7 @@ function initiateSteal(game, stealerIndex, stealPosition, stealNameGuess = null)
 
 
 // =============================================================
-// resolveRound — called when the active player clicks Submit
+// resolveTurn — called when the active player clicks Submit
 //
 // Evaluates the active placement, any steal, and the name guess
 // all at once (since Submit triggers the reveal).
@@ -534,7 +534,7 @@ function initiateSteal(game, stealerIndex, stealPosition, stealNameGuess = null)
 // Returns a full result object for the UI to display.
 // =============================================================
 
-function resolveRound(game, activePosition, nameGuess) {
+function resolveTurn(game, activePosition, nameGuess) {
     let activePlayer = game.getCurrentPlayer();
     let card         = game.currentCard;
     let mode         = game.mode;

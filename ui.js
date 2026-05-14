@@ -474,7 +474,13 @@ function setButtonEnabled(btn, enabled) {
 
 // Spawns a ✪ token in the centre of the screen, spins it, flies it to the
 // token badge in the header, then plays a coin-landing sound and bumps the badge.
+// The token count in the header only increments visually when the coin arrives.
 async function animateTokenEarned() {
+    // Hold back the displayed count — the coin will "deliver" the +1 when it lands
+    const countEl    = el('active-player-token-count');
+    const finalCount = parseInt(countEl.textContent, 10);
+    countEl.textContent = String(finalCount - 1);
+
     const token = document.createElement('div');
     token.className = 'token-fly';
     token.textContent = '✪';
@@ -482,19 +488,26 @@ async function animateTokenEarned() {
 
     token.style.left      = `${window.innerWidth  / 2}px`;
     token.style.top       = `${window.innerHeight * 0.50}px`;
-    token.style.animation = 'token-spawn 0.55s cubic-bezier(0.34,1.56,0.64,1) forwards';
+    token.style.animation = 'token-spawn 0.65s cubic-bezier(0.34,1.56,0.64,1) forwards';
 
-    await sleep(530);
+    await sleep(630);
 
     const badge = el('active-player-tokens');
     const r     = badge.getBoundingClientRect();
-    token.style.transition = 'left 0.55s cubic-bezier(0.4,0,0.2,1), top 0.55s cubic-bezier(0.4,0,0.2,1), transform 0.55s ease, opacity 0.1s ease 0.47s';
-    token.style.left       = `${r.left + r.width  / 2}px`;
-    token.style.top        = `${r.top  + r.height / 2}px`;
-    token.style.transform  = 'translate(-50%,-50%) scale(0.15) rotate(720deg)';
+    token.style.transition = [
+        'left 0.62s cubic-bezier(0.4,0,0.2,1)',
+        'top 0.62s cubic-bezier(0.4,0,0.2,1)',
+        'transform 0.62s ease-in',
+        'opacity 0.08s ease 0.56s'
+    ].join(', ');
+    token.style.left      = `${r.left + r.width  / 2}px`;
+    token.style.top       = `${r.top  + r.height / 2}px`;
+    token.style.transform = 'translate(-50%,-50%) scale(0.1) rotate(720deg)';
 
-    await sleep(570);
+    await sleep(640);
 
+    // Coin has landed — now update the count and play the sound
+    countEl.textContent = String(finalCount);
     soundCoinLands();
     token.style.opacity = '0';
 

@@ -987,6 +987,10 @@ el('submit-btn').addEventListener('click', async () => {
         } else {
             nameGuessFeedback = 'artist & title not quite';
         }
+        // Capitalise the first character so it reads as a proper sentence start
+        if (nameGuessFeedback) {
+            nameGuessFeedback = nameGuessFeedback[0].toUpperCase() + nameGuessFeedback.slice(1);
+        }
     }
 
     // Handle each outcome
@@ -1019,7 +1023,7 @@ el('submit-btn').addEventListener('click', async () => {
             if (isPro) {
                 showRevealMessage(`Right placement & artist/title ✅  ${sName}'s challenge failed — token lost.`, 'success');
             } else if (ngAttempted) {
-                showRevealMessage(`Right placement ✅  ${nameGuessFeedback}  ${sName}'s steal failed — token lost.`, 'success');
+                showRevealMessage(`Right placement ✅  ${nameGuessFeedback}. ${sName}'s steal failed — token lost.`, 'success');
             } else {
                 showRevealMessage(`${game.getCurrentPlayer().name} was right! ✅  ${sName}'s steal failed — token lost.`, 'success');
             }
@@ -1039,7 +1043,7 @@ el('submit-btn').addEventListener('click', async () => {
         } else if (isPro) {
             showRevealMessage(`Wrong position — card discarded. ${sName}'s challenge also failed — token lost.`, 'error');
         } else if (ngAttempted) {
-            showRevealMessage(`Wrong position — card discarded. ${nameGuessFeedback}  ${sName}'s steal also failed — token lost.`, 'error');
+            showRevealMessage(`Wrong position — card discarded. ${nameGuessFeedback}. ${sName}'s steal also failed — token lost.`, 'error');
         } else {
             showRevealMessage(`Wrong position — card discarded. ${sName}'s steal also failed — token lost. Better luck next turn!`, 'error');
         }
@@ -1051,7 +1055,7 @@ el('submit-btn').addEventListener('click', async () => {
         if (isPro && result.activeCorrect) {
             showRevealMessage('Right position, but artist & title incorrect — card discarded.', 'error');
         } else if (ngAttempted) {
-            showRevealMessage(`Wrong position — card discarded. ${nameGuessFeedback} Better luck next turn!`, 'error');
+            showRevealMessage(`Wrong position — card discarded. ${nameGuessFeedback}. Better luck next turn!`, 'error');
         } else {
             showRevealMessage('Wrong position — card discarded. Better luck next turn!', 'error');
         }

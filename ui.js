@@ -590,6 +590,11 @@ function beginTurn() {
     // Name guess area visible from the very start of every turn
     el('name-guess-area').classList.remove('hidden');
 
+    // Reset Spotify preview — hide embed, show the play button again
+    el('spotify-preview-container').classList.add('hidden');
+    el('spotify-preview-container').innerHTML = '';
+    el('preview-btn').classList.remove('hidden');
+
     // Draw a card if none is in play
     if (!game.currentCard) {
         const card = drawCard(game);
@@ -836,6 +841,25 @@ function confirmSteal(stealerIndex, stealPosition) {
 // EVENT LISTENERS
 // =============================================================
 
+// --- Spotify preview ---
+el('preview-btn').addEventListener('click', () => {
+    const url = game?.currentCard?.spotify_url;
+    if (!url) return;
+    const trackId = url.split('/track/')[1]?.split('?')[0];
+    if (!trackId) return;
+
+    el('preview-btn').classList.add('hidden');
+    const container = el('spotify-preview-container');
+    container.innerHTML = `<iframe
+        src="https://open.spotify.com/embed/track/${trackId}?utm_source=generator&theme=0&autoplay=1"
+        width="100%"
+        height="80"
+        frameborder="0"
+        allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+        loading="lazy"></iframe>`;
+    container.classList.remove('hidden');
+});
+
 // --- Name guess toggle ---
 el('name-guess-toggle-btn').addEventListener('click', () => {
     const form = el('name-guess-form');
@@ -946,6 +970,8 @@ el('submit-btn').addEventListener('click', async () => {
     el('flip-card-inner').classList.add('flipped');
     soundCardFlip();
     el('scan-hint').classList.add('hidden');
+    el('preview-btn').classList.add('hidden');
+    el('spotify-preview-container').classList.add('hidden');
     el('steal-btn').classList.add('hidden');
     el('steal-panel').classList.add('hidden');
     el('submit-btn').classList.add('hidden');
@@ -1248,6 +1274,9 @@ el('skip-btn').addEventListener('click', () => {
         soundSkipCard();
         if (result.card) {
             generateQRCode(result.card.spotify_url);
+            el('spotify-preview-container').classList.add('hidden');
+            el('spotify-preview-container').innerHTML = '';
+            el('preview-btn').classList.remove('hidden');
             renderPlayerHeader();
             renderTimeline();
             renderAllPlayers();
@@ -1279,6 +1308,8 @@ el('buy-btn').addEventListener('click', async () => {
         el('flip-card-inner').classList.add('flipped');
         soundCardFlip();
         el('scan-hint').classList.add('hidden');
+        el('preview-btn').classList.add('hidden');
+        el('spotify-preview-container').classList.add('hidden');
         el('place-btn').classList.add('hidden');
         el('skip-btn').classList.add('hidden');
         el('steal-btn').classList.add('hidden');

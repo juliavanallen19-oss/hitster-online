@@ -476,6 +476,32 @@ function resetFinishButton() {
     btn.textContent = 'Finish game';
 }
 
+// Sets the label and any persistent message on the next-turn button depending on
+// whether the win target has been hit and how many players remain in the final round.
+function updateNextTurnButton() {
+    const btn = el('next-turn-btn');
+    const winner = checkWinCondition(game);
+    if (!game.finalRound && winner) {
+        const n = game.players.length;
+        const remaining = (game.startingPlayerIndex - game.currentPlayerIndex - 1 + n) % n;
+        if (remaining === 0) {
+            btn.textContent = 'Show Winners';
+        } else {
+            btn.textContent = 'Final Round →';
+            showMessage(
+                `🏆 ${winner.name} reached ${game.winTarget} cards! ${remaining} more player${remaining > 1 ? 's' : ''} still get a turn.`,
+                true
+            );
+        }
+    } else if (game.finalRound) {
+        const n = game.players.length;
+        const nextIdx = (game.currentPlayerIndex + 1) % n;
+        btn.textContent = nextIdx === game.startingPlayerIndex ? 'Show Winners' : 'Final Round →';
+    } else {
+        btn.textContent = 'Continue to next turn →';
+    }
+}
+
 
 // =============================================================
 // TURN FLOW
@@ -489,6 +515,9 @@ function beginTurn() {
     stealModeStealerIndex = null;
     el('timeline-container').classList.remove('steal-mode');
     resetFinishButton();
+    if (game && game.finalRound) {
+        showMessage('🏁 Final Round — everyone gets one more turn!', true);
+    }
 
     // Reset the flip card instantly (no transition) so it snaps back to QR side
     const inner = el('flip-card-inner');
@@ -1060,6 +1089,7 @@ el('submit-btn').addEventListener('click', async () => {
     }
 
     el('next-turn-btn').classList.remove('hidden');
+    updateNextTurnButton();
     // Reflect the new "round complete" phase in the prompt
     updatePhasePrompt({ hasSlot: selectedPosition !== null, placed: activePosition !== null });
 });
@@ -1086,8 +1116,7 @@ el('override-btn').addEventListener('click', async () => {
         updateTokenDisplay();
         renderAllPlayers();
 
-        const winner = checkWinCondition(game);
-        if (winner) { await sleep(800); showWinScreen(winner, 'goal'); }
+        updateNextTurnButton();
     } else {
         // Original/Chill: just grant the bonus token for the correct guess
         overrideAndGrantToken(game);
@@ -1124,8 +1153,7 @@ el('steal-override-btn').addEventListener('click', async () => {
 
     showRevealMessage(`Override accepted — ${stealer.name} wins the card! Token returned. ✅`, 'success');
 
-    const winner = checkWinCondition(game);
-    if (winner) { await sleep(800); showWinScreen(winner, 'goal'); }
+    updateNextTurnButton();
 });
 
 // --- Next turn ---

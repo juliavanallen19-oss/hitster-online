@@ -73,9 +73,14 @@ class Game {
 
         // Whose turn it is, set by the players in setup
         this.currentPlayerIndex = startingPlayerIndex;
+        this.startingPlayerIndex = startingPlayerIndex;
 
         // Pending steal attempt for the current turn (null if no steal)
         this.pendingSteal = null;
+
+        // Final round: becomes true once the win target is first reached.
+        // Remaining players in the current round each get one more turn.
+        this.finalRound = false;
     }
 
     // Helper to get the Player object whose turn it is right now
@@ -354,14 +359,44 @@ function attemptNameGuess(game, guessedArtist, guessedTitle) {
 }
 
 // --- Step C: End the turn. Always called at the end. ---
-// Checks for a win, otherwise advances to the next player.
+// Handles the final round: when the win target is first hit, the remaining
+// players in the current round each get one more turn before the game ends.
 function endTurn(game) {
-    let winner = checkWinCondition(game);
-    if (winner) {
-        return { won: true, winner: winner };
+    const winner = checkWinCondition(game);
+
+    if (!game.finalRound && winner) {
+        const n = game.players.length;
+        const remaining = (game.startingPlayerIndex - game.currentPlayerIndex - 1 + n) % n;
+        if (remaining === 0) {
+            // This player was last in the round — game ends immediately
+            return { won: true, winner: resolveWinners(game) };
+        }
+        // Others still need to play — start the final round
+        game.finalRound = true;
+        nextTurn(game);
+        return { won: false, finalRoundStarted: true };
     }
+
     nextTurn(game);
-    return { won: false, winner: null };
+
+    if (game.finalRound && game.currentPlayerIndex === game.startingPlayerIndex) {
+        // Everyone has played — pick the winner
+        return { won: true, winner: resolveWinners(game) };
+    }
+
+    return { won: false };
+}
+
+// Picks the winner at the end of the final round.
+// Among players who reached the win target: most cards wins; ties broken by tokens.
+function resolveWinners(game) {
+    const qualifiers = game.players.filter(p => p.timeline.length >= game.winTarget);
+    if (qualifiers.length === 0) return handleEmptyDeck(game)[0];
+    const maxCards = Math.max(...qualifiers.map(p => p.timeline.length));
+    const leaders = qualifiers.filter(p => p.timeline.length === maxCards);
+    if (leaders.length === 1) return leaders[0];
+    const maxTokens = Math.max(...leaders.map(p => p.tokens));
+    return leaders.filter(p => p.tokens === maxTokens)[0];
 }
 
 

@@ -1049,7 +1049,7 @@ el('submit-btn').addEventListener('click', async () => {
         el('stealer-timeline-section').classList.remove('hidden');
 
         soundStealWins();
-        if (ng && !isPro && result.tokenEarned) setTimeout(animateTokenEarned, 900);
+        if (result.tokenEarned || isPro) setTimeout(animateTokenEarned, 900);
         await flyCardToTimeline('stealer-timeline-container');
         await sleep(1800);
 
@@ -1066,7 +1066,7 @@ el('submit-btn').addEventListener('click', async () => {
     } else if (result.activeKeepsCard) {
         await flyCardToTimeline('timeline-container');
         soundCorrectPlacement();
-        if (ng && !isPro && result.tokenEarned) setTimeout(animateTokenEarned, 350);
+        if (result.tokenEarned) setTimeout(animateTokenEarned, 350);
         await sleep(1800);
 
         if (sName) {
@@ -1091,7 +1091,7 @@ el('submit-btn').addEventListener('click', async () => {
 
     } else if (result.stealResult?.outcome === 'both_wrong') {
         soundWrongPlacement();
-        if (ng && !isPro && result.tokenEarned) setTimeout(animateTokenEarned, 500);
+        if (result.tokenEarned) setTimeout(animateTokenEarned, 500);
         if (isPro && result.activeCorrect) {
             showRevealMessage(`Right position, but artist & title incorrect — card discarded. ${sName}'s challenge also failed — token lost.`, 'error');
         } else if (isPro) {
@@ -1107,7 +1107,7 @@ el('submit-btn').addEventListener('click', async () => {
     } else {
         // No steal, active player failed
         soundWrongPlacement();
-        if (ng && !isPro && result.tokenEarned) setTimeout(animateTokenEarned, 500);
+        if (result.tokenEarned) setTimeout(animateTokenEarned, 500);
         if (isPro && result.activeCorrect) {
             showRevealMessage('Right position, but artist & title incorrect — card discarded.', 'error');
         } else if (ng) {
@@ -1173,6 +1173,7 @@ el('override-btn').addEventListener('click', async () => {
         updateTokenDisplay();
         renderAllPlayers();
         el('override-btn').classList.add('hidden');
+        animateTokenEarned();
         showRevealMessage('Override accepted — bonus token awarded! ✪', 'success');
     }
 });
@@ -1196,6 +1197,7 @@ el('steal-override-btn').addEventListener('click', async () => {
 
     updateTokenDisplay();
     renderAllPlayers();
+    animateTokenEarned();
 
     await flyCardToTimeline('stealer-timeline-container');
     soundCorrectPlacement();

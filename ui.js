@@ -1054,6 +1054,20 @@ el('submit-btn').addEventListener('click', async () => {
         if (ng && !isPro && result.tokenEarned) setTimeout(soundTokenEarned, 500);
         if (isPro && result.activeCorrect) {
             showRevealMessage('Right position, but artist & title incorrect — card discarded.', 'error');
+        } else if (ngAttempted && ng) {
+            // Position wrong but name was correct — build a "token granted" note
+            let tokenNote;
+            if (isChill && result.nameGuessDetail) {
+                const d = result.nameGuessDetail;
+                const field = (d.artistCorrect && d.titleCorrect) ? 'Song title & artist'
+                            : d.artistCorrect ? 'Artist' : 'Song title';
+                tokenNote = result.tokenEarned ? `${field} correct — token granted ✪`
+                                               : `${field} correct — already at max tokens`;
+            } else {
+                tokenNote = result.tokenEarned ? 'Artist & title correct — token granted ✪'
+                                               : 'Artist & title correct — already at max tokens';
+            }
+            showRevealMessage(`Wrong position — card discarded. ${tokenNote}. Better luck next turn!`, 'error');
         } else if (ngAttempted) {
             showRevealMessage(`Wrong position — card discarded. ${nameGuessFeedback}. Better luck next turn!`, 'error');
         } else {

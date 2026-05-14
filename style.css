@@ -1416,6 +1416,37 @@ body {
 }
 
 
+/* ===== Token fly animation — earned token pops up and flies to the badge ===== */
+
+.token-fly {
+  position: fixed;
+  font-size: 2.4rem;
+  color: #f0c040;
+  z-index: 9999;
+  pointer-events: none;
+  line-height: 1;
+  text-shadow: 0 0 20px rgba(240, 192, 64, 0.9), 0 0 40px rgba(240, 192, 64, 0.5);
+}
+
+@keyframes token-spawn {
+  0%   { opacity: 0; transform: translate(-50%, -50%) scale(0)    rotate(0deg);   }
+  55%  { opacity: 1; transform: translate(-50%, -50%) scale(1.22) rotate(200deg); }
+  78%  { opacity: 1; transform: translate(-50%, -50%) scale(0.92) rotate(330deg); }
+  100% { opacity: 1; transform: translate(-50%, -50%) scale(1)    rotate(360deg); }
+}
+
+@keyframes token-badge-bump {
+  0%   { transform: scale(1);    }
+  22%  { transform: scale(1.42); }
+  48%  { transform: scale(0.88); }
+  72%  { transform: scale(1.12); }
+  100% { transform: scale(1);    }
+}
+
+.token-badge--bump {
+  animation: token-badge-bump 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
 /* ===== Token badge: flash when player tries to earn a token but is already at max (5) ===== */
 
 @keyframes token-capped-pulse {

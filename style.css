@@ -489,7 +489,7 @@ body {
    a safe fallback rule in case anything still references it */
 .deck-counter { display: none; }
 
-/* Generic icon button — small, square, hover-tint. Used for the finish-game eject icon. */
+/* Generic icon button — small, square, hover-tint */
 .icon-btn {
   font-family: inherit;
   font-size: 1.1rem;
@@ -512,8 +512,43 @@ body {
   background: rgba(255, 61, 139, 0.08);
 }
 
+/* Mode badge — shown in the header to the left of the finish button */
+.mode-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 11px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #9a9aa8;
+  background: #0e0e12;
+  border: 1px solid #2a2a36;
+  border-radius: 8px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  letter-spacing: 0.01em;
+}
+
+/* Finish game button — auto-sized text button */
 .finish-game-btn {
-  /* Overrides — kept as a special icon-btn so legacy selectors still resolve */
+  font-family: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  line-height: 1.2;
+  padding: 6px 14px;
+  white-space: nowrap;
+  background: transparent;
+  color: #9a9aa8;
+  border: 1px solid #3a3a48;
+  border-radius: 8px;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+
+.finish-game-btn:hover {
+  color: #ff3d8b;
+  border-color: #ff3d8b;
+  background: rgba(255, 61, 139, 0.08);
 }
 
 .finish-game-btn--confirm {

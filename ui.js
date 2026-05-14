@@ -548,6 +548,13 @@ function beginTurn() {
     el('guess-artist').disabled = false;
     el('guess-title').disabled  = false;
 
+    // Update mode badge in header
+    const modeBadge = el('mode-badge');
+    if (modeBadge) {
+        const modeLabels = { original: '🎵 Original', chill: '😎 Chill', pro: '🔥 PRO' };
+        modeBadge.textContent = modeLabels[game.mode] || game.mode;
+    }
+
     // Mode-specific name-guess hint text
     const isPro   = game.mode === "pro";
     const isChill = game.mode === "chill";

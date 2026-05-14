@@ -472,6 +472,46 @@ function setButtonEnabled(btn, enabled) {
     }
 }
 
+// Spawns a ✪ token in the center of the screen, spins it, flies it to the
+// token badge in the header, then plays a coin-landing sound and bumps the badge.
+async function animateTokenEarned() {
+    const countEl  = el('active-player-token-count');
+    const newCount = parseInt(countEl.textContent, 10);
+    countEl.textContent = String(newCount - 1); // show old count during flight
+
+    const token = document.createElement('div');
+    token.className = 'token-fly';
+    token.textContent = '✪';
+    document.body.appendChild(token);
+
+    token.style.left      = `${window.innerWidth  / 2}px`;
+    token.style.top       = `${window.innerHeight * 0.52}px`;
+    token.style.animation = 'token-spawn 0.45s ease forwards';
+
+    await sleep(450);
+
+    const badge = el('active-player-tokens');
+    const r     = badge.getBoundingClientRect();
+    token.style.transition = 'left 0.5s cubic-bezier(0.25,0.46,0.45,0.94), top 0.5s cubic-bezier(0.25,0.46,0.45,0.94), transform 0.5s ease, opacity 0.15s ease 0.38s';
+    token.style.left       = `${r.left + r.width  / 2}px`;
+    token.style.top        = `${r.top  + r.height / 2}px`;
+    token.style.transform  = 'translate(-50%,-50%) scale(0.2) rotate(1080deg)';
+
+    await sleep(500);
+
+    // Land: restore correct count, play coin sound, bump the badge
+    countEl.textContent = String(newCount);
+    soundCoinLands();
+    token.style.opacity = '0';
+
+    badge.classList.remove('token-badge--bump');
+    void badge.offsetWidth;
+    badge.classList.add('token-badge--bump');
+    badge.addEventListener('animationend', () => badge.classList.remove('token-badge--bump'), { once: true });
+
+    setTimeout(() => token.remove(), 200);
+}
+
 function resetFinishButton() {
     clearTimeout(finishConfirmTimer);
     const btn = el('finish-game-btn');
@@ -1009,7 +1049,7 @@ el('submit-btn').addEventListener('click', async () => {
         el('stealer-timeline-section').classList.remove('hidden');
 
         soundStealWins();
-        if (ng && !isPro && result.tokenEarned) setTimeout(soundTokenEarned, 900);
+        if (ng && !isPro && result.tokenEarned) setTimeout(animateTokenEarned, 900);
         await flyCardToTimeline('stealer-timeline-container');
         await sleep(1800);
 
@@ -1026,7 +1066,7 @@ el('submit-btn').addEventListener('click', async () => {
     } else if (result.activeKeepsCard) {
         await flyCardToTimeline('timeline-container');
         soundCorrectPlacement();
-        if (ng && !isPro && result.tokenEarned) setTimeout(soundTokenEarned, 350);
+        if (ng && !isPro && result.tokenEarned) setTimeout(animateTokenEarned, 350);
         await sleep(1800);
 
         if (sName) {
@@ -1051,7 +1091,7 @@ el('submit-btn').addEventListener('click', async () => {
 
     } else if (result.stealResult?.outcome === 'both_wrong') {
         soundWrongPlacement();
-        if (ng && !isPro && result.tokenEarned) setTimeout(soundTokenEarned, 500);
+        if (ng && !isPro && result.tokenEarned) setTimeout(animateTokenEarned, 500);
         if (isPro && result.activeCorrect) {
             showRevealMessage(`Right position, but artist & title incorrect — card discarded. ${sName}'s challenge also failed — token lost.`, 'error');
         } else if (isPro) {
@@ -1067,7 +1107,7 @@ el('submit-btn').addEventListener('click', async () => {
     } else {
         // No steal, active player failed
         soundWrongPlacement();
-        if (ng && !isPro && result.tokenEarned) setTimeout(soundTokenEarned, 500);
+        if (ng && !isPro && result.tokenEarned) setTimeout(animateTokenEarned, 500);
         if (isPro && result.activeCorrect) {
             showRevealMessage('Right position, but artist & title incorrect — card discarded.', 'error');
         } else if (ng) {

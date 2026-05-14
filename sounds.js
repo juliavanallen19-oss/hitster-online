@@ -132,6 +132,13 @@ function soundTokenCapped() {
     note(110,  'sine', 0.14, 0.20, 0.10);    // dull low thud underneath
 }
 
+// Coin lands on other coins — sharp metallic ping with a decaying ring
+function soundCoinLands() {
+    note(2100, 'sine', 0.22, 0.04, 0.00);   // sharp initial hit
+    note(1550, 'sine', 0.16, 0.20, 0.03);   // first ring
+    note(1100, 'sine', 0.09, 0.38, 0.09);   // settling resonance
+}
+
 // Win screen fanfare — triumphant ascending arpeggio with a sustained chord
 function soundWin() {
     note(523,  'sine', 0.26, 0.20, 0.00);   // C5

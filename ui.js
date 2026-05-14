@@ -515,6 +515,8 @@ function beginTurn() {
     el('guess-title').value     = '';
     el('guess-artist').disabled = false;
     el('guess-title').disabled  = false;
+    el('guess-artist').classList.remove('hidden');
+    el('guess-title').classList.remove('hidden');
 
     // Mode-specific name-guess hint text
     const isPro   = game.mode === "pro";
@@ -901,7 +903,22 @@ el('submit-btn').addEventListener('click', async () => {
     el('steal-btn').classList.add('hidden');
     el('steal-panel').classList.add('hidden');
     el('submit-btn').classList.add('hidden');
-    el('name-guess-area').classList.add('hidden');
+
+    // Wrong guess — keep inputs visible so players can check what they typed
+    // Correct or unattempted — hide the whole area as before
+    if (ngAttempted && !ng) {
+        el('guess-artist').disabled = true;
+        el('guess-title').disabled  = true;
+        if (isChill) {
+            // Only keep the field(s) that actually had something in them
+            if (!artist) el('guess-artist').classList.add('hidden');
+            if (!title)  el('guess-title').classList.add('hidden');
+        }
+        const hintEl = document.getElementById('name-guess-hint');
+        if (hintEl) hintEl.classList.add('hidden'); // hide the prompt; just show the typed values
+    } else {
+        el('name-guess-area').classList.add('hidden');
+    }
 
     updateTokenDisplay();
 
@@ -946,19 +963,29 @@ el('submit-btn').addEventListener('click', async () => {
     // (1) what happened to the card, (2) whether the name guess was correct
     const sName = result.stealResult?.stealer.name ?? null;
 
-    // Compose the "name guess" part of the message once, so every branch stays consistent.
-    // Chill: reports which field(s) were right. Cap: "already at max tokens" note. Others: generic.
-    let bonusSentence = '';
-    if (ngAttempted && ng) {
-        if (!result.tokenEarned) {
-            bonusSentence = '(already at max tokens — no bonus token)';
-        } else if (isChill && result.nameGuessDetail) {
+    // Per-field name-guess feedback string — used in all outcome messages below.
+    // Chill: names exactly which field(s) were right/wrong.
+    // Original/PRO: generic correct/wrong.
+    // Token-cap: appends a note when correct but already at max.
+    let nameGuessFeedback = '';
+    if (ngAttempted) {
+        if (isChill && result.nameGuessDetail) {
             const d = result.nameGuessDetail;
-            if (d.artistCorrect && d.titleCorrect) bonusSentence = 'Both correct! ✪';
-            else if (d.artistCorrect)              bonusSentence = 'Artist correct! ✪';
-            else                                   bonusSentence = 'Song title correct! ✪';
+            const parts = [];
+            if (artist) parts.push(d.artistCorrect ? 'artist correct' : 'artist wrong');
+            if (title)  parts.push(d.titleCorrect  ? 'song title correct' : 'song title wrong');
+            if (parts.length === 2 && d.artistCorrect && d.titleCorrect) {
+                nameGuessFeedback = 'both correct';
+            } else if (parts.length === 2 && !d.artistCorrect && !d.titleCorrect) {
+                nameGuessFeedback = 'both wrong';
+            } else {
+                nameGuessFeedback = parts.join(' · ');
+            }
+            if (ng) nameGuessFeedback += result.tokenEarned ? ' ✪' : ' (already at max tokens)';
+        } else if (ng) {
+            nameGuessFeedback = result.tokenEarned ? 'artist & title correct ✪' : 'artist & title correct (already at max tokens)';
         } else {
-            bonusSentence = 'Bonus token! ✪';
+            nameGuessFeedback = 'artist & title not quite';
         }
     }
 
@@ -976,10 +1003,8 @@ el('submit-btn').addEventListener('click', async () => {
 
         if (isPro) {
             showRevealMessage(`🎉 ${sName} stole the card! Artist & title correct — token returned! ✪`, 'success');
-        } else if (ng) {
-            showRevealMessage(`🎉 ${sName} stole the card! ${bonusSentence}`, 'success');
         } else if (ngAttempted) {
-            showRevealMessage(`🎉 ${sName} stole the card! Artist & title not quite. Better luck next turn!`, 'error');
+            showRevealMessage(`🎉 ${sName} stole the card! ${nameGuessFeedback}`, ng ? 'success' : 'error');
         } else {
             showRevealMessage(`🎉 ${sName} stole the card!`, 'error');
         }
@@ -993,19 +1018,15 @@ el('submit-btn').addEventListener('click', async () => {
         if (sName) {
             if (isPro) {
                 showRevealMessage(`Right placement & artist/title ✅  ${sName}'s challenge failed — token lost.`, 'success');
-            } else if (ng) {
-                showRevealMessage(`Right placement ✅  ${bonusSentence}  ${sName}'s steal failed — token lost.`, 'success');
             } else if (ngAttempted) {
-                showRevealMessage(`Right placement ✅  Artist & title not quite.  ${sName}'s steal failed — token lost.`, 'success');
+                showRevealMessage(`Right placement ✅  ${nameGuessFeedback}  ${sName}'s steal failed — token lost.`, 'success');
             } else {
                 showRevealMessage(`${game.getCurrentPlayer().name} was right! ✅  ${sName}'s steal failed — token lost.`, 'success');
             }
         } else if (isPro) {
             showRevealMessage('Correct! ✅  Placement and artist & title both right!', 'success');
-        } else if (ng) {
-            showRevealMessage(`Correct placement! ✅  ${bonusSentence}`, 'success');
         } else if (ngAttempted) {
-            showRevealMessage('Correct placement! ✅  Artist & title not quite — good try!', 'success');
+            showRevealMessage(`Correct placement! ✅  ${nameGuessFeedback}`, 'success');
         } else {
             showRevealMessage('Correct placement! ✅', 'success');
         }
@@ -1017,10 +1038,8 @@ el('submit-btn').addEventListener('click', async () => {
             showRevealMessage(`Right position, but artist & title incorrect — card discarded. ${sName}'s challenge also failed — token lost.`, 'error');
         } else if (isPro) {
             showRevealMessage(`Wrong position — card discarded. ${sName}'s challenge also failed — token lost.`, 'error');
-        } else if (ng) {
-            showRevealMessage(`Wrong position — card discarded. ${sName}'s steal also failed — token lost. ${bonusSentence}`, 'error');
         } else if (ngAttempted) {
-            showRevealMessage(`Wrong position — card discarded. Also artist & title not quite. ${sName}'s steal also failed — token lost.`, 'error');
+            showRevealMessage(`Wrong position — card discarded. ${nameGuessFeedback}  ${sName}'s steal also failed — token lost.`, 'error');
         } else {
             showRevealMessage(`Wrong position — card discarded. ${sName}'s steal also failed — token lost. Better luck next turn!`, 'error');
         }
@@ -1031,10 +1050,8 @@ el('submit-btn').addEventListener('click', async () => {
         if (ng && !isPro && result.tokenEarned) setTimeout(soundTokenEarned, 500);
         if (isPro && result.activeCorrect) {
             showRevealMessage('Right position, but artist & title incorrect — card discarded.', 'error');
-        } else if (ng) {
-            showRevealMessage(`Wrong position — card discarded. ${bonusSentence} Better luck next turn!`, 'error');
         } else if (ngAttempted) {
-            showRevealMessage('Wrong position — card discarded. Also artist & title not quite. Better luck next turn!', 'error');
+            showRevealMessage(`Wrong position — card discarded. ${nameGuessFeedback} Better luck next turn!`, 'error');
         } else {
             showRevealMessage('Wrong position — card discarded. Better luck next turn!', 'error');
         }
@@ -1068,6 +1085,8 @@ el('submit-btn').addEventListener('click', async () => {
 el('override-btn').addEventListener('click', async () => {
     el('steal-override-btn').classList.add('hidden'); // only one override can apply
     stealerForOverride = null;
+
+    el('name-guess-area').classList.add('hidden'); // no longer needed for review
 
     if (game.mode === "pro") {
         // PRO: the position was right, so the card is awarded (no extra token — that's the rule)
@@ -1106,6 +1125,7 @@ el('steal-override-btn').addEventListener('click', async () => {
     el('steal-override-btn').classList.add('hidden');
     stealerForOverride = null;
 
+    el('name-guess-area').classList.add('hidden'); // no longer needed for review
     earnToken(stealer); // return the token they paid to initiate the steal
     const pos   = findCorrectPosition(stealer.timeline, lastPlayedCard);
     justWonCard = lastPlayedCard;

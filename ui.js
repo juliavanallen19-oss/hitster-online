@@ -342,8 +342,8 @@ function renderAllPlayers() {
         const cards = createEl('span', 'player-pill-stat');
         cards.title = 'Cards on timeline';
         cards.append(
-            createEl('span', 'player-pill-card-icon', '🎴'),
-            document.createTextNode(String(player.timeline.length))
+            createEl('span', 'player-pill-card-count', String(player.timeline.length)),
+            createEl('span', 'player-pill-card-label', ' cards')
         );
         pill.appendChild(cards);
 
@@ -650,7 +650,7 @@ function beginTurn() {
     // Update mode badge in header
     const modeBadge = el('mode-badge');
     if (modeBadge) {
-        const modeLabels = { original: '🎵 Original', chill: '😎 Chill', pro: '🔥 PRO' };
+        const modeLabels = { original: '🎵 Original Mode', chill: '😎 Chill Mode', pro: '🔥 PRO Mode' };
         modeBadge.textContent = modeLabels[game.mode] || game.mode;
     }
 

@@ -500,6 +500,23 @@ body {
   letter-spacing: 0.02em;
 }
 
+/* Pills scroll hint arrow — hidden everywhere; JS adds .visible on mobile when pills overflow */
+.pills-scroll-hint {
+  display: none;
+}
+
+.pills-scroll-hint.visible {
+  display: block;
+  position: absolute;
+  right: 16px;
+  bottom: 48px;  /* vertically centered in the pills row */
+  font-size: 1.3rem;
+  line-height: 1;
+  color: #6a6a78;
+  pointer-events: none;
+  z-index: 1;
+}
+
 /* Token badge — same dimensions as the finish-game button so they align when stacked */
 .token-badge {
   display: inline-flex;
@@ -1773,6 +1790,129 @@ body {
    ≤767px — MOBILE tweaks
    ============================================================= */
 @media (max-width: 767px) {
+
+  /* ─────────────────────────────────────────────────────────────
+     GAME SCREEN HEADER — CSS Grid, 3 rows, works for 2–6 players
+     Both row divs use display:contents → children sit in the grid.
+
+     Row 1: Brand (1fr) | ★ tokens | ? | Finish game
+     Row 2: Active player's turn  (spans all 4 cols)
+     Row 3: Player pills          (spans all 4 cols, horizontally scrollable)
+
+     Mode badge hidden from header → shown as badge in the game area.
+     Songs left hidden on mobile.
+     ───────────────────────────────────────────────────────────── */
+
+  .turn-header {
+    display: grid;
+    grid-template-columns: 1fr auto auto auto;
+    column-gap: 8px;
+    row-gap: 8px;
+    padding: 12px 14px;
+  }
+
+  /* Flatten both row wrappers so their children sit directly in the grid */
+  .turn-header-row1,
+  .turn-header-row2 {
+    display: contents;
+  }
+
+  /* ── Row 1 ── */
+  .brand {
+    grid-row: 1; grid-column: 1;
+    align-self: center;
+  }
+
+  #active-player-tokens {
+    grid-row: 1; grid-column: 2;
+    min-width: unset;
+    height: 32px;
+    padding: 0 10px;
+    font-size: 0.82rem;
+    gap: 4px;
+    align-self: center;
+  }
+
+  #game-how-to-play-btn {
+    grid-row: 1; grid-column: 3;
+    width: 32px;
+    height: 32px;
+    align-self: center;
+  }
+
+  #finish-game-btn {
+    grid-row: 1; grid-column: 4;
+    min-width: unset;
+    height: 32px;
+    font-size: 0.78rem;
+    padding: 0 10px;
+    align-self: center;
+  }
+
+  /* ── Row 2: player pills — scrollable, works for 2–6 players ── */
+  #players-list {
+    grid-row: 2; grid-column: 1 / 5;
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+    gap: 6px;
+    align-self: center;
+    padding: 2px 32px 2px 4px; /* left: room for scaled active pill; right: room for › arrow */
+    /* Gradient fade on the right hints that more pills can be scrolled into view */
+    -webkit-mask-image: linear-gradient(to right, black 78%, transparent 100%);
+    mask-image: linear-gradient(to right, black 78%, transparent 100%);
+  }
+  #players-list::-webkit-scrollbar { display: none; }
+
+  /* ── Row 3: active player's turn — full width, indented to align with pills ── */
+  .active-player-banner {
+    grid-row: 3; grid-column: 1 / 5;
+    align-self: center;
+    padding-left: 4px;
+  }
+
+  /* Hidden on mobile */
+  #mode-badge,
+  .deck-counter-inline {
+    display: none;
+  }
+
+  /* › scroll-hint arrow — shown by JS only when pills overflow */
+  .turn-header {
+    position: relative;
+  }
+
+  /* Sizing — padding-bottom prevents descenders (g, j, p) from clipping */
+  .active-player-name  { font-size: 1.3rem; padding-bottom: 3px; }
+  .active-player-label { font-size: 0.82rem; }
+
+  /* Finish game and token badge — same font size */
+  #finish-game-btn {
+    font-size: 0.8rem;
+  }
+
+  #active-player-tokens {
+    font-size: 0.8rem;
+  }
+
+  .player-pill {
+    font-size: 0.72rem;
+    padding: 4px 8px;
+    gap: 5px;
+    flex-shrink: 0;   /* pills never shrink — scroll instead */
+  }
+
+  /* ? button: pink to match its own q-icon colour */
+  #game-how-to-play-btn {
+    color: #ff3d8b;
+    border-color: rgba(255, 61, 139, 0.45);
+  }
+
+  .token-icon                { font-size: 0.95rem; }
+  #active-player-token-count { font-size: 0.85rem; }
+  .token-badge-label         { font-size: 0.7rem; }
+
 
   /* "Win the game." drops to its own second line */
   .tagline-win {

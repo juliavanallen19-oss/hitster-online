@@ -946,8 +946,6 @@ body {
   flex-direction: column;
   gap: 8px;
   width: 100%;
-  /* Match the flip-card width so inputs align with the QR code above */
-  max-width: clamp(190px, 58vw, 230px);
 }
 
 .name-guess-hint {
@@ -1572,6 +1570,16 @@ body {
   letter-spacing: 0.01em;
 }
 
+/* Turns blue to match the steal-override button when an override is possible */
+.steal-live-guess--override {
+  background: rgba(61, 210, 255, 0.06);
+  border-color: rgba(61, 210, 255, 0.25);
+}
+
+.steal-live-guess--override .steal-live-guess-label {
+  color: #3dd2ff;
+}
+
 /* =============================================================
    Mobile default: the two HTML wrappers used by the desktop grid
    layout (.board-main and .board-stack) are flattened so the existing
@@ -1637,10 +1645,6 @@ body {
 
   .flip-card {
     width: clamp(220px, 18vw, 260px);
-  }
-
-  .name-guess-area {
-    max-width: clamp(220px, 18vw, 260px);
   }
 
   .reveal-year {
@@ -1744,10 +1748,6 @@ body {
 
   .flip-card {
     width: clamp(240px, 18vw, 280px);
-  }
-
-  .name-guess-area {
-    max-width: clamp(240px, 18vw, 280px);
   }
 
   .reveal-year {

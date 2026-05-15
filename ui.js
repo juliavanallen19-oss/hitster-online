@@ -469,7 +469,9 @@ function updatePhasePrompt({ hasSlot, placed }) {
         return;
     }
     if (placed) {
-        promptEl.textContent = '🎵 Submit to reveal the year — or let opponents steal first.';
+        promptEl.textContent = game.pendingSteal
+            ? '🎵 Submit to reveal the year.'
+            : '🎵 Submit to reveal the year — or let opponents steal first.';
         return;
     }
     if (hasSlot) {
@@ -627,6 +629,7 @@ function beginTurn() {
     el('steal-review-title').value  = '';
     el('steal-review-artist').value = '';
     el('steal-live-guess').classList.add('hidden');
+    el('steal-live-guess').classList.remove('steal-live-guess--override');
     stealerForOverride = null;
     el('scan-hint').classList.remove('hidden');
     el('guess-artist').value    = '';
@@ -1293,13 +1296,8 @@ el('submit-btn').addEventListener('click', async () => {
     if (result.stealResult?.outcome === 'both_wrong' && result.stealResult?.stealPositionCorrect) {
         stealerForOverride = result.stealResult.stealer;
         el('steal-override-btn').classList.remove('hidden');
-        // Show what the stealer typed so players can compare with the revealed answer
-        if (savedSteal?.stealNameGuess) {
-            el('steal-review-title').value  = savedSteal.stealNameGuess.title;
-            el('steal-review-artist').value = savedSteal.stealNameGuess.artist;
-            el('steal-guess-review-label').textContent = `${savedSteal.stealerName} typed:`;
-            el('steal-guess-review').classList.remove('hidden');
-        }
+        // Recolour the stealer's live-guess panel to match the blue override button
+        el('steal-live-guess').classList.add('steal-live-guess--override');
     }
 
     // Keep steal-live-guess visible only if the stealer had the correct position
@@ -1320,6 +1318,7 @@ el('override-btn').addEventListener('click', async () => {
     el('next-turn-btn').classList.add('hidden'); // prevent beginTurn() firing mid-animation
     el('steal-override-btn').classList.add('hidden'); // only one override can apply
     el('steal-guess-review').classList.add('hidden');
+    el('steal-live-guess').classList.remove('steal-live-guess--override');
     stealerForOverride = null;
 
     el('name-guess-area').classList.add('hidden'); // no longer needed for review
@@ -1362,6 +1361,7 @@ el('steal-override-btn').addEventListener('click', async () => {
     el('override-btn').classList.add('hidden'); // only one override can apply
     el('steal-override-btn').classList.add('hidden');
     el('steal-guess-review').classList.add('hidden');
+    el('steal-live-guess').classList.remove('steal-live-guess--override');
     stealerForOverride = null;
 
     el('name-guess-area').classList.add('hidden'); // no longer needed for review

@@ -439,9 +439,26 @@ body {
   color: #d0d0d8;
 }
 
-.player-pill-card-icon {
-  font-size: 0.78rem;
-  opacity: 0.85;
+.player-pill-card-count {
+  font-weight: 600;
+  color: #c8c8d4;
+}
+
+.player-pill-card-label {
+  font-size: 0.7rem;
+  color: #6a6a78;
+  font-weight: 400;
+}
+
+/* Small card-shaped icon with the brand gradient — used in player pills */
+.card-icon {
+  display: inline-block;
+  flex-shrink: 0;
+  width: 9px;
+  height: 12px;
+  background: linear-gradient(160deg, #ff3d8b, #ffae3d);
+  border-radius: 2px;
+  vertical-align: middle;
 }
 
 /* Row 2: active player banner + tokens + deck counter */
@@ -478,15 +495,19 @@ body {
   letter-spacing: 0.02em;
 }
 
-/* Token badge — bigger, with explicit "tokens" label so first-time players know what ✪ is */
+/* Token badge — same dimensions as the finish-game button so they align when stacked */
 .token-badge {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
+  height: 36px;
+  box-sizing: border-box;
+  min-width: 112px;
   background: rgba(240, 192, 64, 0.08);
   border: 1px solid rgba(240, 192, 64, 0.35);
-  border-radius: 10px;
-  padding: 8px 14px;
+  border-radius: 8px;
+  padding: 0 14px;
   font-size: 1rem;
   font-weight: 600;
   white-space: nowrap;
@@ -505,16 +526,23 @@ body {
   margin-left: 2px;
 }
 
+#active-player-token-count {
+  font-size: 0.92rem;
+  font-weight: 700;
+}
+
 /* Deck-counter moved into header so it's always visible */
 .deck-counter-inline {
   display: inline-flex;
   align-items: center;
+  height: 36px;
+  box-sizing: border-box;
   gap: 6px;
   font-size: 0.85rem;
   color: #8a8aaa;
-  padding: 6px 10px;
-  background: #0e0e12;
-  border: 1px solid #2a2a36;
+  padding: 0 12px;
+  background: #1a1a22;
+  border: 1px solid #3a3a48;
   border-radius: 8px;
 }
 
@@ -555,33 +583,40 @@ body {
   background: rgba(255, 61, 139, 0.08);
 }
 
-/* Mode badge — shown in the header to the left of the finish button */
+/* Mode badge — shown in the header, clearly labelled */
 .mode-badge {
   display: inline-flex;
   align-items: center;
-  padding: 5px 11px;
-  font-size: 0.78rem;
+  height: 36px;
+  box-sizing: border-box;
+  padding: 0 11px;
+  font-size: 0.8rem;
   font-weight: 600;
-  color: #9a9aa8;
-  background: #0e0e12;
-  border: 1px solid #2a2a36;
+  color: #c8c8d4;
+  background: #1a1a22;
+  border: 1px solid #3a3a48;
   border-radius: 8px;
   white-space: nowrap;
   flex-shrink: 0;
   letter-spacing: 0.01em;
 }
 
-/* Finish game button — auto-sized text button */
+/* Finish game button — amber so it reads as an important action at a glance */
 .finish-game-btn {
   font-family: inherit;
   font-size: 0.82rem;
   font-weight: 600;
-  line-height: 1.2;
-  padding: 6px 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 36px;
+  box-sizing: border-box;
+  min-width: 112px;
+  padding: 0 14px;
   white-space: nowrap;
-  background: transparent;
-  color: #9a9aa8;
-  border: 1px solid #3a3a48;
+  background: rgba(255, 174, 61, 0.08);
+  color: #ffae3d;
+  border: 1.5px solid rgba(255, 174, 61, 0.45);
   border-radius: 8px;
   cursor: pointer;
   flex-shrink: 0;
@@ -589,14 +624,15 @@ body {
 }
 
 .finish-game-btn:hover {
-  color: #ff3d8b;
-  border-color: #ff3d8b;
-  background: rgba(255, 61, 139, 0.08);
+  background: rgba(255, 174, 61, 0.18);
+  border-color: #ffae3d;
+  color: #ffae3d;
 }
 
 .finish-game-btn--confirm {
-  color: #ffae3d;
-  border-color: #ffae3d;
+  background: rgba(255, 61, 139, 0.12);
+  color: #ff3d8b;
+  border-color: #ff3d8b;
 }
 
 /* How-to-play icon button — gradient border + text on hover */

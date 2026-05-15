@@ -8,9 +8,12 @@ let selectedPosition      = null; // slot the active player clicked (index into 
 let activePosition        = null; // confirmed after Place Here is clicked (used in resolveTurn)
 let lastPlayedCard        = null; // stored for reveal display
 let justWonCard           = null; // card that was just added to a timeline (gets glow animation)
-let stealModeStealerIndex = null; // when set, timeline slot clicks are steal position choices
+let stealModeStealerIndex = null; // when set, timeline slot clicks register pending steal positions
 let stealerForOverride    = null; // stealer Player object held for the steal-override-btn click
 let finishConfirmTimer    = null; // temporary second-click confirmation for finishing early
+let pendingStealPosition  = null; // slot the stealer tapped, not yet locked with "Place token here"
+let stealNameGuessLogged  = false; // PRO: true once the stealer clicks "Log song title & artist"
+let pendingStealNameGuess = null;  // PRO: { title, artist } logged by the stealer before locking
 
 // --- Shorthand helper ---
 function el(id) { return document.getElementById(id); }
@@ -299,9 +302,16 @@ function renderTimelineInto(container, timeline, pendingPos, stealPos, interacti
 }
 
 function renderTimeline() {
-    const player   = game.getCurrentPlayer();
-    const stealPos = game.pendingSteal ? game.pendingSteal.stealPosition : null;
-    renderTimelineInto(el('timeline-container'), player.timeline, activePosition, stealPos, true);
+    const player = game.getCurrentPlayer();
+    let stealPos = null, stealerName = null;
+    if (stealModeStealerIndex !== null) {
+        // Stealer is choosing: show their pending tap (not yet locked)
+        stealPos    = pendingStealPosition;
+        stealerName = game.players[stealModeStealerIndex].name;
+    } else if (game.pendingSteal) {
+        stealPos = game.pendingSteal.stealPosition;
+    }
+    renderTimelineInto(el('timeline-container'), player.timeline, activePosition, stealPos, true, null, stealerName);
 }
 
 function renderAllPlayers() {
@@ -440,7 +450,13 @@ function updateButtonStates() {
 function updatePhasePrompt({ hasSlot, placed }) {
     const promptEl = el('phase-prompt');
     if (!promptEl) return;
-    // If a steal is in progress / steal panel is open, defer to its own UI
+    // Once a stealer is actively choosing their slot, show their name in the prompt
+    if (stealModeStealerIndex !== null) {
+        const stealerName = game.players[stealModeStealerIndex].name;
+        promptEl.textContent = `🎯 ${stealerName}: tap a slot directly on the timeline below.`;
+        return;
+    }
+    // Steal panel open but no stealer chosen yet (player selection for 3+ players)
     if (!el('steal-panel').classList.contains('hidden')) {
         promptEl.textContent = '🎯 Anyone want to challenge this placement?';
         return;
@@ -519,6 +535,15 @@ async function animateTokenEarned() {
     setTimeout(() => token.remove(), 200);
 }
 
+// Enables/disables the "Place token here" submit button based on whether the
+// stealer has tapped a slot (and, in PRO mode, also logged their name guess).
+function updatePlaceTokenButton() {
+    if (stealModeStealerIndex === null) return;
+    const isPro = game.mode === "pro";
+    const ready = pendingStealPosition !== null && (!isPro || stealNameGuessLogged);
+    setButtonEnabled(el('submit-btn'), ready);
+}
+
 function resetFinishButton() {
     clearTimeout(finishConfirmTimer);
     const btn = el('finish-game-btn');
@@ -570,6 +595,9 @@ function beginTurn() {
     lastPlayedCard        = null;
     justWonCard           = null;
     stealModeStealerIndex = null;
+    pendingStealPosition  = null;
+    stealNameGuessLogged  = false;
+    pendingStealNameGuess = null;
     el('timeline-container').classList.remove('steal-mode');
     resetFinishButton();
     if (game && game.finalRound) {
@@ -598,6 +626,7 @@ function beginTurn() {
     el('steal-guess-review').classList.add('hidden');
     el('steal-review-title').value  = '';
     el('steal-review-artist').value = '';
+    el('steal-live-guess').classList.add('hidden');
     stealerForOverride = null;
     el('scan-hint').classList.remove('hidden');
     el('guess-artist').value    = '';
@@ -635,6 +664,8 @@ function beginTurn() {
     el('steal-btn').classList.remove('hidden');
     el('buy-btn').classList.remove('hidden');
     el('submit-btn').classList.add('hidden');
+    el('submit-btn').textContent = 'Reveal the year ✨';
+    setButtonEnabled(el('submit-btn'), true);
     el('next-turn-btn').classList.add('hidden');
 
     // Name guess area visible from the very start of every turn
@@ -671,7 +702,9 @@ function onSlotClick(position) {
             showMessage("That slot is already taken by the active player — pick a different one.", true);
             return;
         }
-        confirmSteal(stealModeStealerIndex, position);
+        pendingStealPosition = position;
+        renderTimeline(); // show the chosen slot highlighted in the timeline
+        updatePlaceTokenButton();
         return;
     }
     if (activePosition !== null) return; // already placed
@@ -765,125 +798,142 @@ function renderStealPanel() {
     const panel     = el('steal-panel');
     const nonActive = game.players
         .map((p, i) => ({ player: p, index: i }))
-        .filter(({ player, index }) => index !== game.currentPlayerIndex && player.tokens >= 1);
+        .filter(({ index }) => index !== game.currentPlayerIndex && game.players[index].tokens >= 1);
 
+    // With only two players there is only one possible stealer — skip the chooser step
+    if (game.players.length === 2 || nonActive.length === 1) {
+        renderStealSlots(nonActive[0].index);
+        return;
+    }
+
+    // Three or more players: show a chooser list first
     panel.innerHTML = '';
     panel.appendChild(createEl('p', 'steal-label', 'Who wants to challenge? (costs 1 ✪ token)'));
     nonActive.forEach(({ player, index }) => {
         const label = `${player.name} — ${player.tokens} token${player.tokens !== 1 ? 's' : ''}`;
-        const btn = createButton(label, 'secondary-btn steal-player-btn', () => {
-            if (game.players[index].tokens < 1) {
-                showMessage(`${game.players[index].name} doesn't have enough tokens to steal.`);
-                return;
-            }
-            renderStealSlots(index);
-        });
+        const btn   = createButton(label, 'secondary-btn steal-player-btn', () => renderStealSlots(index));
         btn.dataset.playerIndex = index;
         panel.appendChild(btn);
     });
 
     const cancel = createButton('Cancel', 'secondary-btn', () => {
         el('steal-panel').classList.add('hidden');
+        updatePhasePrompt({ hasSlot: selectedPosition !== null, placed: activePosition !== null });
     });
     cancel.id = 'cancel-steal-btn';
     panel.appendChild(cancel);
 }
 
 function renderStealSlots(stealerIndex) {
-    const panel    = el('steal-panel');
-    const stealer  = game.players[stealerIndex];
-    const timeline = game.getCurrentPlayer().timeline;
-    const isPro    = game.mode === "pro";
+    const panel   = el('steal-panel');
+    const stealer = game.players[stealerIndex];
+    const isPro   = game.mode === "pro";
 
-    // Activate steal mode: timeline slots now call confirmSteal instead of onSlotClick
+    // Enter steal mode — timeline slots now register pending positions
     stealModeStealerIndex = stealerIndex;
+    pendingStealPosition  = null;
+    stealNameGuessLogged  = false;
+    pendingStealNameGuess = null;
     el('timeline-container').classList.add('steal-mode');
-    renderTimeline(); // re-render so the timeline reflects steal mode visually
+    renderTimeline();
 
     panel.innerHTML = '';
-    panel.appendChild(createEl('p', 'steal-label', `${stealer.name}: tap a slot directly on the timeline above, or pick from the list below`));
-    const slotButtons = createEl('div', 'steal-slot-buttons');
 
-    for (let i = 0; i <= timeline.length; i++) {
-        if (i === activePosition) continue; // skip the slot the active player already chose
-
-        let label;
-        if (timeline.length === 0) {
-            label = 'Only available position';
-        } else if (i === 0) {
-            label = `Before ${timeline[0].year}`;
-        } else if (i === timeline.length) {
-            label = `After ${timeline[timeline.length - 1].year}`;
-        } else {
-            label = `Between ${timeline[i - 1].year} and ${timeline[i].year}`;
-        }
-
-        const pos = i;
-        const btn = createButton(label, 'secondary-btn steal-slot-btn', () => {
-            confirmSteal(stealerIndex, pos);
-        });
-        btn.dataset.position = pos;
-        btn.dataset.stealer = stealerIndex;
-        slotButtons.appendChild(btn);
-    }
-    panel.appendChild(slotButtons);
-
-    // PRO mode: stealer must also name artist + title
+    // PRO mode: stealer names artist & title first, then logs them
     if (isPro) {
         const guess = createEl('div', 'steal-name-guess');
-        guess.appendChild(createEl('p', 'steal-name-guess-label', `🔥 PRO: ${stealer.name} must also name artist & title to win the steal`));
+        guess.appendChild(createEl('p', 'steal-name-guess-label', `🔥 PRO: ${stealer.name} must name artist & title to win the steal`));
         const titleInput = createEl('input', 'player-name-input');
-        titleInput.type = 'text';
-        titleInput.id = 'steal-guess-title';
+        titleInput.type        = 'text';
+        titleInput.id          = 'steal-guess-title';
         titleInput.placeholder = 'Song title';
-        titleInput.maxLength = 60;
+        titleInput.maxLength   = 60;
         const artistInput = createEl('input', 'player-name-input');
-        artistInput.type = 'text';
-        artistInput.id = 'steal-guess-artist';
+        artistInput.type        = 'text';
+        artistInput.id          = 'steal-guess-artist';
         artistInput.placeholder = 'Artist name';
-        artistInput.maxLength = 60;
-        guess.append(titleInput, artistInput);
+        artistInput.maxLength   = 60;
+
+        const logBtn = createButton('Log song title & artist', 'primary-btn steal-log-btn', () => {
+            const t = (el('steal-guess-title')?.value  ?? '').trim();
+            const a = (el('steal-guess-artist')?.value ?? '').trim();
+            if (!t || !a) {
+                showMessage('Fill in BOTH song title and artist name before logging.', true);
+                return;
+            }
+            pendingStealNameGuess = { title: t, artist: a };
+            stealNameGuessLogged  = true;
+            el('steal-guess-title').disabled  = true;
+            el('steal-guess-artist').disabled = true;
+            logBtn.textContent = '✓ Song & artist logged';
+            logBtn.classList.add('btn-disabled');
+            logBtn.disabled = true;
+            updatePlaceTokenButton();
+        });
+        guess.append(titleInput, artistInput, logBtn);
         panel.appendChild(guess);
     }
 
     const cancel = createButton('Cancel', 'secondary-btn', () => {
         stealModeStealerIndex = null;
+        pendingStealPosition  = null;
+        stealNameGuessLogged  = false;
+        pendingStealNameGuess = null;
         el('timeline-container').classList.remove('steal-mode');
         el('steal-panel').classList.add('hidden');
         game.pendingSteal = null;
+        el('submit-btn').textContent = 'Reveal the year ✨';
+        setButtonEnabled(el('submit-btn'), true);
         renderTimeline();
         updateButtonStates();
+        updatePhasePrompt({ hasSlot: selectedPosition !== null, placed: activePosition !== null });
     });
     cancel.id = 'cancel-steal-btn';
     panel.appendChild(cancel);
+
+    // Repurpose the submit button as "Place token here" while steal mode is active
+    el('submit-btn').textContent = 'Place token here 🎯';
+    setButtonEnabled(el('submit-btn'), false); // enabled only once a slot (+ PRO log) is ready
+    updatePhasePrompt({ hasSlot: selectedPosition !== null, placed: activePosition !== null });
 }
 
-function confirmSteal(stealerIndex, stealPosition) {
-    // PRO: collect the stealer's name guess before locking in
-    let stealNameGuess = null;
-    if (game.mode === "pro") {
-        const stealTitle  = el('steal-guess-title')?.value.trim()  ?? '';
-        const stealArtist = el('steal-guess-artist')?.value.trim() ?? '';
-        if (!stealTitle || !stealArtist) {
-            showMessage('PRO mode: fill in BOTH artist name and song title before confirming the steal.', true);
-            return;
-        }
-        stealNameGuess = { artist: stealArtist, title: stealTitle };
-    }
+// Called when "Place token here" is clicked during steal mode.
+// Locks in the stealer's chosen position and (in PRO) their logged name guess.
+function lockSteal() {
+    const stealerIndex = stealModeStealerIndex;
+    const stealPos     = pendingStealPosition;
+    const nameGuess    = pendingStealNameGuess;
 
     stealModeStealerIndex = null;
+    pendingStealPosition  = null;
+    stealNameGuessLogged  = false;
+    pendingStealNameGuess = null;
+
     el('timeline-container').classList.remove('steal-mode');
-    const result = initiateSteal(game, stealerIndex, stealPosition, stealNameGuess);
+    el('steal-panel').classList.add('hidden');
+
+    const result = initiateSteal(game, stealerIndex, stealPos, nameGuess);
     if (!result.success) {
         showMessage('Could not register steal — try again.');
         return;
     }
-    el('steal-panel').classList.add('hidden');
+
+    // PRO: show the logged guess in a persistent panel (visible until after reveal)
+    if (game.mode === "pro" && nameGuess) {
+        el('steal-live-guess-label').textContent = `${result.stealer.name} guessed:`;
+        el('steal-live-guess-title').value        = nameGuess.title;
+        el('steal-live-guess-artist').value       = nameGuess.artist;
+        el('steal-live-guess').classList.remove('hidden');
+    }
+
+    el('submit-btn').textContent = 'Reveal the year ✨';
+    setButtonEnabled(el('submit-btn'), true);
+
     updateTokenDisplay();
     renderAllPlayers();
-    renderTimeline(); // re-render with token marker visible
-    updateButtonStates(); // disable steal button (one per turn)
-    showMessage(`${result.stealer.name} has placed their token! Click "Submit & reveal" when ready.`, true);
+    renderTimeline(); // re-render with the locked steal token marker
+    updateButtonStates();
+    showMessage(`${result.stealer.name} has placed their token! Click "Reveal the year" when ready.`, true);
 }
 
 
@@ -963,8 +1013,22 @@ el('steal-btn').addEventListener('click', () => {
     updatePhasePrompt({ hasSlot: selectedPosition !== null, placed: activePosition !== null });
 });
 
-// --- Submit & reveal ---
+// --- Submit & reveal (also doubles as "Place token here" during steal mode) ---
 el('submit-btn').addEventListener('click', async () => {
+    // If a stealer is actively choosing their slot, this button acts as "Place token here"
+    if (stealModeStealerIndex !== null) {
+        if (pendingStealPosition === null) {
+            showMessage('Tap a slot on the timeline first.', true);
+            return;
+        }
+        if (game.mode === "pro" && !stealNameGuessLogged) {
+            showMessage('PRO mode: log your artist & title before placing the token.', true);
+            return;
+        }
+        lockSteal();
+        return;
+    }
+
     hideMessageBars();
     const artist  = el('guess-artist').value.trim();
     const title   = el('guess-title').value.trim();
@@ -1236,6 +1300,13 @@ el('submit-btn').addEventListener('click', async () => {
             el('steal-guess-review-label').textContent = `${savedSteal.stealerName} typed:`;
             el('steal-guess-review').classList.remove('hidden');
         }
+    }
+
+    // Keep steal-live-guess visible only if the stealer had the correct position
+    // (so players can review what was typed before deciding on an override).
+    // In all other cases, tidy it away now.
+    if (!result.stealResult?.stealPositionCorrect) {
+        el('steal-live-guess').classList.add('hidden');
     }
 
     el('next-turn-btn').classList.remove('hidden');

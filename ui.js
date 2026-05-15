@@ -170,7 +170,7 @@ function updateDeleteButtons() {
 
 // "Who goes first?" dropdown — only shows players who have typed a name (fix #2)
 function updateStartingPlayerDropdown() {
-    const inputs  = document.querySelectorAll('.player-name-input:not(#win-target-input)');
+    const inputs  = document.querySelectorAll('#player-inputs .player-name-input');
     const select  = el('starting-player-select');
     const current = select.value;
     select.innerHTML = '';
@@ -196,7 +196,7 @@ function validateWinTarget() {
 }
 
 function onStartGame() {
-    const inputs = document.querySelectorAll('.player-name-input:not(#win-target-input)');
+    const inputs = document.querySelectorAll('#player-inputs .player-name-input');
     const names  = Array.from(inputs).map(i => i.value.trim()).filter(n => n.length > 0);
     if (names.length < 2) {
         showMessage('Please enter at least 2 player names.', true);

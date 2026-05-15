@@ -322,6 +322,15 @@ function renderTimeline() {
     renderTimelineInto(el('timeline-container'), player.timeline, activePosition, stealPos, true, null, stealerName);
 }
 
+function updatePillsScrollHint() {
+    const hint = el('pills-scroll-hint');
+    const list = el('players-list');
+    if (!hint || !list) return;
+    const overflowing = list.scrollWidth > list.clientWidth + 2;
+    const atEnd = list.scrollLeft + list.clientWidth >= list.scrollWidth - 4;
+    hint.classList.toggle('visible', overflowing && !atEnd);
+}
+
 function renderAllPlayers() {
     const list = el('players-list');
     list.innerHTML = '';
@@ -349,6 +358,8 @@ function renderAllPlayers() {
 
         list.appendChild(pill);
     });
+    // Use rAF so the browser has laid out the new pills before measuring overflow
+    requestAnimationFrame(updatePillsScrollHint);
 }
 
 // Fills in the flip card back with the song's info (year / artist / title)
@@ -1588,4 +1599,8 @@ el('play-again-btn').addEventListener('click', () => {
 // =============================================================
 // INITIALISE ON PAGE LOAD
 // =============================================================
+
+// Hide the pills scroll-hint arrow when the user scrolls to the end
+el('players-list').addEventListener('scroll', updatePillsScrollHint);
+
 initSetupScreen();

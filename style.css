@@ -628,7 +628,7 @@ body {
   border: 1px solid #2a2a36;
   border-radius: 14px;
   width: 100%;
-  max-width: 480px;
+  max-width: 700px;
   max-height: 85vh;
   overflow-y: auto;
   box-shadow: 0 8px 40px rgba(0, 0, 0, 0.6);
@@ -1997,3 +1997,103 @@ body {
   display: block;
   border-radius: 12px;
 }
+
+/* =============================================================
+   TURN FADE-IN
+   Applied to .board-main at the start of each turn so the whole
+   playing area eases in rather than snapping into place.
+   ============================================================= */
+@keyframes turn-fade-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.turn-fade-in {
+  animation: turn-fade-in 0.35s ease forwards;
+}
+
+/* =============================================================
+   TURN SPLASH — full-screen player name intro
+   ============================================================= */
+.turn-splash {
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+  background: rgba(10, 10, 16, 0.92);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.turn-splash.hidden {
+  display: none;
+}
+
+.turn-splash-name {
+  font-size: 2.4rem;
+  font-weight: 800;
+  color: #f0c040;
+  text-align: center;
+  padding: 0 24px;
+  animation: turn-splash-in 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.turn-splash-label {
+  font-size: 1.1rem;
+  color: #9a9aa8;
+  margin-top: 8px;
+  animation: turn-splash-in 0.3s 0.05s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+@keyframes turn-splash-in {
+  from { opacity: 0; transform: scale(0.75); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+.turn-splash--shrink .turn-splash-name,
+.turn-splash--shrink .turn-splash-label {
+  transition: opacity 0.35s ease-in, transform 0.35s ease-in;
+  opacity: 0;
+  transform: scale(0.5) translateY(-60px);
+}
+
+/* =============================================================
+   HTP FONT SIZE CONTROLS
+   ============================================================= */
+.htp-font-controls {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-right: 8px;
+}
+
+.htp-font-btn {
+  background: transparent;
+  border: 1px solid #3a3a4a;
+  border-radius: 6px;
+  color: #9a9aa8;
+  cursor: pointer;
+  line-height: 1;
+  padding: 3px 7px;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.htp-font-btn:nth-child(1) { font-size: 0.7rem; }
+.htp-font-btn:nth-child(2) { font-size: 0.9rem; }
+.htp-font-btn:nth-child(3) { font-size: 1.1rem; }
+
+.htp-font-btn--active,
+.htp-font-btn:hover {
+  background: #2a2a38;
+  border-color: #f0c040;
+  color: #f0c040;
+}
+
+/* Font size variants applied to the body */
+.htp-modal-body.htp-font--small li,
+.htp-modal-body.htp-font--small p { font-size: 0.75rem; }
+
+.htp-modal-body.htp-font--large li,
+.htp-modal-body.htp-font--large p { font-size: 1.05rem; }

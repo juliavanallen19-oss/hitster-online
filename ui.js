@@ -664,9 +664,9 @@ function beginTurn() {
         el('name-guess-form').classList.add('name-guess-form--required');
         if (hintEl) hintEl.textContent = '🔥 PRO: name BOTH the title and artist or lose the card';
     } else if (isChill) {
-        if (hintEl) hintEl.textContent = '😎 Name the title OR artist for a bonus ✪';
+        if (hintEl) hintEl.textContent = 'Optional: 😎 Name the title OR artist for a bonus ✪';
     } else {
-        if (hintEl) hintEl.textContent = '🎵 Name both the title and artist for a bonus ✪';
+        if (hintEl) hintEl.textContent = 'Optional: 🎵 Name both the title and artist for a bonus ✪';
     }
 
     // Show action buttons; submit only appears after Place here
@@ -704,6 +704,13 @@ function beginTurn() {
     renderTimeline();
     renderAllPlayers();
     updateButtonStates();
+
+    // Smooth fade-in of the whole board on each new turn
+    const boardMain = document.querySelector('.board-main');
+    if (boardMain) {
+        boardMain.classList.remove('turn-fade-in');
+        requestAnimationFrame(() => requestAnimationFrame(() => boardMain.classList.add('turn-fade-in')));
+    }
 }
 
 // Player clicks a slot in the timeline.
@@ -831,6 +838,8 @@ function renderStealPanel() {
 
     const cancel = createButton('Cancel', 'secondary-btn', () => {
         el('steal-panel').classList.add('hidden');
+        el('steal-btn').classList.remove('hidden');
+        updateButtonStates();
         updatePhasePrompt({ hasSlot: selectedPosition !== null, placed: activePosition !== null });
     });
     cancel.id = 'cancel-steal-btn';
@@ -848,6 +857,7 @@ function renderStealSlots(stealerIndex) {
     stealNameGuessLogged  = false;
     pendingStealNameGuess = null;
     el('timeline-container').classList.add('steal-mode');
+    el('steal-btn').classList.add('hidden'); // hide until cancel or next turn
     renderTimeline();
 
     panel.innerHTML = '';
@@ -894,6 +904,7 @@ function renderStealSlots(stealerIndex) {
         pendingStealNameGuess = null;
         el('timeline-container').classList.remove('steal-mode');
         el('steal-panel').classList.add('hidden');
+        el('steal-btn').classList.remove('hidden');
         game.pendingSteal = null;
         el('submit-btn').classList.remove('submit-btn--challenge');
         el('submit-btn').textContent = 'Reveal the year ✨';
@@ -1011,8 +1022,8 @@ el('place-btn').addEventListener('click', () => {
 
 // --- HITSTER! steal ---
 el('steal-btn').addEventListener('click', () => {
-    const anyoneCanSteal = game.players.some((p, i) => i !== game.currentPlayerIndex && p.tokens >= 1);
-    if (!anyoneCanSteal) {
+    const eligibleChallengers = game.players.filter((p, i) => i !== game.currentPlayerIndex && p.tokens >= 1);
+    if (eligibleChallengers.length === 0) {
         showMessage('No player has enough tokens to steal.', true);
         return;
     }
@@ -1027,6 +1038,14 @@ el('steal-btn').addEventListener('click', () => {
     renderStealPanel();
     el('steal-panel').classList.remove('hidden');
     updatePhasePrompt({ hasSlot: selectedPosition !== null, placed: activePosition !== null });
+    // If only one eligible challenger, renderStealPanel auto-selects them via renderStealSlots
+    // which will hide the button. For 2+ challengers, grey it until someone is selected.
+    if (eligibleChallengers.length > 1) {
+        setButtonEnabled(el('steal-btn'), false);
+    }
+    requestAnimationFrame(() => {
+        el('steal-panel').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    });
 });
 
 // --- Submit & reveal (also doubles as "Place token here" during steal mode) ---
@@ -1407,9 +1426,24 @@ el('next-turn-btn').addEventListener('click', () => {
     const result = endTurn(game);
     if (result.won) {
         showWinScreen(result.winner, 'goal');
-    } else {
-        beginTurn();
+        return;
     }
+    // Show player name splash before loading the new turn
+    const nextPlayer = game.getCurrentPlayer();
+    const splash     = el('turn-splash');
+    const splashName = el('turn-splash-name');
+    splashName.textContent = nextPlayer.name;
+    splash.classList.remove('hidden', 'turn-splash--shrink');
+    // After 900 ms start shrink-out transition
+    setTimeout(() => {
+        splash.classList.add('turn-splash--shrink');
+        // After transition finishes, hide and start the turn
+        setTimeout(() => {
+            splash.classList.add('hidden');
+            splash.classList.remove('turn-splash--shrink');
+            beginTurn();
+        }, 380);
+    }, 900);
 });
 
 // --- Skip card ---
@@ -1483,14 +1517,28 @@ el('buy-btn').addEventListener('click', async () => {
 });
 
 // --- How to Play modal ---
+let closeHtpModal = () => {};
 (function () {
-    const modal = el('how-to-play-modal');
+    const modal    = el('how-to-play-modal');
+    const body     = modal.querySelector('.htp-modal-body');
     const openModal  = () => { modal.classList.add('open');    modal.setAttribute('aria-hidden', 'false'); };
     const closeModal = () => { modal.classList.remove('open'); modal.setAttribute('aria-hidden', 'true');  };
+    closeHtpModal = closeModal;
     el('game-how-to-play-btn').addEventListener('click', openModal);
     modal.querySelector('.htp-modal-close').addEventListener('click', closeModal);
     modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
     document.addEventListener('keydown', e => { if (e.key === 'Escape' && modal.classList.contains('open')) closeModal(); });
+
+    // Font size controls
+    const fontBtns = modal.querySelectorAll('.htp-font-btn');
+    const applySize = (size) => {
+        body.classList.remove('htp-font--small', 'htp-font--medium', 'htp-font--large');
+        if (size !== 'medium') body.classList.add(`htp-font--${size}`);
+        fontBtns.forEach(b => b.classList.toggle('htp-font-btn--active', b.dataset.size === size));
+        localStorage.setItem('htp-font-size', size);
+    };
+    fontBtns.forEach(btn => btn.addEventListener('click', () => applySize(btn.dataset.size)));
+    applySize(localStorage.getItem('htp-font-size') || 'medium');
 })();
 
 // --- Finish game early ---
@@ -1510,6 +1558,7 @@ el('finish-game-btn').addEventListener('click', () => {
 
 // --- Play Again ---
 el('play-again-btn').addEventListener('click', () => {
+    closeHtpModal();
     game             = null;
     selectedPosition = null;
     activePosition   = null;

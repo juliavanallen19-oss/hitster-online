@@ -461,32 +461,32 @@ function updatePhasePrompt({ hasSlot, placed }) {
     // Once a stealer is actively choosing their slot, show their name in the prompt
     if (stealModeStealerIndex !== null) {
         const stealerName = game.players[stealModeStealerIndex].name;
-        promptEl.textContent = `🎯 ${stealerName}: tap a slot directly on the timeline below.`;
+        promptEl.textContent = `⚔️ ${stealerName}: tap a slot on the timeline below.`;
         return;
     }
     // Steal panel open but no stealer chosen yet (player selection for 3+ players)
     if (!el('steal-panel').classList.contains('hidden')) {
-        promptEl.textContent = '🎯 Anyone want to challenge this placement?';
+        promptEl.textContent = '⚔️ Anyone want to challenge this placement?';
         return;
     }
     if (!el('next-turn-btn').classList.contains('hidden')) {
         const isShowWinners = el('next-turn-btn').textContent.trim() === 'Show Winners';
         promptEl.textContent = isShowWinners
             ? '🏆 Round complete. Continue to see who wins!'
-            : '✨ Turn complete. Continue to the next turn.';
+            : '✨ Turn complete — continue when ready.';
         return;
     }
     if (placed) {
         promptEl.textContent = game.pendingSteal
-            ? '🎵 Submit to reveal the year.'
-            : '🎵 Submit to reveal the year — or let opponents steal first.';
+            ? '🎵 Challenge placed — tap "Reveal the year".'
+            : '🎵 Reveal now, or let an opponent challenge first.';
         return;
     }
     if (hasSlot) {
-        promptEl.textContent = '✅ Slot selected. Tap "Place card here" to commit.';
+        promptEl.textContent = '✅ Slot chosen — tap "Place card here".';
         return;
     }
-    promptEl.textContent = '🎧 Scan the QR with your phone, then tap a slot where you think the song belongs.';
+    promptEl.textContent = '🎧 Listen first via the QR code, then tap a slot on your timeline.';
 }
 
 function setButtonEnabled(btn, enabled) {
@@ -699,6 +699,7 @@ function beginTurn() {
     lastPlayedCard = game.currentCard;
 
     generateQRCode(game.currentCard.spotify_url);
+    el('flip-card').classList.add('qr-pulse');
     renderPlayerHeader();
     renderTimeline();
     renderAllPlayers();
@@ -708,6 +709,7 @@ function beginTurn() {
 // Player clicks a slot in the timeline.
 // In steal mode the click selects the steal position; otherwise it selects a placement slot.
 function onSlotClick(position) {
+    el('flip-card').classList.remove('qr-pulse');
     if (stealModeStealerIndex !== null) {
         if (position === activePosition) {
             showMessage("That slot is already taken by the active player — pick a different one.", true);
@@ -853,7 +855,7 @@ function renderStealSlots(stealerIndex) {
     // PRO mode: stealer names artist & title first, then logs them
     if (isPro) {
         const guess = createEl('div', 'steal-name-guess');
-        guess.appendChild(createEl('p', 'steal-name-guess-label', `🔥 PRO: ${stealer.name} must name artist & title to win the steal`));
+        guess.appendChild(createEl('p', 'steal-name-guess-label', `🔥 PRO: ${stealer.name} must name artist & title to win the challenge`));
         const titleInput = createEl('input', 'player-name-input');
         titleInput.type        = 'text';
         titleInput.id          = 'steal-guess-title';
@@ -893,6 +895,7 @@ function renderStealSlots(stealerIndex) {
         el('timeline-container').classList.remove('steal-mode');
         el('steal-panel').classList.add('hidden');
         game.pendingSteal = null;
+        el('submit-btn').classList.remove('submit-btn--challenge');
         el('submit-btn').textContent = 'Reveal the year ✨';
         setButtonEnabled(el('submit-btn'), true);
         renderTimeline();
@@ -903,7 +906,8 @@ function renderStealSlots(stealerIndex) {
     panel.appendChild(cancel);
 
     // Repurpose the submit button as "Place token here" while steal mode is active
-    el('submit-btn').textContent = 'Place token here 🎯';
+    el('submit-btn').textContent = 'Place token here ⚔️';
+    el('submit-btn').classList.add('submit-btn--challenge');
     setButtonEnabled(el('submit-btn'), false); // enabled only once a slot (+ PRO log) is ready
     updatePhasePrompt({ hasSlot: selectedPosition !== null, placed: activePosition !== null });
 }
@@ -937,6 +941,7 @@ function lockSteal() {
         el('steal-live-guess').classList.remove('hidden');
     }
 
+    el('submit-btn').classList.remove('submit-btn--challenge');
     el('submit-btn').textContent = 'Reveal the year ✨';
     setButtonEnabled(el('submit-btn'), true);
 
@@ -1093,6 +1098,7 @@ el('submit-btn').addEventListener('click', async () => {
     showSongInfo(lastPlayedCard);
 
     // Flip the card (QR → song info); hide inputs and scan hint
+    el('flip-card').classList.remove('qr-pulse');
     el('flip-card-inner').classList.add('flipped');
     soundCardFlip();
     el('scan-hint').classList.add('hidden');
@@ -1183,7 +1189,7 @@ el('submit-btn').addEventListener('click', async () => {
         } else if (ng) {
             nameGuessFeedback = result.tokenEarned ? 'artist & title correct ✪' : 'artist & title correct (already at max tokens)';
         } else {
-            nameGuessFeedback = 'artist & title not quite';
+            nameGuessFeedback = 'Artist & title guess wrong';
         }
         // Capitalise the first character so it reads as a proper sentence start
         if (nameGuessFeedback) {
@@ -1195,7 +1201,7 @@ el('submit-btn').addEventListener('click', async () => {
     if (result.stealResult?.outcome === 'steal_wins') {
         const stealer = result.stealResult.stealer;
         renderTimelineInto(el('stealer-timeline-container'), stealer.timeline, null, null, false);
-        el('stealer-timeline-label').textContent = `🎉 ${stealer.name} steals the card!`;
+        el('stealer-timeline-label').textContent = `🎉 ${stealer.name} wins the challenge!`;
         el('stealer-timeline-section').classList.remove('hidden');
 
         soundStealWins();
@@ -1204,11 +1210,11 @@ el('submit-btn').addEventListener('click', async () => {
         await sleep(1800);
 
         if (isPro) {
-            showRevealMessage(`🎉 ${sName} stole the card! Artist & title correct — token returned! ✪`, 'success');
+            showRevealMessage(`🎉 ${sName} wins the challenge! Artist & title correct — token returned ✪`, 'success');
         } else if (ngAttempted) {
-            showRevealMessage(`🎉 ${sName} stole the card! ${nameGuessFeedback}`, ng ? 'success' : 'error');
+            showRevealMessage(`🎉 ${sName} wins the challenge! ${nameGuessFeedback}`, ng ? 'success' : 'error');
         } else {
-            showRevealMessage(`🎉 ${sName} stole the card!`, 'error');
+            showRevealMessage(`🎉 ${sName} wins the challenge!`, 'error');
         }
 
     } else if (result.activeKeepsCard) {
@@ -1219,11 +1225,11 @@ el('submit-btn').addEventListener('click', async () => {
 
         if (sName) {
             if (isPro) {
-                showRevealMessage(`Right placement & artist/title ✅  ${sName}'s challenge failed — token lost.`, 'success');
+                showRevealMessage(`Right placement & artist/title ✅ ${sName}'s challenge failed.`, 'success');
             } else if (ngAttempted) {
-                showRevealMessage(`Right placement ✅  ${nameGuessFeedback}. ${sName}'s steal failed — token lost.`, 'success');
+                showRevealMessage(`Right placement ✅ ${nameGuessFeedback}. ${sName}'s challenge failed.`, 'success');
             } else {
-                showRevealMessage(`${game.getCurrentPlayer().name} was right! ✅  ${sName}'s steal failed — token lost.`, 'success');
+                showRevealMessage(`Right placement ✅ ${sName}'s challenge failed.`, 'success');
             }
         } else if (isPro) {
             showRevealMessage('Correct! ✅  Placement and artist & title both right!', 'success');
@@ -1237,15 +1243,15 @@ el('submit-btn').addEventListener('click', async () => {
         soundWrongPlacement();
         if (result.tokenEarned) setTimeout(animateTokenEarned, 500);
         if (isPro && result.activeCorrect) {
-            showRevealMessage(`Right position, but artist & title incorrect — card discarded. ${sName}'s challenge also failed — token lost.`, 'error');
+            showRevealMessage(`Right position, but artist & title wrong — card discarded. ${sName}'s challenge also failed.`, 'error');
         } else if (isPro && result.stealResult.stealPositionCorrect) {
-            showRevealMessage(`Wrong position for you. ${sName} was correct time-wise but artist & title were wrong — challenge failed, token lost.`, 'error');
+            showRevealMessage(`Wrong position. ${sName} got the slot right but artist & title wrong — challenge failed.`, 'error');
         } else if (isPro) {
-            showRevealMessage(`Wrong position for you and ${sName} — card discarded. Their challenge failed — token lost.`, 'error');
+            showRevealMessage(`Wrong position for both — card discarded. ${sName}'s challenge failed.`, 'error');
         } else if (ngAttempted) {
-            showRevealMessage(`Wrong position — card discarded. ${nameGuessFeedback}. ${sName}'s steal also failed — token lost.`, 'error');
+            showRevealMessage(`Wrong position — card discarded. ${nameGuessFeedback}. ${sName}'s challenge also failed.`, 'error');
         } else {
-            showRevealMessage(`Wrong position — card discarded. ${sName}'s steal also failed — token lost. Better luck next turn!`, 'error');
+            showRevealMessage(`Wrong position — card discarded. ${sName}'s challenge also failed.`, 'error');
         }
 
     } else {
@@ -1267,11 +1273,11 @@ el('submit-btn').addEventListener('click', async () => {
                 tokenNote = result.tokenEarned ? 'Artist & title correct — token granted ✪'
                                                : 'Artist & title correct — already at max tokens';
             }
-            showRevealMessage(`Wrong position — card discarded. Better luck next turn! ${tokenNote}.`, 'error');
+            showRevealMessage(`Wrong position — card discarded. ${tokenNote}.`, 'error');
         } else if (ngAttempted) {
-            showRevealMessage(`Wrong position — card discarded. ${nameGuessFeedback}. Better luck next turn!`, 'error');
+            showRevealMessage(`Wrong position — card discarded. ${nameGuessFeedback}.`, 'error');
         } else {
-            showRevealMessage('Wrong position — card discarded. Better luck next turn!', 'error');
+            showRevealMessage('Wrong position — card discarded.', 'error');
         }
     }
 
@@ -1421,6 +1427,8 @@ el('skip-btn').addEventListener('click', () => {
         soundSkipCard();
         if (result.card) {
             generateQRCode(result.card.spotify_url);
+            el('flip-card').classList.remove('qr-pulse');
+            el('flip-card').classList.add('qr-pulse');
             el('spotify-preview-container').classList.add('hidden');
             el('spotify-preview-container').innerHTML = '';
             el('preview-btn').classList.remove('hidden');
@@ -1428,7 +1436,7 @@ el('skip-btn').addEventListener('click', () => {
             renderTimeline();
             renderAllPlayers();
             updateButtonStates();
-            showMessage('Skipped! New card ready — scan the QR code again to hear your next song.', true);
+            showMessage('Skipped — scan the new QR code 🎧', true);
         } else {
             showWinScreen(handleEmptyDeck(game), 'deck-empty');
         }
@@ -1450,6 +1458,7 @@ el('buy-btn').addEventListener('click', async () => {
         // Render timeline with the newly placed card as a --won-pending placeholder
         renderTimelineInto(el('timeline-container'), game.getCurrentPlayer().timeline, null, null, false);
 
+        el('flip-card').classList.remove('qr-pulse');
         showSongInfo(card);
         soundBuyPlacement(); // three coin-pings for spending 3 tokens
         el('flip-card-inner').classList.add('flipped');

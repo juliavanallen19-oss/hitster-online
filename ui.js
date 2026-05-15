@@ -199,12 +199,14 @@ function onStartGame() {
     const inputs = document.querySelectorAll('#player-inputs .player-name-input');
     const names  = Array.from(inputs).map(i => i.value.trim()).filter(n => n.length > 0);
     if (names.length < 2) {
-        showMessage('Please enter at least 2 player names.', true);
+        showMessage('Please enter at least 2 player names.');
         return;
     }
-    const normalizedNames = names.map(n => n.toLocaleLowerCase());
+    // Case-insensitive exact-duplicate check — "Julia" and "julia" count as the same,
+    // but "Julia" and "Julias" are fine.
+    const normalizedNames = names.map(n => n.toLowerCase());
     if (new Set(normalizedNames).size !== names.length) {
-        showMessage('Please use unique player names so turns and steals are clear.', true);
+        showMessage('Please use unique player names so turns and steals are clear.');
         return;
     }
 
@@ -217,9 +219,15 @@ function onStartGame() {
     const startingName  = el('starting-player-select').value;
     const startingIndex = names.indexOf(startingName);
     const mode          = el('mode-select').value;
-    startGame(names, mode, startingIndex >= 0 ? startingIndex : 0, winTarget);
-    showScreen('game-screen');
-    beginTurn();
+
+    try {
+        startGame(names, mode, startingIndex >= 0 ? startingIndex : 0, winTarget);
+        showScreen('game-screen');
+        beginTurn();
+    } catch (err) {
+        showMessage('Something went wrong starting the game — please try again.');
+        console.error('startGame error:', err);
+    }
 }
 
 

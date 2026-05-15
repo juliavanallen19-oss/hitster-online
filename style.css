@@ -396,9 +396,15 @@ body {
   color: #d0d0d8;
 }
 
-.player-pill-card-icon {
-  font-size: 0.78rem;
-  opacity: 0.85;
+.player-pill-card-count {
+  font-weight: 600;
+  color: #c8c8d4;
+}
+
+.player-pill-card-label {
+  font-size: 0.7rem;
+  color: #6a6a78;
+  font-weight: 400;
 }
 
 /* Row 2: active player banner + tokens + deck counter */
@@ -512,23 +518,23 @@ body {
   background: rgba(255, 61, 139, 0.08);
 }
 
-/* Mode badge — shown in the header to the left of the finish button */
+/* Mode badge — shown in the header, clearly labelled */
 .mode-badge {
   display: inline-flex;
   align-items: center;
   padding: 5px 11px;
-  font-size: 0.78rem;
+  font-size: 0.8rem;
   font-weight: 600;
-  color: #9a9aa8;
-  background: #0e0e12;
-  border: 1px solid #2a2a36;
+  color: #c8c8d4;
+  background: #1a1a22;
+  border: 1px solid #3a3a48;
   border-radius: 8px;
   white-space: nowrap;
   flex-shrink: 0;
   letter-spacing: 0.01em;
 }
 
-/* Finish game button — auto-sized text button */
+/* Finish game button — amber/warning colour so it stands out */
 .finish-game-btn {
   font-family: inherit;
   font-size: 0.82rem;
@@ -536,9 +542,9 @@ body {
   line-height: 1.2;
   padding: 6px 14px;
   white-space: nowrap;
-  background: transparent;
-  color: #9a9aa8;
-  border: 1px solid #3a3a48;
+  background: rgba(255, 174, 61, 0.08);
+  color: #ffae3d;
+  border: 1.5px solid rgba(255, 174, 61, 0.45);
   border-radius: 8px;
   cursor: pointer;
   flex-shrink: 0;
@@ -546,14 +552,14 @@ body {
 }
 
 .finish-game-btn:hover {
-  color: #ff3d8b;
-  border-color: #ff3d8b;
-  background: rgba(255, 61, 139, 0.08);
+  background: rgba(255, 174, 61, 0.18);
+  border-color: #ffae3d;
 }
 
 .finish-game-btn--confirm {
-  color: #ffae3d;
-  border-color: #ffae3d;
+  background: rgba(255, 61, 139, 0.12);
+  color: #ff3d8b;
+  border-color: #ff3d8b;
 }
 
 /* ===== QR code / flip-card area ===== */

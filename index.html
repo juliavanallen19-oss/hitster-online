@@ -28,17 +28,74 @@
 
     <!-- ===== How to Play collapsible ===== -->
     <details class="how-to-play">
-      <summary class="how-to-play-toggle">📖 How to play</summary>
+      <summary class="how-to-play-toggle"><span class="q-icon">?</span> How to play</summary>
       <div class="how-to-play-body">
+
+        <h3 class="htp-section-title">Goal</h3>
         <ul>
-          <li><strong>Draw a card</strong> — scan the QR code with your phone to listen to the song.</li>
-          <li><strong>Place it</strong> — tap a slot on your timeline where you think the song belongs chronologically (oldest on the left, newest on the right).</li>
-          <li><strong>Correct?</strong> The card stays. Wrong? It's discarded.</li>
-          <li><strong>Bonus token ✪</strong> — guess both the artist and song title correctly to earn an extra token.</li>
-          <li><strong>Spend tokens</strong> — Skip a card (1✪), attempt a HITSTER! steal (1✪), or buy a guaranteed placement without a year check (3✪). Max 5 tokens per player.</li>
-          <li><strong>HITSTER! steal</strong> — after the active player chooses a slot, one challenger can pay 1✪ to pick a different slot on the active player's timeline. If the challenger is right and the active player is wrong, the challenger steals the card.</li>
-          <li><strong>Win</strong> — first to reach the goal number of cards wins!</li>
+          <li>Be the first player to collect the target number of cards on your personal timeline. The default is <strong>10 cards</strong> — you can change this before starting.</li>
         </ul>
+
+        <h3 class="htp-section-title">Setup</h3>
+        <ul>
+          <li>Each player receives <strong>one starter card</strong> already placed on their timeline as a reference point.</li>
+          <li>Everyone also receives starting tokens ✪ depending on the chosen mode (see Modes below).</li>
+          <li>The remaining songs are shuffled into a shared deck. One player goes first — chosen in setup.</li>
+        </ul>
+
+        <h3 class="htp-section-title">A Turn</h3>
+        <ul>
+          <li><strong>1. Listen</strong> — a QR code appears. Scan it with your phone to open the song on Spotify and listen.</li>
+          <li><strong>2. Place</strong> — tap a slot on your timeline where you think the song belongs chronologically. Your timeline runs oldest → newest, left to right. Slots appear between and around your existing cards.</li>
+          <li><strong>3. Name guess (optional)</strong> — before revealing the answer, you can try to name the artist and/or song title for a bonus token ✪. For songs with featured artists, naming just the main artist is enough. See mode rules for what counts.</li>
+          <li><strong>4. Submit</strong> — hit Submit to lock in your placement and name guess. The card flips to reveal the year, artist, and title.</li>
+          <li><strong>5. Result</strong> — correct placement means the card stays on your timeline. Wrong placement means the card is discarded. Either way, the turn passes to the next player.</li>
+        </ul>
+
+        <h3 class="htp-section-title">Tokens ✪</h3>
+        <ul>
+          <li><strong>Earning tokens</strong> — guess the name correctly during your turn to earn +1 token. For featured songs, the main artist alone counts (e.g. "Eminem" for <em>Eminem ft. Rihanna</em>). Tokens are capped at <strong>5 per player</strong>.</li>
+          <li><strong>Skip (1 ✪)</strong> — discard the current card and draw a fresh one instead. Useful if you have no idea about the song.</li>
+          <li><strong>HITSTER! Steal (1 ✪)</strong> — before the active player submits, any one other player can pay 1 token to challenge. See the Steal section below.</li>
+          <li><strong>Buy Placement (3 ✪)</strong> — spend 3 tokens to let the game place the card automatically in the correct chronological position. No guessing, no risk — guaranteed card.</li>
+        </ul>
+
+        <h3 class="htp-section-title">HITSTER! Steal</h3>
+        <ul>
+          <li>After the active player has chosen their slot but <em>before</em> they submit, any one other player may pay <strong>1 token</strong> to attempt a steal.</li>
+          <li>The challenger picks a <strong>different slot</strong> on the active player's timeline — they are betting that the active player is wrong and they know the right position.</li>
+          <li><strong>Active player correct</strong> — they keep the card. The challenger loses their token.</li>
+          <li><strong>Challenger correct, active player wrong</strong> — the challenger wins the card, which is automatically added to the challenger's own timeline.</li>
+          <li><strong>Both wrong</strong> — the card is discarded. The challenger already lost their token.</li>
+          <li>Only <strong>one steal attempt</strong> is allowed per turn.</li>
+          <li><em>PRO mode only:</em> the challenger must also name the song correctly to win the steal. If they win, their token is returned.</li>
+        </ul>
+
+        <h3 class="htp-section-title">Modes</h3>
+        <ul>
+          <li>
+            <strong>Original</strong> — the classic experience. Start with <strong>2 tokens</strong>. Place the card correctly to keep it. Guess both artist and title correctly for a bonus token. The steal works on position alone.
+          </li>
+          <li>
+            <strong>Chill</strong> — more relaxed. Start with <strong>3 tokens</strong>. Same placement rules as Original. For the bonus token, guessing either the artist <em>or</em> the title is enough — you don't need both. Empty fields don't count as wrong.
+          </li>
+          <li>
+            <strong>PRO</strong> — hardest mode. Start with <strong>5 tokens</strong>. To keep a card you must get the placement <em>and</em> the name (artist + title) both right. Getting only one of the two is not enough. For steals, the challenger must also name correctly to win — but if they do, their token is returned to them.
+          </li>
+        </ul>
+
+        <h3 class="htp-section-title">Winning</h3>
+        <ul>
+          <li><strong>Normal win</strong> — the first player to reach the target number of cards on their timeline wins immediately.</li>
+          <li><strong>Deck runs out</strong> — if the song deck is empty and no one has hit the target yet, the player with the <strong>most cards</strong> wins. If still tied, the player with the <strong>most tokens</strong> wins. If still tied, all tied players share the victory.</li>
+        </ul>
+
+        <h3 class="htp-section-title">Good to know</h3>
+        <ul>
+          <li>Songs from the <strong>same year</strong> can be placed in any order relative to each other — both slots are accepted.</li>
+          <li>If the active player typed the song name with a small typo, any other player can tap <strong>"Mark as correct"</strong> to still award the bonus token.</li>
+        </ul>
+
       </div>
     </details>
 
@@ -135,6 +192,7 @@
             <!-- player pills inserted by JS -->
           </div>
           <div id="mode-badge" class="mode-badge"></div>
+          <button type="button" id="game-how-to-play-btn" class="icon-btn how-to-play-btn" title="How to play" aria-label="How to play"><span class="q-icon">?</span></button>
           <button type="button" id="finish-game-btn" class="finish-game-btn" title="End game now" aria-label="End game now">Finish game</button>
         </div>
         <div class="turn-header-row2">
@@ -309,6 +367,87 @@
       <!-- Full ranking of all players — built by JS -->
       <div id="win-ranking" class="win-ranking"></div>
       <button type="button" id="play-again-btn" class="primary-btn">Play again</button>
+    </div>
+  </div>
+
+  <!-- =========================================================== -->
+  <!-- HOW TO PLAY MODAL                                             -->
+  <!-- Shared overlay triggered from the game screen ? button        -->
+  <!-- =========================================================== -->
+  <div id="how-to-play-modal" class="htp-modal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="htp-modal-title">
+    <div class="htp-modal-inner">
+      <div class="htp-modal-header">
+        <h2 id="htp-modal-title" class="htp-modal-title"><span class="q-icon">?</span> How to play</h2>
+        <button type="button" class="icon-btn htp-modal-close" aria-label="Close">✕</button>
+      </div>
+      <div class="htp-modal-body">
+
+        <h3 class="htp-section-title">Goal</h3>
+        <ul>
+          <li>Be the first player to collect the target number of cards on your personal timeline. The default is <strong>10 cards</strong> — you can change this before starting.</li>
+        </ul>
+
+        <h3 class="htp-section-title">Setup</h3>
+        <ul>
+          <li>Each player receives <strong>one starter card</strong> already placed on their timeline as a reference point.</li>
+          <li>Everyone also receives starting tokens ✪ depending on the chosen mode (see Modes below).</li>
+          <li>The remaining songs are shuffled into a shared deck. One player goes first — chosen in setup.</li>
+        </ul>
+
+        <h3 class="htp-section-title">A Turn</h3>
+        <ul>
+          <li><strong>1. Listen</strong> — a QR code appears. Scan it with your phone to open the song on Spotify and listen.</li>
+          <li><strong>2. Place</strong> — tap a slot on your timeline where you think the song belongs chronologically. Your timeline runs oldest → newest, left to right. Slots appear between and around your existing cards.</li>
+          <li><strong>3. Name guess (optional)</strong> — before revealing the answer, you can try to name the artist and/or song title for a bonus token ✪. For songs with featured artists, naming just the main artist is enough. See mode rules for what counts.</li>
+          <li><strong>4. Submit</strong> — hit Submit to lock in your placement and name guess. The card flips to reveal the year, artist, and title.</li>
+          <li><strong>5. Result</strong> — correct placement means the card stays on your timeline. Wrong placement means the card is discarded. Either way, the turn passes to the next player.</li>
+        </ul>
+
+        <h3 class="htp-section-title">Tokens ✪</h3>
+        <ul>
+          <li><strong>Earning tokens</strong> — guess the name correctly during your turn to earn +1 token. For featured songs, the main artist alone counts (e.g. "Eminem" for <em>Eminem ft. Rihanna</em>). Tokens are capped at <strong>5 per player</strong>.</li>
+          <li><strong>Skip (1 ✪)</strong> — discard the current card and draw a fresh one instead. Useful if you have no idea about the song.</li>
+          <li><strong>HITSTER! Steal (1 ✪)</strong> — before the active player submits, any one other player can pay 1 token to challenge. See the Steal section below.</li>
+          <li><strong>Buy Placement (3 ✪)</strong> — spend 3 tokens to let the game place the card automatically in the correct chronological position. No guessing, no risk — guaranteed card.</li>
+        </ul>
+
+        <h3 class="htp-section-title">HITSTER! Steal</h3>
+        <ul>
+          <li>After the active player has chosen their slot but <em>before</em> they submit, any one other player may pay <strong>1 token</strong> to attempt a steal.</li>
+          <li>The challenger picks a <strong>different slot</strong> on the active player's timeline — they are betting that the active player is wrong and they know the right position.</li>
+          <li><strong>Active player correct</strong> — they keep the card. The challenger loses their token.</li>
+          <li><strong>Challenger correct, active player wrong</strong> — the challenger wins the card, which is automatically added to the challenger's own timeline.</li>
+          <li><strong>Both wrong</strong> — the card is discarded. The challenger already lost their token.</li>
+          <li>Only <strong>one steal attempt</strong> is allowed per turn.</li>
+          <li><em>PRO mode only:</em> the challenger must also name the song correctly to win the steal. If they win, their token is returned.</li>
+        </ul>
+
+        <h3 class="htp-section-title">Modes</h3>
+        <ul>
+          <li>
+            <strong>Original</strong> — the classic experience. Start with <strong>2 tokens</strong>. Place the card correctly to keep it. Guess both artist and title correctly for a bonus token. The steal works on position alone.
+          </li>
+          <li>
+            <strong>Chill</strong> — more relaxed. Start with <strong>3 tokens</strong>. Same placement rules as Original. For the bonus token, guessing either the artist <em>or</em> the title is enough — you don't need both. Empty fields don't count as wrong.
+          </li>
+          <li>
+            <strong>PRO</strong> — hardest mode. Start with <strong>5 tokens</strong>. To keep a card you must get the placement <em>and</em> the name (artist + title) both right. Getting only one of the two is not enough. For steals, the challenger must also name correctly to win — but if they do, their token is returned to them.
+          </li>
+        </ul>
+
+        <h3 class="htp-section-title">Winning</h3>
+        <ul>
+          <li><strong>Normal win</strong> — the first player to reach the target number of cards on their timeline wins immediately.</li>
+          <li><strong>Deck runs out</strong> — if the song deck is empty and no one has hit the target yet, the player with the <strong>most cards</strong> wins. If still tied, the player with the <strong>most tokens</strong> wins. If still tied, all tied players share the victory.</li>
+        </ul>
+
+        <h3 class="htp-section-title">Good to know</h3>
+        <ul>
+          <li>Songs from the <strong>same year</strong> can be placed in any order relative to each other — both slots are accepted.</li>
+          <li>If the active player typed the song name with a small typo, any other player can tap <strong>"Mark as correct"</strong> to still award the bonus token.</li>
+        </ul>
+
+      </div>
     </div>
   </div>
 

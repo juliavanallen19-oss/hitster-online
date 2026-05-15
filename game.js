@@ -217,8 +217,12 @@ function discardCard(game) {
 // =============================================================
 
 function checkNameGuess(card, guessedArtist, guessedTitle) {
-    let artistCorrect = card.artist.toLowerCase().trim() === guessedArtist.toLowerCase().trim();
-    let titleCorrect  = card.title.toLowerCase().trim()  === guessedTitle.toLowerCase().trim();
+    // Accept the main artist alone (before " ft.") or the full artist string
+    const fullArtist  = card.artist.toLowerCase().trim();
+    const mainArtist  = fullArtist.split(' ft.')[0].trim();
+    const guessArtist = guessedArtist.toLowerCase().trim();
+    let artistCorrect = guessArtist === mainArtist || guessArtist === fullArtist;
+    let titleCorrect  = card.title.toLowerCase().trim() === guessedTitle.toLowerCase().trim();
     return artistCorrect && titleCorrect;
 }
 
@@ -231,8 +235,11 @@ function checkNameGuessChill(card, guessedArtist, guessedTitle) {
     // An empty field counts as "not attempted", not as a wrong answer
     const ga = guessedArtist.trim();
     const gt = guessedTitle.trim();
-    const artistCorrect = ga !== '' && card.artist.toLowerCase() === ga.toLowerCase();
-    const titleCorrect  = gt !== '' && card.title.toLowerCase()  === gt.toLowerCase();
+    // Accept the main artist alone (before " ft.") or the full artist string
+    const fullArtist = card.artist.toLowerCase();
+    const mainArtist = fullArtist.split(' ft.')[0].trim();
+    const artistCorrect = ga !== '' && (ga.toLowerCase() === mainArtist || ga.toLowerCase() === fullArtist);
+    const titleCorrect  = gt !== '' && card.title.toLowerCase() === gt.toLowerCase();
     // Returns an object so the UI can tell the player exactly which field was right
     return { correct: artistCorrect || titleCorrect, artistCorrect, titleCorrect };
 }

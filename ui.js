@@ -1200,6 +1200,17 @@ el('buy-btn').addEventListener('click', async () => {
     }
 });
 
+// --- How to Play modal ---
+(function () {
+    const modal = el('how-to-play-modal');
+    const openModal  = () => { modal.classList.add('open');    modal.setAttribute('aria-hidden', 'false'); };
+    const closeModal = () => { modal.classList.remove('open'); modal.setAttribute('aria-hidden', 'true');  };
+    el('game-how-to-play-btn').addEventListener('click', openModal);
+    modal.querySelector('.htp-modal-close').addEventListener('click', closeModal);
+    modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape' && modal.classList.contains('open')) closeModal(); });
+})();
+
 // --- Finish game early ---
 el('finish-game-btn').addEventListener('click', () => {
     if (!game) return;

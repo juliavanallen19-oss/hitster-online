@@ -158,6 +158,15 @@ body {
   background-position: right 14px center;
 }
 
+/* ===== Gradient question-mark icon (shared between setup toggle and game-screen button) ===== */
+
+.q-icon {
+  color: #ff3d8b;
+  font-weight: 800;
+  font-style: normal;
+  line-height: 1;
+}
+
 /* ===== How to Play collapsible ===== */
 
 .how-to-play {
@@ -220,6 +229,25 @@ body {
 
 .how-to-play-body li strong {
   color: #f0f0f0;
+}
+
+.how-to-play-body li em {
+  color: #c0c0cc;
+  font-style: italic;
+}
+
+.htp-section-title {
+  margin: 16px 0 6px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: #5a5a72;
+}
+
+.how-to-play-body .htp-section-title:first-child,
+.htp-modal-body .htp-section-title:first-child {
+  margin-top: 4px;
 }
 
 /* ===== Win target input ===== */
@@ -519,6 +547,95 @@ body {
 .finish-game-btn--confirm {
   color: #ffae3d;
   border-color: #ffae3d;
+}
+
+/* How-to-play icon button — gradient border + text on hover */
+.how-to-play-btn:hover {
+  border-color: #ff3d8b;
+  background: rgba(255, 61, 139, 0.08);
+}
+
+/* ===== How to Play modal ===== */
+
+.htp-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.htp-modal.open {
+  display: flex;
+}
+
+.htp-modal-inner {
+  background: #1a1a22;
+  border: 1px solid #2a2a36;
+  border-radius: 14px;
+  width: 100%;
+  max-width: 480px;
+  max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.6);
+}
+
+.htp-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px 12px;
+  border-bottom: 1px solid #2a2a36;
+}
+
+.htp-modal-title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #f0f0f0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.htp-modal-title .q-icon {
+  font-size: 1.1rem;
+}
+
+.htp-modal-close {
+  flex-shrink: 0;
+  font-size: 0.85rem;
+}
+
+.htp-modal-body {
+  padding: 16px 20px 20px;
+}
+
+.htp-modal-body ul {
+  margin: 0;
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.htp-modal-body li {
+  font-size: 0.875rem;
+  color: #9a9aa8;
+  line-height: 1.55;
+}
+
+.htp-modal-body li strong {
+  color: #f0f0f0;
+}
+
+.htp-modal-body li em {
+  color: #c0c0cc;
+  font-style: italic;
 }
 
 /* ===== QR code / flip-card area ===== */

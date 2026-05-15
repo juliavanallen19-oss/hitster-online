@@ -28,7 +28,7 @@
 
     <!-- ===== How to Play collapsible ===== -->
     <details class="how-to-play">
-      <summary class="how-to-play-toggle"><span class="q-icon">?</span> How to play</summary>
+      <summary class="how-to-play-toggle"><span class="q-icon">?</span> New here? Read <strong>How to Play</strong> before starting</summary>
       <div class="how-to-play-body">
 
         <h3 class="htp-section-title">Goal</h3>
@@ -56,19 +56,19 @@
         <ul>
           <li><strong>Earning tokens</strong> — guess the name correctly during your turn to earn +1 token. For featured songs, the main artist alone counts (e.g. "Eminem" for <em>Eminem ft. Rihanna</em>). Tokens are capped at <strong>5 per player</strong>.</li>
           <li><strong>Skip (1 ✪)</strong> — discard the current card and draw a fresh one instead. Useful if you have no idea about the song.</li>
-          <li><strong>HITSTER! Steal (1 ✪)</strong> — before the active player submits, any one other player can pay 1 token to challenge. See the Steal section below.</li>
+          <li><strong>HITSTER! Challenge (1 ✪)</strong> — before the active player submits, any other player can pay 1 token to challenge. See the Challenge section below.</li>
           <li><strong>Buy Placement (3 ✪)</strong> — spend 3 tokens to let the game place the card automatically in the correct chronological position. No guessing, no risk — guaranteed card.</li>
         </ul>
 
-        <h3 class="htp-section-title">HITSTER! Steal</h3>
+        <h3 class="htp-section-title">HITSTER! Challenge</h3>
         <ul>
-          <li>After the active player has chosen their slot but <em>before</em> they submit, any one other player may pay <strong>1 token</strong> to attempt a steal.</li>
-          <li>The challenger picks a <strong>different slot</strong> on the active player's timeline — they are betting that the active player is wrong and they know the right position.</li>
+          <li>After the active player has chosen their slot but <em>before</em> they submit, any other player may pay <strong>1 token</strong> to challenge.</li>
+          <li>The challenger picks a <strong>different slot</strong> on the active player's timeline — betting the active player is wrong and they know the right position.</li>
           <li><strong>Active player correct</strong> — they keep the card. The challenger loses their token.</li>
-          <li><strong>Challenger correct, active player wrong</strong> — the challenger wins the card, which is automatically added to the challenger's own timeline.</li>
+          <li><strong>Challenger correct, active player wrong</strong> — the challenger wins the card, automatically added to their own timeline.</li>
           <li><strong>Both wrong</strong> — the card is discarded. The challenger already lost their token.</li>
-          <li>Only <strong>one steal attempt</strong> is allowed per turn.</li>
-          <li><em>PRO mode only:</em> the challenger must also name the song correctly to win the steal. If they win, their token is returned.</li>
+          <li>Only <strong>one challenge attempt</strong> is allowed per turn.</li>
+          <li><em>PRO mode only:</em> the challenger must also name the song correctly to win the challenge. If they win, their token is returned.</li>
         </ul>
 
         <h3 class="htp-section-title">Modes</h3>
@@ -237,19 +237,6 @@
           <button type="button" id="preview-btn" class="preview-btn hidden">▶ Play Spotify Preview</button>
           <div id="spotify-preview-container" class="spotify-preview-container hidden"></div>
 
-          <!-- Name guess: always-visible inputs from start of turn -->
-          <div id="name-guess-area" class="name-guess-area hidden">
-            <!-- Toggle kept for legacy JS but hidden by default; only PRO mode uses .name-guess-form--required -->
-            <button type="button" id="name-guess-toggle-btn" class="secondary-btn name-guess-toggle-btn hidden">
-              🎵 Name song &amp; artist for a bonus token ✪
-            </button>
-            <p class="name-guess-hint" id="name-guess-hint">🎵 Name song &amp; artist for a bonus token ✪</p>
-            <div id="name-guess-form" class="name-guess-form">
-              <input type="text" id="guess-title" class="player-name-input" placeholder="Song title" maxlength="60">
-              <input type="text" id="guess-artist" class="player-name-input" placeholder="Artist name" maxlength="60">
-            </div>
-          </div>
-
           <!-- Reveal outcome message — shown in the card area after the flip -->
           <div id="reveal-message" class="reveal-message hidden"></div>
 
@@ -257,9 +244,9 @@
           <button type="button" id="override-btn" class="secondary-btn override-btn hidden">
             ✏️ Actually, the artist &amp; title were correct
           </button>
-          <!-- PRO steal override: appears when stealer had the right year but wrong name -->
+          <!-- PRO challenge override: appears when challenger had the right year but wrong name -->
           <button type="button" id="steal-override-btn" class="secondary-btn override-btn steal-override-btn hidden">
-            ✏️ Override steal: artist &amp; title were actually correct
+            ✏️ Override challenge: artist &amp; title were actually correct
           </button>
           <!-- PRO: shows what the stealer typed, so players can compare before deciding to override -->
           <div id="steal-guess-review" class="steal-guess-review hidden">
@@ -304,6 +291,20 @@
         </div>
       </section>
 
+      <!-- Name guess: always-visible inputs from start of turn -->
+      <!-- Placed here (after timeline) so on mobile the step order is: listen → place → guess name -->
+      <div id="name-guess-area" class="name-guess-area hidden">
+        <!-- Toggle kept for legacy JS but hidden by default; only PRO mode uses .name-guess-form--required -->
+        <button type="button" id="name-guess-toggle-btn" class="secondary-btn name-guess-toggle-btn hidden">
+          🎵 Name song &amp; artist for a bonus token ✪
+        </button>
+        <p class="name-guess-hint" id="name-guess-hint">🎵 Name song &amp; artist for a bonus token ✪</p>
+        <div id="name-guess-form" class="name-guess-form">
+          <input type="text" id="guess-title" class="player-name-input" placeholder="Song title" maxlength="60">
+          <input type="text" id="guess-artist" class="player-name-input" placeholder="Artist name" maxlength="60">
+        </div>
+      </div>
+
       <!-- ===== Feedback message bar ===== -->
       <div id="message-bar" class="message-bar hidden" role="alert"></div>
 
@@ -321,8 +322,8 @@
             <span class="icon-action-cost">1 ✪</span>
           </button>
           <button type="button" id="steal-btn" class="secondary-btn icon-action-btn">
-            <span class="icon-action-emoji">🎯</span>
-            <span class="icon-action-label">HITSTER! steal</span>
+            <span class="icon-action-emoji">⚔️</span>
+            <span class="icon-action-label">Challenge</span>
             <span class="icon-action-cost">1 ✪</span>
           </button>
           <button type="button" id="buy-btn" class="secondary-btn icon-action-btn">
@@ -407,19 +408,19 @@
         <ul>
           <li><strong>Earning tokens</strong> — guess the name correctly during your turn to earn +1 token. For featured songs, the main artist alone counts (e.g. "Eminem" for <em>Eminem ft. Rihanna</em>). Tokens are capped at <strong>5 per player</strong>.</li>
           <li><strong>Skip (1 ✪)</strong> — discard the current card and draw a fresh one instead. Useful if you have no idea about the song.</li>
-          <li><strong>HITSTER! Steal (1 ✪)</strong> — before the active player submits, any one other player can pay 1 token to challenge. See the Steal section below.</li>
+          <li><strong>HITSTER! Challenge (1 ✪)</strong> — before the active player submits, any other player can pay 1 token to challenge. See the Challenge section below.</li>
           <li><strong>Buy Placement (3 ✪)</strong> — spend 3 tokens to let the game place the card automatically in the correct chronological position. No guessing, no risk — guaranteed card.</li>
         </ul>
 
-        <h3 class="htp-section-title">HITSTER! Steal</h3>
+        <h3 class="htp-section-title">HITSTER! Challenge</h3>
         <ul>
-          <li>After the active player has chosen their slot but <em>before</em> they submit, any one other player may pay <strong>1 token</strong> to attempt a steal.</li>
-          <li>The challenger picks a <strong>different slot</strong> on the active player's timeline — they are betting that the active player is wrong and they know the right position.</li>
+          <li>After the active player has chosen their slot but <em>before</em> they submit, any other player may pay <strong>1 token</strong> to challenge.</li>
+          <li>The challenger picks a <strong>different slot</strong> on the active player's timeline — betting the active player is wrong and they know the right position.</li>
           <li><strong>Active player correct</strong> — they keep the card. The challenger loses their token.</li>
-          <li><strong>Challenger correct, active player wrong</strong> — the challenger wins the card, which is automatically added to the challenger's own timeline.</li>
+          <li><strong>Challenger correct, active player wrong</strong> — the challenger wins the card, automatically added to their own timeline.</li>
           <li><strong>Both wrong</strong> — the card is discarded. The challenger already lost their token.</li>
-          <li>Only <strong>one steal attempt</strong> is allowed per turn.</li>
-          <li><em>PRO mode only:</em> the challenger must also name the song correctly to win the steal. If they win, their token is returned.</li>
+          <li>Only <strong>one challenge attempt</strong> is allowed per turn.</li>
+          <li><em>PRO mode only:</em> the challenger must also name the song correctly to win the challenge. If they win, their token is returned.</li>
         </ul>
 
         <h3 class="htp-section-title">Modes</h3>

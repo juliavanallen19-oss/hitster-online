@@ -179,6 +179,11 @@
   <!-- token counters, action buttons.                               -->
   <!-- =========================================================== -->
   <div id="game-screen" class="screen">
+    <!-- Player name intro splash shown between turns -->
+    <div id="turn-splash" class="turn-splash hidden" aria-live="polite">
+      <span id="turn-splash-name" class="turn-splash-name"></span>
+      <span class="turn-splash-label">'s turn</span>
+    </div>
     <div class="game-container">
 
       <!-- ===== HEADER ============================================
@@ -379,6 +384,11 @@
     <div class="htp-modal-inner">
       <div class="htp-modal-header">
         <h2 id="htp-modal-title" class="htp-modal-title"><span class="q-icon">?</span> How to play</h2>
+        <div class="htp-font-controls" aria-label="Text size">
+          <button type="button" class="htp-font-btn" data-size="small" aria-label="Small text">A</button>
+          <button type="button" class="htp-font-btn htp-font-btn--active" data-size="medium" aria-label="Medium text">A</button>
+          <button type="button" class="htp-font-btn" data-size="large" aria-label="Large text">A</button>
+        </div>
         <button type="button" class="icon-btn htp-modal-close" aria-label="Close">✕</button>
       </div>
       <div class="htp-modal-body">

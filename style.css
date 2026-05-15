@@ -450,6 +450,17 @@ body {
   font-weight: 400;
 }
 
+/* Small card-shaped icon with the brand gradient — used in player pills */
+.card-icon {
+  display: inline-block;
+  flex-shrink: 0;
+  width: 9px;
+  height: 12px;
+  background: linear-gradient(160deg, #ff3d8b, #ffae3d);
+  border-radius: 2px;
+  vertical-align: middle;
+}
+
 /* Row 2: active player banner + tokens + deck counter */
 .turn-header-row2 {
   display: flex;
@@ -484,15 +495,19 @@ body {
   letter-spacing: 0.02em;
 }
 
-/* Token badge — bigger, with explicit "tokens" label so first-time players know what ✪ is */
+/* Token badge — same dimensions as the finish-game button so they align when stacked */
 .token-badge {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
+  height: 36px;
+  box-sizing: border-box;
+  min-width: 112px;
   background: rgba(240, 192, 64, 0.08);
   border: 1px solid rgba(240, 192, 64, 0.35);
-  border-radius: 10px;
-  padding: 8px 14px;
+  border-radius: 8px;
+  padding: 0 14px;
   font-size: 1rem;
   font-weight: 600;
   white-space: nowrap;
@@ -511,16 +526,23 @@ body {
   margin-left: 2px;
 }
 
+#active-player-token-count {
+  font-size: 0.92rem;
+  font-weight: 700;
+}
+
 /* Deck-counter moved into header so it's always visible */
 .deck-counter-inline {
   display: inline-flex;
   align-items: center;
+  height: 36px;
+  box-sizing: border-box;
   gap: 6px;
   font-size: 0.85rem;
   color: #8a8aaa;
-  padding: 6px 10px;
-  background: #0e0e12;
-  border: 1px solid #2a2a36;
+  padding: 0 12px;
+  background: #1a1a22;
+  border: 1px solid #3a3a48;
   border-radius: 8px;
 }
 
@@ -565,7 +587,9 @@ body {
 .mode-badge {
   display: inline-flex;
   align-items: center;
-  padding: 5px 11px;
+  height: 36px;
+  box-sizing: border-box;
+  padding: 0 11px;
   font-size: 0.8rem;
   font-weight: 600;
   color: #c8c8d4;
@@ -582,8 +606,13 @@ body {
   font-family: inherit;
   font-size: 0.82rem;
   font-weight: 600;
-  line-height: 1.2;
-  padding: 6px 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 36px;
+  box-sizing: border-box;
+  min-width: 112px;
+  padding: 0 14px;
   white-space: nowrap;
   background: rgba(255, 174, 61, 0.08);
   color: #ffae3d;

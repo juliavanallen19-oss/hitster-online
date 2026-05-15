@@ -342,8 +342,8 @@ function renderAllPlayers() {
         const cards = createEl('span', 'player-pill-stat');
         cards.title = 'Cards on timeline';
         cards.append(
-            createEl('span', 'player-pill-card-count', String(player.timeline.length)),
-            createEl('span', 'player-pill-card-label', ' cards')
+            createEl('span', 'card-icon'),
+            createEl('span', 'player-pill-card-count', String(player.timeline.length))
         );
         pill.appendChild(cards);
 

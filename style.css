@@ -1430,6 +1430,28 @@ body {
     animation: token-capped-pulse 0.55s ease 2;
 }
 
+/* ===== PRO steal-guess review panel — shown below the steal-override button ===== */
+
+.steal-guess-review {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 6px;
+    padding: 10px 12px;
+    background: rgba(61, 210, 255, 0.06);
+    border: 1px solid rgba(61, 210, 255, 0.25);
+    border-radius: 8px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.steal-guess-review-label {
+    margin: 0;
+    font-size: 0.8rem;
+    color: #3dd2ff;
+    letter-spacing: 0.01em;
+}
+
 /* ===== PRO steal override button — blue tint to distinguish from active player's override ===== */
 
 .steal-override-btn {
@@ -1499,6 +1521,8 @@ body {
   border-radius: 10px;
   padding: 12px;
   background: #1a1208;
+  box-sizing: border-box;
+  width: 100%;
 }
 
 .name-guess-form--required #name-guess-label {
@@ -1520,6 +1544,40 @@ body {
   margin: 0;
   font-size: 0.82rem;
   color: #ff8c42;
+}
+
+/* "Log song title & artist" button inside the steal panel */
+.steal-log-btn {
+  width: 100%;
+  margin-top: 2px;
+}
+
+/* Stealer's locked-in guess: shown after "Place token here", stays until after reveal */
+.steal-live-guess {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 12px;
+  background: rgba(255, 107, 53, 0.06);
+  border: 1px solid rgba(255, 107, 53, 0.25);
+  border-radius: 8px;
+}
+
+.steal-live-guess-label {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #ff8c42;
+  letter-spacing: 0.01em;
+}
+
+/* Turns blue to match the steal-override button when an override is possible */
+.steal-live-guess--override {
+  background: rgba(61, 210, 255, 0.06);
+  border-color: rgba(61, 210, 255, 0.25);
+}
+
+.steal-live-guess--override .steal-live-guess-label {
+  color: #3dd2ff;
 }
 
 /* =============================================================

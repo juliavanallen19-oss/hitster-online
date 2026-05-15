@@ -203,6 +203,12 @@
           <button type="button" id="steal-override-btn" class="secondary-btn override-btn steal-override-btn hidden">
             ✏️ Override steal: artist &amp; title were actually correct
           </button>
+          <!-- PRO: shows what the stealer typed, so players can compare before deciding to override -->
+          <div id="steal-guess-review" class="steal-guess-review hidden">
+            <p id="steal-guess-review-label" class="steal-guess-review-label"></p>
+            <input type="text" id="steal-review-title"  class="player-name-input" disabled placeholder="Song title">
+            <input type="text" id="steal-review-artist" class="player-name-input" disabled placeholder="Artist name">
+          </div>
 
         </div>
       </section>
@@ -271,6 +277,13 @@
 
       <!-- ===== HITSTER! steal panel ===== -->
       <div id="steal-panel" class="steal-panel hidden"></div>
+
+      <!-- PRO: stealer's locked-in guess, visible from "Place token here" until after reveal -->
+      <div id="steal-live-guess" class="steal-live-guess hidden">
+        <p id="steal-live-guess-label" class="steal-live-guess-label"></p>
+        <input type="text" id="steal-live-guess-title"  class="player-name-input" disabled placeholder="Song title">
+        <input type="text" id="steal-live-guess-artist" class="player-name-input" disabled placeholder="Artist name">
+      </div>
 
       </div> <!-- /.board-stack -->
       </div> <!-- /.board-main -->

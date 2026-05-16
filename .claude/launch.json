@@ -1,0 +1,12 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "hitster",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["--yes", "http-server", ".", "-c-1", "-s"],
+      "port": 8080,
+      "autoPort": true
+    }
+  ]
+}

@@ -1741,6 +1741,9 @@ let closeHtpModal = () => {};
     const closeModal = () => { modal.classList.remove('open'); modal.setAttribute('aria-hidden', 'true');  };
     closeHtpModal = closeModal;
     el('game-how-to-play-btn').addEventListener('click', openModal);
+    // Setup screen "? How to Play" entry — opens the same modal (no more inline duplicate)
+    const setupHtpBtn = document.getElementById('setup-htp-btn');
+    if (setupHtpBtn) setupHtpBtn.addEventListener('click', openModal);
     modal.querySelector('.htp-modal-close').addEventListener('click', closeModal);
     modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
     document.addEventListener('keydown', e => { if (e.key === 'Escape' && modal.classList.contains('open')) closeModal(); });

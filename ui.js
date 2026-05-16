@@ -395,6 +395,7 @@ function renderAllPlayers() {
     game.players.forEach((player, i) => {
         const isActive = i === game.currentPlayerIndex;
         const pill = createEl('div', 'player-pill' + (isActive ? ' player-pill--active' : ''));
+        pill.dataset.playerIndex = i;
 
         pill.appendChild(createEl('span', 'player-pill-name', player.name));
 
@@ -573,12 +574,30 @@ function setButtonEnabled(btn, enabled) {
     }
 }
 
+function tokenAnimationTarget(playerIndex = game.currentPlayerIndex) {
+    if (playerIndex === game.currentPlayerIndex) {
+        return {
+            countEl: el('active-player-token-count'),
+            badge: el('active-player-tokens')
+        };
+    }
+
+    const pill = document.querySelector(`.player-pill[data-player-index="${playerIndex}"]`);
+    return {
+        countEl: pill?.querySelector('.player-token-count') ?? null,
+        badge: pill?.querySelector('.player-pill-stat') ?? null
+    };
+}
+
 // Spawns a ✪ token in the centre of the screen, spins it, flies it to the
-// token badge in the header, then plays a coin-landing sound and bumps the badge.
-// The token count in the header only increments visually when the coin arrives.
-async function animateTokenEarned() {
+// target player's token badge, then plays a coin-landing sound and bumps it.
+// The token count only increments visually when the coin arrives.
+async function animateTokenEarned(playerIndex = game.currentPlayerIndex) {
+    const target = tokenAnimationTarget(playerIndex);
+    if (!target.countEl || !target.badge) return;
+
     // Hold back the displayed count — the coin will "deliver" the +1 when it lands
-    const countEl    = el('active-player-token-count');
+    const countEl    = target.countEl;
     const finalCount = parseInt(countEl.textContent, 10);
     countEl.textContent = String(finalCount - 1);
 
@@ -593,7 +612,7 @@ async function animateTokenEarned() {
 
     await sleep(630);
 
-    const badge = el('active-player-tokens');
+    const badge = target.badge;
     const r     = badge.getBoundingClientRect();
     token.style.transition = [
         'left 0.62s cubic-bezier(0.4,0,0.2,1)',
@@ -1087,14 +1106,16 @@ el('qf-play-btn').addEventListener('click', () => {
     qfAudioStarted = true;
     qfAudio = new Audio(url);
     qfAudio.volume = 0.85;
-    qfAudio.addEventListener('ended', () => stopQuickFireTimer());
-    qfAudio.play().catch(() => {
+    qfAudio.play().then(() => {
+        startQuickFireCountdown();
+        updatePhasePrompt({ hasSlot: selectedPosition !== null, placed: activePosition !== null });
+    }).catch(() => {
+        stopQuickFireTimer();
         showMessage('Could not play audio — check your internet connection.', true);
         qfAudioStarted = false;
+        el('qf-play-icon').textContent = '▶';
         el('qf-play-btn').disabled = false;
     });
-    startQuickFireCountdown();
-    updatePhasePrompt({ hasSlot: selectedPosition !== null, placed: activePosition !== null });
 });
 
 // --- Name guess toggle ---
@@ -1336,7 +1357,10 @@ el('submit-btn').addEventListener('click', async () => {
         el('stealer-timeline-section').classList.remove('hidden');
 
         soundStealWins();
-        if (result.tokenEarned || isPro) setTimeout(animateTokenEarned, 900);
+        if (result.tokenEarned || isPro) {
+            const stealerIndex = game.players.indexOf(stealer);
+            setTimeout(() => animateTokenEarned(stealerIndex), 900);
+        }
         await flyCardToTimeline('stealer-timeline-container');
         await sleep(1800);
 
@@ -1521,7 +1545,7 @@ el('steal-override-btn').addEventListener('click', async () => {
 
     updateTokenDisplay();
     renderAllPlayers();
-    animateTokenEarned();
+    animateTokenEarned(game.players.indexOf(stealer));
 
     await flyCardToTimeline('stealer-timeline-container');
     soundCorrectPlacement();

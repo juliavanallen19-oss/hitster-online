@@ -316,7 +316,7 @@ function checkWinCondition(game) {
 
 
 // =============================================================
-// TASK 3.14 — Turn flow, split into TWO steps (CHANGE #9)
+// TASK 3.14 — Turn flow
 //
 // In the real game, the order is:
 //   1. Player listens to the song (QR code already shown)
@@ -326,47 +326,10 @@ function checkWinCondition(game) {
 //   5. If applicable, reveal wether name artist + title are correct for a bonus token
 //   6. Move to next player
 //
-// We split this into two functions so the UI can call them at the right moments.
+// The UI resolves placement, name guesses, and challenges together in resolveTurn().
 // =============================================================
 
-// --- Step A: Place the card. Always called, mandatory. ---
-// Returns an object describing what happened.
-function placeCard(game, chosenPosition) {
-    let activePlayer = game.getCurrentPlayer();
-    let card = game.currentCard;
-
-    let correct = isPlacementCorrect(activePlayer.timeline, card, chosenPosition);
-
-    if (correct) {
-        insertCardIntoTimeline(activePlayer, card, chosenPosition);
-    } else {
-        discardCard(game);
-    }
-
-    return {
-        placementCorrect: correct,
-        card: card,
-        player: activePlayer,
-    };
-}
-
-// --- Step B: Attempt artist/title guess. OPTIONAL. ---
-// Called BEFORE the card is revealed. Reads from game.currentCard
-// so it works whether the card has been inserted yet or not.
-// A token is earned for a correct guess regardless of placement outcome.
-function attemptNameGuess(game, guessedArtist, guessedTitle) {
-    let activePlayer = game.getCurrentPlayer();
-    let card = game.currentCard;
-
-    let correct = checkNameGuess(card, guessedArtist, guessedTitle);
-    if (correct) {
-        earnToken(activePlayer);
-    }
-
-    return { nameGuessCorrect: correct };
-}
-
-// --- Step C: End the turn. Always called at the end. ---
+// End the turn. Always called at the end.
 // Handles the final round: when the win target is first hit, the remaining
 // players in the current round each get one more turn before the game ends.
 function endTurn(game) {
@@ -463,27 +426,6 @@ function skipCard(game) {
     discardCard(game);
     let nextCard = drawCard(game);
     return { success: true, card: nextCard };
-}
-
-
-// =============================================================
-// TASKS 4.2 + 4.3 — HITSTER! steal attempt
-// A non-active player pays 1 token and picks a position on their
-// OWN timeline. If the year fits → they keep the card.
-// If wrong → the active player keeps it (normal flow continues).
-// =============================================================
-
-function stealAttempt(game, stealerIndex, chosenPosition) {
-    let stealer = game.players[stealerIndex];
-    let card = game.currentCard;
-    if (stealer.tokens < 1) return { stealCorrect: false, stealer, card };
-    stealer.tokens -= 1;
-    let correct = isPlacementCorrect(stealer.timeline, card, chosenPosition);
-    if (correct) {
-        insertCardIntoTimeline(stealer, card, chosenPosition);
-        game.currentCard = null;
-    }
-    return { stealCorrect: correct, stealer, card };
 }
 
 

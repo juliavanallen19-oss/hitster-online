@@ -496,6 +496,7 @@ body {
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
+  padding-bottom: 8px;
 }
 
 .active-player-label {

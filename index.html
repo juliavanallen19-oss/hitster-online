@@ -137,12 +137,17 @@
           <span class="mode-card-name">🔥 PRO</span>
           <span class="mode-card-desc">5 tokens to start. You must name both artist &amp; title correctly to keep the card. Stealers must too — but they get their token back if they succeed.</span>
         </button>
+        <button type="button" class="mode-card" data-mode="quickfire">
+          <span class="mode-card-name">⚡ Quick Fire</span>
+          <span class="mode-card-desc">3 tokens to start. Hear a 30-second preview and place your card before time runs out!</span>
+        </button>
       </div>
       <!-- Hidden select keeps the selected value for onStartGame() to read -->
       <select id="mode-select" class="hidden">
         <option value="original">Original</option>
         <option value="chill">Chill</option>
         <option value="pro">PRO</option>
+        <option value="quickfire">Quick Fire</option>
       </select>
     </section>
 
@@ -225,6 +230,20 @@
             <div id="flip-card-inner" class="flip-card-inner">
               <div class="flip-card-front">
                 <div id="qr-container" class="qr-container"></div>
+                <!-- Quick Fire audio player — sits inside the card, hidden in other modes -->
+                <div id="quickfire-player" class="quickfire-player hidden">
+                  <button type="button" id="qf-play-btn" class="qf-play-btn">
+                    <span id="qf-play-icon" class="qf-play-icon">▶</span>
+                    <span class="qf-play-label">Play preview</span>
+                  </button>
+                  <div id="qf-timer-display" class="qf-timer-display hidden">
+                    <div id="qf-countdown" class="qf-countdown">30</div>
+                    <div id="qf-progress-bar" class="qf-progress-bar">
+                      <div id="qf-progress-fill" class="qf-progress-fill"></div>
+                    </div>
+                    <p class="qf-timer-label">seconds to place your card</p>
+                  </div>
+                </div>
               </div>
               <div class="flip-card-back" aria-hidden="true">
                 <p id="reveal-year" class="reveal-year">—</p>

@@ -15,8 +15,64 @@ let pendingStealPosition  = null; // slot the stealer tapped, not yet locked wit
 let stealNameGuessLogged  = false; // PRO: true once the stealer clicks "Log song title & artist"
 let pendingStealNameGuess = null;  // PRO: { title, artist } logged by the stealer before locking
 
+// --- Quick Fire state ---
+let qfTimerInterval = null;   // setInterval handle for the countdown tick
+let qfTimerSeconds  = 30;     // seconds remaining in current countdown
+let qfAudio         = null;   // HTMLAudioElement for the preview clip
+let qfAudioStarted  = false;  // true once the player has pressed Play this turn
+
 // --- Shorthand helper ---
 function el(id) { return document.getElementById(id); }
+
+// --- Quick Fire helpers ---
+function isQuickFire() { return game && game.mode === "quickfire"; }
+
+function stopQuickFireTimer() {
+    if (qfTimerInterval !== null) { clearInterval(qfTimerInterval); qfTimerInterval = null; }
+    if (qfAudio !== null) { qfAudio.pause(); qfAudio.src = ''; qfAudio = null; }
+}
+
+function resetQuickFirePlayer() {
+    stopQuickFireTimer();
+    qfTimerSeconds = 30;
+    qfAudioStarted = false;
+    el('qf-play-icon').textContent     = '▶';
+    el('qf-countdown').textContent     = '30';
+    el('qf-countdown').classList.remove('qf-countdown--urgent');
+    el('qf-progress-fill').style.width = '100%';
+    el('qf-timer-display').classList.add('hidden');
+    el('qf-play-btn').disabled = false;
+}
+
+function startQuickFireCountdown() {
+    qfTimerSeconds = 30;
+    el('qf-timer-display').classList.remove('hidden');
+    el('qf-play-icon').textContent = '⏸';
+    el('qf-play-btn').disabled = true;
+
+    qfTimerInterval = setInterval(() => {
+        qfTimerSeconds -= 1;
+        el('qf-countdown').textContent = String(qfTimerSeconds);
+        el('qf-progress-fill').style.width = ((qfTimerSeconds / 30) * 100) + '%';
+        if (qfTimerSeconds <= 10) el('qf-countdown').classList.add('qf-countdown--urgent');
+        if (qfTimerSeconds <= 0) { stopQuickFireTimer(); onQuickFireTimeUp(); }
+    }, 1000);
+}
+
+function onQuickFireTimeUp() {
+    setButtonEnabled(el('skip-btn'), false);
+    setButtonEnabled(el('buy-btn'),  false);
+    if (activePosition !== null) return; // already placed — normal flow continues
+    discardCard(game);
+    el('place-btn').classList.add('hidden');
+    el('skip-btn').classList.add('hidden');
+    el('buy-btn').classList.add('hidden');
+    el('steal-btn').classList.add('hidden');
+    el('submit-btn').classList.add('hidden');
+    showRevealMessage("⏱ Time's up — card discarded.", 'error');
+    el('next-turn-btn').classList.remove('hidden');
+    updatePhasePrompt({ hasSlot: false, placed: false });
+}
 
 function createEl(tag, className = '', text = '') {
     const node = document.createElement(tag);
@@ -497,7 +553,13 @@ function updatePhasePrompt({ hasSlot, placed }) {
         promptEl.textContent = '✅ Slot chosen — tap "Place card here".';
         return;
     }
-    promptEl.textContent = '🎧 Listen first via the QR code, then tap a slot on your timeline.';
+    if (isQuickFire()) {
+        promptEl.textContent = qfAudioStarted
+            ? '⚡ Timer running — tap a slot on your timeline, then Place card here.'
+            : '⚡ Tap Play to start the 30-second preview, then place your card.';
+    } else {
+        promptEl.textContent = '🎧 Listen first via the QR code, then tap a slot on your timeline.';
+    }
 }
 
 function setButtonEnabled(btn, enabled) {
@@ -661,7 +723,7 @@ function beginTurn() {
     // Update mode badge in header
     const modeBadge = el('mode-badge');
     if (modeBadge) {
-        const modeLabels = { original: '🎵 Original Mode', chill: '😎 Chill Mode', pro: '🔥 PRO Mode' };
+        const modeLabels = { original: '🎵 Original Mode', chill: '😎 Chill Mode', pro: '🔥 PRO Mode', quickfire: '⚡ Quick Fire' };
         modeBadge.textContent = modeLabels[game.mode] || game.mode;
     }
 
@@ -676,6 +738,8 @@ function beginTurn() {
         if (hintEl) hintEl.textContent = '🔥 PRO: name BOTH the title and artist or lose the card';
     } else if (isChill) {
         if (hintEl) hintEl.textContent = 'Optional: 😎 Name the title OR artist for a bonus ✪';
+    } else if (game.mode === "quickfire") {
+        if (hintEl) hintEl.textContent = 'Optional: ⚡ Name both the title and artist for a bonus ✪';
     } else {
         if (hintEl) hintEl.textContent = 'Optional: 🎵 Name both the title and artist for a bonus ✪';
     }
@@ -709,8 +773,20 @@ function beginTurn() {
 
     lastPlayedCard = game.currentCard;
 
-    generateQRCode(game.currentCard.spotify_url);
-    el('flip-card').classList.add('qr-pulse');
+    if (isQuickFire()) {
+        el('qr-container').innerHTML = '';
+        el('flip-card').classList.remove('qr-pulse');
+        el('scan-hint').classList.add('hidden');
+        el('preview-btn').classList.add('hidden');
+        el('spotify-preview-container').classList.add('hidden');
+        el('spotify-preview-container').innerHTML = '';
+        el('quickfire-player').classList.remove('hidden');
+        resetQuickFirePlayer();
+    } else {
+        generateQRCode(game.currentCard.spotify_url);
+        el('flip-card').classList.add('qr-pulse');
+        el('quickfire-player').classList.add('hidden');
+    }
     renderPlayerHeader();
     renderTimeline();
     renderAllPlayers();
@@ -998,6 +1074,24 @@ el('preview-btn').addEventListener('click', () => {
     container.classList.remove('hidden');
 });
 
+// --- Quick Fire play button ---
+el('qf-play-btn').addEventListener('click', () => {
+    if (qfAudioStarted) return;
+    const url = game?.currentCard?.preview_url;
+    if (!url) { showMessage('No audio preview available for this card.', true); return; }
+    qfAudioStarted = true;
+    qfAudio = new Audio(url);
+    qfAudio.volume = 0.85;
+    qfAudio.addEventListener('ended', () => stopQuickFireTimer());
+    qfAudio.play().catch(() => {
+        showMessage('Could not play audio — check your internet connection.', true);
+        qfAudioStarted = false;
+        el('qf-play-btn').disabled = false;
+    });
+    startQuickFireCountdown();
+    updatePhasePrompt({ hasSlot: selectedPosition !== null, placed: activePosition !== null });
+});
+
 // --- Name guess toggle ---
 el('name-guess-toggle-btn').addEventListener('click', () => {
     const form = el('name-guess-form');
@@ -1075,6 +1169,7 @@ el('submit-btn').addEventListener('click', async () => {
         return;
     }
 
+    if (isQuickFire()) stopQuickFireTimer();
     hideMessageBars();
     const artist  = el('guess-artist').value.trim();
     const title   = el('guess-title').value.trim();
@@ -1134,6 +1229,7 @@ el('submit-btn').addEventListener('click', async () => {
     el('scan-hint').classList.add('hidden');
     el('preview-btn').classList.add('hidden');
     el('spotify-preview-container').classList.add('hidden');
+    el('quickfire-player').classList.add('hidden');
     el('steal-btn').classList.add('hidden');
     el('steal-panel').classList.add('hidden');
     el('submit-btn').classList.add('hidden');
@@ -1463,6 +1559,7 @@ el('skip-btn').addEventListener('click', () => {
         showMessage("You don't have enough tokens. Gain them first to use this feature.", true);
         return;
     }
+    if (isQuickFire()) stopQuickFireTimer();
     const result = skipCard(game);
     if (result.success) {
         lastPlayedCard   = result.card;
@@ -1471,17 +1568,28 @@ el('skip-btn').addEventListener('click', () => {
         hideSongInfo();
         soundSkipCard();
         if (result.card) {
-            generateQRCode(result.card.spotify_url);
-            el('flip-card').classList.remove('qr-pulse');
-            el('flip-card').classList.add('qr-pulse');
-            el('spotify-preview-container').classList.add('hidden');
-            el('spotify-preview-container').innerHTML = '';
-            el('preview-btn').classList.remove('hidden');
-            renderPlayerHeader();
-            renderTimeline();
-            renderAllPlayers();
-            updateButtonStates();
-            showMessage('Skipped — scan the new QR code 🎧', true);
+            if (isQuickFire()) {
+                el('flip-card').classList.remove('qr-pulse');
+                el('quickfire-player').classList.remove('hidden');
+                resetQuickFirePlayer();
+                renderPlayerHeader();
+                renderTimeline();
+                renderAllPlayers();
+                updateButtonStates();
+                showMessage('Skipped — tap Play to hear the new song ⚡', true);
+            } else {
+                generateQRCode(result.card.spotify_url);
+                el('flip-card').classList.remove('qr-pulse');
+                el('flip-card').classList.add('qr-pulse');
+                el('spotify-preview-container').classList.add('hidden');
+                el('spotify-preview-container').innerHTML = '';
+                el('preview-btn').classList.remove('hidden');
+                renderPlayerHeader();
+                renderTimeline();
+                renderAllPlayers();
+                updateButtonStates();
+                showMessage('Skipped — scan the new QR code 🎧', true);
+            }
         } else {
             showWinScreen(handleEmptyDeck(game), 'deck-empty');
         }
@@ -1494,6 +1602,7 @@ el('buy-btn').addEventListener('click', async () => {
         showMessage("You don't have enough tokens. Gain them first to use this feature.", true);
         return;
     }
+    if (isQuickFire()) { stopQuickFireTimer(); el('quickfire-player').classList.add('hidden'); }
     const card = game.currentCard;
     justWonCard = card; // set before buyPlacement clears currentCard
     const result = buyPlacement(game);
@@ -1570,6 +1679,10 @@ el('finish-game-btn').addEventListener('click', () => {
 // --- Play Again ---
 el('play-again-btn').addEventListener('click', () => {
     closeHtpModal();
+    stopQuickFireTimer();
+    qfTimerSeconds = 30;
+    qfAudioStarted = false;
+    el('quickfire-player').classList.add('hidden');
     game             = null;
     selectedPosition = null;
     activePosition   = null;

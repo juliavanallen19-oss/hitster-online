@@ -47,6 +47,7 @@ class Game {
         if (mode === "pro") startingTokens = 5;
         if (mode === "expert") startingTokens = 3;
         if (mode === "cooperative") startingTokens = 3;
+        if (mode === "quickfire") startingTokens = 3;
 
         // Create a Player object for each name, with the right starting tokens
         this.players = playerNames.map(name => {

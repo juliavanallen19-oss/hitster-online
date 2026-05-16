@@ -838,6 +838,7 @@ function onSlotClick(position) {
 function showWinScreen(winners, reason = null) {
     soundWin();
     const list = Array.isArray(winners) ? winners : [winners];
+    const recap = collectGameStats(game, list, reason);
 
     // Context note above the headline
     const noteEl = el('win-deck-note');
@@ -868,35 +869,99 @@ function showWinScreen(winners, reason = null) {
     }
     el('winner-stats').textContent = statsText;
 
+    renderWinRecap(recap);
+
     // Full ranking — sorted by cards (desc), then tokens (desc) as tiebreaker
-    const sorted = [...game.players].sort(
-        (a, b) => b.timeline.length - a.timeline.length || b.tokens - a.tokens
-    );
+    const sorted = recap.players;
     const rankEl = el('win-ranking');
     rankEl.innerHTML = '';
     rankEl.appendChild(createEl('h3', 'win-ranking-title', 'Final standings'));
 
-    let rank = 1;
-    sorted.forEach((player, i) => {
-        if (i > 0) {
-            const prev = sorted[i - 1];
-            if (prev.timeline.length !== player.timeline.length || prev.tokens !== player.tokens) {
-                rank = i + 1;
-            }
-        }
-        const isWinner = list.some(w => w === player);
+    sorted.forEach(player => {
         const row = document.createElement('div');
-        row.className = 'win-rank-row' + (isWinner ? ' win-rank-row--winner' : '');
-        const cardText = `${player.timeline.length} card${player.timeline.length !== 1 ? 's' : ''} · ${player.tokens} ✪`;
-        row.append(
-            createEl('span', 'win-rank-pos', isWinner ? '🏆' : `#${rank}`),
+        row.className = 'win-rank-row' + (player.isWinner ? ' win-rank-row--winner' : '');
+
+        const main = createEl('div', 'win-rank-main');
+        main.append(
             createEl('span', 'win-rank-name', player.name),
-            createEl('span', 'win-rank-stats', cardText)
+            createEl('span', 'win-rank-stats', `${player.finalCards} cards · ${player.finalTokens} ✪ left`)
+        );
+
+        const metrics = createEl('div', 'win-rank-metrics');
+        [
+            ['Correctly placed', player.placementAttempts ? `${player.placementAccuracy}%` : '—'],
+            ['Song guess', player.nameGuesses ? `${player.nameAccuracy}%` : '—'],
+            ['Best streak', String(player.bestStreak)],
+            ['Challenges', `${player.challengesWon}/${player.challengesStarted}`],
+        ].forEach(([label, value]) => metrics.appendChild(createMiniMetric(label, value)));
+
+        row.append(
+            createEl('span', 'win-rank-pos', player.isWinner ? '🏆' : `#${player.rank}`),
+            main,
+            metrics
         );
         rankEl.appendChild(row);
     });
 
     showScreen('win-screen');
+}
+
+function createMiniMetric(label, value) {
+    const metric = createEl('span', 'win-mini-metric');
+    metric.append(
+        createEl('span', 'win-mini-value', value),
+        createEl('span', 'win-mini-label', label)
+    );
+    return metric;
+}
+
+function renderWinRecap(recap) {
+    const hero = el('win-recap-hero');
+    const highlights = el('win-highlights');
+    hero.innerHTML = '';
+    highlights.innerHTML = '';
+
+    const bestStreak = recap.highlights.bestStreak;
+    const challengeWinner = recap.highlights.challengeWinner;
+
+    [
+        ['Turns played', recap.totalTurns],
+        ['Cards won', recap.totalCardsWon],
+        ['Best streak', bestStreak ? `${bestStreak.bestStreak} by ${bestStreak.name}` : '—'],
+    ].forEach(([label, value]) => {
+        const card = createEl('div', 'win-recap-card');
+        card.append(
+            createEl('span', 'win-recap-value', String(value)),
+            createEl('span', 'win-recap-label', label)
+        );
+        hero.appendChild(card);
+    });
+
+    const highlightItems = [
+        buildHighlight('Best placement accuracy', recap.highlights.bestPlacement, p => `${p.placementAccuracy}% correct`),
+        buildHighlight('Best name guesses', recap.highlights.bestName, p => `${p.nameAccuracy}% correct`),
+        buildHighlight('Token machine', recap.highlights.mostTokensEarned, p => `${p.tokensEarned} earned`),
+        buildHighlight('Challenge champion', challengeWinner, p => `${p.challengesWon} won`),
+    ].filter(Boolean);
+
+    if (highlightItems.length === 0) return;
+    highlights.appendChild(createEl('h3', 'win-ranking-title', 'Game recap'));
+    const grid = createEl('div', 'win-highlight-grid');
+    highlightItems.forEach(item => {
+        const card = createEl('div', 'win-highlight-card');
+        card.append(
+            createEl('span', 'win-highlight-title', item.title),
+            createEl('strong', 'win-highlight-value', item.value),
+            createEl('span', 'win-highlight-detail', item.detail)
+        );
+        grid.appendChild(card);
+    });
+    highlights.appendChild(grid);
+}
+
+function buildHighlight(title, player, detail) {
+    if (!player) return null;
+    return { title, value: player.name, detail: detail(player) };
 }
 
 
@@ -1474,6 +1539,7 @@ el('override-btn').addEventListener('click', async () => {
         const pos    = findCorrectPosition(player.timeline, lastPlayedCard);
         justWonCard  = lastPlayedCard;
         insertCardIntoTimeline(player, lastPlayedCard, pos);
+        recordManualCardAward(player);
         renderTimelineInto(el('timeline-container'), player.timeline, null, null, false);
         el('override-btn').classList.add('hidden');
 
@@ -1510,10 +1576,11 @@ el('steal-override-btn').addEventListener('click', async () => {
     stealerForOverride = null;
 
     el('name-guess-area').classList.add('hidden'); // no longer needed for review
-    earnToken(stealer); // return the token they paid to initiate the steal
+    refundToken(stealer); // return the token they paid to initiate the steal
     const pos   = findCorrectPosition(stealer.timeline, lastPlayedCard);
     justWonCard = lastPlayedCard;
     insertCardIntoTimeline(stealer, lastPlayedCard, pos);
+    recordChallengeOverrideWin(stealer);
 
     el('stealer-timeline-label').textContent = `${stealer.name}'s timeline`;
     renderTimelineInto(el('stealer-timeline-container'), stealer.timeline, null, null, false);

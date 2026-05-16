@@ -1565,6 +1565,12 @@ body {
 
 /* ===== Steal mode: timeline slots turn gold on hover to signal "pick steal position" ===== */
 
+/* Quick Fire: timeline locked after timer expires */
+#timeline-container.timeline--locked .timeline-slot {
+  pointer-events: none;
+  cursor: default;
+}
+
 #timeline-container.steal-mode .timeline-slot {
   cursor: crosshair;
 }
@@ -2265,14 +2271,22 @@ body {
   color: #3dd2ff;
 }
 
-/* Player container */
+/* Dark card face in Quick Fire mode */
+.flip-card--quickfire .flip-card-front {
+  background: #1a1a22;
+  padding: 16px;
+  box-sizing: border-box;
+}
+
+/* Player container — fills the card front */
 .quickfire-player {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
+  justify-content: center;
+  gap: 14px;
   width: 100%;
-  margin-top: 12px;
+  height: 100%;
 }
 
 /* Play button */

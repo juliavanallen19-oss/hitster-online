@@ -236,6 +236,20 @@
             <div id="flip-card-inner" class="flip-card-inner">
               <div class="flip-card-front">
                 <div id="qr-container" class="qr-container"></div>
+                <!-- Quick Fire audio player — sits inside the card, hidden in other modes -->
+                <div id="quickfire-player" class="quickfire-player hidden">
+                  <button type="button" id="qf-play-btn" class="qf-play-btn">
+                    <span id="qf-play-icon" class="qf-play-icon">▶</span>
+                    <span class="qf-play-label">Play preview</span>
+                  </button>
+                  <div id="qf-timer-display" class="qf-timer-display hidden">
+                    <div id="qf-countdown" class="qf-countdown">30</div>
+                    <div id="qf-progress-bar" class="qf-progress-bar">
+                      <div id="qf-progress-fill" class="qf-progress-fill"></div>
+                    </div>
+                    <p class="qf-timer-label">seconds to place your card</p>
+                  </div>
+                </div>
               </div>
               <div class="flip-card-back" aria-hidden="true">
                 <p id="reveal-year" class="reveal-year">—</p>
@@ -247,21 +261,6 @@
           <p id="scan-hint" class="scan-hint">Scan with your phone to listen 🎧</p>
           <button type="button" id="preview-btn" class="preview-btn hidden">▶ Play Spotify Preview</button>
           <div id="spotify-preview-container" class="spotify-preview-container hidden"></div>
-
-          <!-- Quick Fire audio player — hidden in all other modes -->
-          <div id="quickfire-player" class="quickfire-player hidden">
-            <button type="button" id="qf-play-btn" class="qf-play-btn">
-              <span id="qf-play-icon" class="qf-play-icon">▶</span>
-              <span class="qf-play-label">Play preview</span>
-            </button>
-            <div id="qf-timer-display" class="qf-timer-display hidden">
-              <div id="qf-countdown" class="qf-countdown">30</div>
-              <div id="qf-progress-bar" class="qf-progress-bar">
-                <div id="qf-progress-fill" class="qf-progress-fill"></div>
-              </div>
-              <p class="qf-timer-label">seconds to place your card</p>
-            </div>
-          </div>
 
           <!-- Reveal outcome message — shown in the card area after the flip -->
           <div id="reveal-message" class="reveal-message hidden"></div>

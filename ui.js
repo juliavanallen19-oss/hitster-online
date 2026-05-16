@@ -62,6 +62,7 @@ function startQuickFireCountdown() {
 function onQuickFireTimeUp() {
     setButtonEnabled(el('skip-btn'), false);
     setButtonEnabled(el('buy-btn'),  false);
+    el('timeline-container').classList.add('timeline--locked');
     if (activePosition !== null) return; // already placed — normal flow continues
     discardCard(game);
     el('place-btn').classList.add('hidden');
@@ -773,9 +774,11 @@ function beginTurn() {
 
     lastPlayedCard = game.currentCard;
 
+    el('timeline-container').classList.remove('timeline--locked');
     if (isQuickFire()) {
         el('qr-container').innerHTML = '';
         el('flip-card').classList.remove('qr-pulse');
+        el('flip-card').classList.add('flip-card--quickfire');
         el('scan-hint').classList.add('hidden');
         el('preview-btn').classList.add('hidden');
         el('spotify-preview-container').classList.add('hidden');
@@ -783,6 +786,7 @@ function beginTurn() {
         el('quickfire-player').classList.remove('hidden');
         resetQuickFirePlayer();
     } else {
+        el('flip-card').classList.remove('flip-card--quickfire');
         generateQRCode(game.currentCard.spotify_url);
         el('flip-card').classList.add('qr-pulse');
         el('quickfire-player').classList.add('hidden');

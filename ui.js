@@ -778,10 +778,10 @@ function beginTurn() {
     // Name guess area visible from the very start of every turn
     el('name-guess-area').classList.remove('hidden');
 
-    // Reset Spotify preview — hide embed, show the play button again
+    // Reset Spotify preview — hide embed and button
     el('spotify-preview-container').classList.add('hidden');
     el('spotify-preview-container').innerHTML = '';
-    el('preview-btn').classList.remove('hidden');
+    el('preview-btn').classList.add('hidden');
 
     // Draw a card if none is in play
     if (!game.currentCard) {
@@ -1679,7 +1679,6 @@ el('skip-btn').addEventListener('click', () => {
                 el('flip-card').classList.add('qr-pulse');
                 el('spotify-preview-container').classList.add('hidden');
                 el('spotify-preview-container').innerHTML = '';
-                el('preview-btn').classList.remove('hidden');
                 renderPlayerHeader();
                 renderTimeline();
                 renderAllPlayers();

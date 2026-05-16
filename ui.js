@@ -231,9 +231,18 @@ function updateStartingPlayerDropdown() {
     const select  = el('starting-player-select');
     const current = select.value;
     select.innerHTML = '';
-    inputs.forEach(input => {
-        const name = input.value.trim();
-        if (!name) return; // skip empty rows
+    const named = Array.from(inputs).map(i => i.value.trim()).filter(n => n.length > 0);
+    if (named.length === 0) {
+        // Placeholder so the empty <select> doesn't read as a broken UI element
+        const opt = document.createElement('option');
+        opt.value = '';
+        opt.textContent = 'Enter player names above…';
+        opt.disabled = true;
+        opt.selected = true;
+        select.appendChild(opt);
+        return;
+    }
+    named.forEach(name => {
         const opt       = document.createElement('option');
         opt.value       = name; // store name, not index
         opt.textContent = name;

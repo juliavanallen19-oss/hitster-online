@@ -2716,16 +2716,24 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
-/* Visible focus ring for keyboard users — apply to all interactive controls */
+/* Visible focus ring for keyboard users.
+   - Plain controls get a soft white outline that reads on every background.
+   - The pink primary button gets a contrasting cyan-ish outline so it
+     doesn't disappear into its own pink gradient.
+   - We use outline (not box-shadow) so it doesn't clobber a button's
+     own elevation shadow, and we never paint the ring on a mouse click
+     (:focus-visible only fires for keyboard focus). */
 button:focus-visible,
 input:focus-visible,
 select:focus-visible,
 [role="button"]:focus-visible,
 .mode-card:focus-visible,
 .player-pill:focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid rgba(255, 255, 255, 0.55);
   outline-offset: 2px;
-  box-shadow: 0 0 0 4px rgba(255, 61, 139, 0.15);
+}
+.primary-btn:focus-visible {
+  outline-color: rgba(61, 210, 255, 0.85);
 }
 
 /* Honor reduced-motion */
@@ -3306,6 +3314,41 @@ select:focus-visible,
   padding: 10px 14px;
   color: var(--text-0);
   box-shadow: var(--shadow-1);
+}
+
+/* Setup validation messages read as inline errors — less heavy, with an icon */
+.setup-message-bar {
+  background: rgba(255, 106, 106, 0.10);
+  border-color: rgba(255, 106, 106, 0.45);
+  color: var(--text-0);
+  padding: 8px 12px;
+  font-size: 0.88rem;
+  text-align: left;
+  box-shadow: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 4px 0 12px;
+}
+.setup-message-bar::before {
+  content: "!";
+  flex: 0 0 18px;
+  width: 18px;
+  height: 18px;
+  border-radius: var(--r-pill);
+  background: var(--danger);
+  color: var(--bg-0);
+  font-weight: 800;
+  font-size: 0.78rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Empty / no-options state for the starting-player select */
+.full-width-select:empty,
+.full-width-select option:first-child:empty {
+  color: var(--text-3);
 }
 
 /* ───── Mobile (≤767px) extra polish ────────────────────────── */

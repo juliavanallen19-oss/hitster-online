@@ -28,8 +28,13 @@
 
     <!-- ===== How to Play collapsible ===== -->
     <details class="how-to-play">
-      <summary class="how-to-play-toggle"><span class="q-icon">?</span><span class="htp-toggle-label"> New here? Read <strong>How to Play</strong> before starting</span></summary>
+      <summary class="how-to-play-toggle"><span class="q-icon">?</span><span class="htp-toggle-label">New here? — Read <strong>How to Play</strong></span></summary>
       <div class="how-to-play-body">
+        <div class="htp-font-controls htp-start-controls" aria-label="Text size">
+          <button type="button" class="htp-font-btn" data-size="small" aria-label="Small text">A</button>
+          <button type="button" class="htp-font-btn htp-font-btn--active" data-size="medium" aria-label="Medium text">A</button>
+          <button type="button" class="htp-font-btn" data-size="large" aria-label="Large text">A</button>
+        </div>
 
         <h3 class="htp-section-title">Goal</h3>
         <ul>
@@ -397,7 +402,7 @@
   <div id="how-to-play-modal" class="htp-modal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="htp-modal-title">
     <div class="htp-modal-inner">
       <div class="htp-modal-header">
-        <h2 id="htp-modal-title" class="htp-modal-title"><span class="q-icon">?</span> How to play</h2>
+        <h2 id="htp-modal-title" class="htp-modal-title"><span class="q-icon">?</span> How to Play</h2>
         <div class="htp-font-controls" aria-label="Text size">
           <button type="button" class="htp-font-btn" data-size="small" aria-label="Small text">A</button>
           <button type="button" class="htp-font-btn htp-font-btn--active" data-size="medium" aria-label="Medium text">A</button>

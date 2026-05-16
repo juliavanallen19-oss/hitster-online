@@ -1654,15 +1654,19 @@ let closeHtpModal = () => {};
     modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
     document.addEventListener('keydown', e => { if (e.key === 'Escape' && modal.classList.contains('open')) closeModal(); });
 
-    // Font size controls
-    const fontBtns = modal.querySelectorAll('.htp-font-btn');
+    // Font size controls — shared between modal and start-screen
+    const allFontBtns = document.querySelectorAll('.htp-font-btn');
+    const startBody = document.querySelector('.how-to-play-body');
     const applySize = (size) => {
-        body.classList.remove('htp-font--small', 'htp-font--medium', 'htp-font--large');
-        if (size !== 'medium') body.classList.add(`htp-font--${size}`);
-        fontBtns.forEach(b => b.classList.toggle('htp-font-btn--active', b.dataset.size === size));
+        [body, startBody].forEach(b => {
+            if (!b) return;
+            b.classList.remove('htp-font--small', 'htp-font--medium', 'htp-font--large');
+            if (size !== 'medium') b.classList.add(`htp-font--${size}`);
+        });
+        allFontBtns.forEach(b => b.classList.toggle('htp-font-btn--active', b.dataset.size === size));
         localStorage.setItem('htp-font-size', size);
     };
-    fontBtns.forEach(btn => btn.addEventListener('click', () => applySize(btn.dataset.size)));
+    allFontBtns.forEach(btn => btn.addEventListener('click', () => applySize(btn.dataset.size)));
     applySize(localStorage.getItem('htp-font-size') || 'medium');
 })();
 
@@ -1710,6 +1714,7 @@ el('play-again-btn').addEventListener('click', () => {
     updateDeleteButtons();
     updateAddPlayerButton();
     updateStartingPlayerDropdown();
+    document.querySelector('.how-to-play').open = false;
     showScreen('setup-screen');
 });
 

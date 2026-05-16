@@ -297,7 +297,8 @@ function renderPlayerHeader() {
     el('active-player-name').textContent        = player.name;
     el('active-player-token-count').textContent = player.tokens;
     el('timeline-label').textContent            = `${player.name}'s timeline`;
-    el('deck-count').textContent                = game.deck.length;
+    const deckCount = el('deck-count');
+    if (deckCount) deckCount.textContent = game.deck.length;
 }
 
 function decadeClass(year) {

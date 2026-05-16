@@ -395,16 +395,17 @@ function endTurn(game) {
     return { won: false };
 }
 
-// Picks the winner at the end of the final round.
+// Picks the winner(s) at the end of the final round.
 // Among players who reached the win target: most cards wins; ties broken by tokens.
 function resolveWinners(game) {
     const qualifiers = game.players.filter(p => p.timeline.length >= game.winTarget);
-    if (qualifiers.length === 0) return handleEmptyDeck(game)[0];
+    if (qualifiers.length === 0) return handleEmptyDeck(game);
     const maxCards = Math.max(...qualifiers.map(p => p.timeline.length));
     const leaders = qualifiers.filter(p => p.timeline.length === maxCards);
     if (leaders.length === 1) return leaders[0];
     const maxTokens = Math.max(...leaders.map(p => p.tokens));
-    return leaders.filter(p => p.tokens === maxTokens)[0];
+    const tokenLeaders = leaders.filter(p => p.tokens === maxTokens);
+    return tokenLeaders.length === 1 ? tokenLeaders[0] : tokenLeaders;
 }
 
 

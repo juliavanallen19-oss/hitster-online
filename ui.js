@@ -1808,7 +1808,7 @@ el('play-again-btn').addEventListener('click', () => {
     updateDeleteButtons();
     updateAddPlayerButton();
     updateStartingPlayerDropdown();
-    document.querySelector('.how-to-play').open = false;
+    // (Inline HTP <details> was removed in favour of the modal — nothing to collapse here.)
     showScreen('setup-screen');
 });
 

@@ -19,7 +19,29 @@ class Player {
         this.name = name;           // The player's name (e.g. "Julia")
         this.timeline = [];         // Starts empty — cards get added as they win them
         this.tokens = 0;            // Will be set by the Game based on mode
+        this.stats = createPlayerStats();
     }
+}
+
+function createPlayerStats() {
+    return {
+        turnsPlayed: 0,
+        placementAttempts: 0,
+        correctPlacements: 0,
+        nameGuesses: 0,
+        correctNameGuesses: 0,
+        tokensEarned: 0,
+        tokensSpent: 0,
+        cardsWon: 0,
+        currentStreak: 0,
+        bestStreak: 0,
+        skipsUsed: 0,
+        buyPlacementsUsed: 0,
+        challengesStarted: 0,
+        challengesWon: 0,
+        challengesLost: 0,
+        biggestMiss: null,
+    };
 }
 
 
@@ -270,9 +292,68 @@ function findCorrectPosition(timeline, card) {
 function earnToken(player) {
     if (player.tokens < 5) {
         player.tokens += 1;
+        player.stats.tokensEarned += 1;
         return true;  // token was actually added
     }
     return false;     // already at cap — token was NOT added
+}
+
+function spendTokens(player, amount) {
+    player.tokens -= amount;
+    player.stats.tokensSpent += amount;
+}
+
+function refundToken(player) {
+    if (player.tokens < 5) {
+        player.tokens += 1;
+    }
+    if (player.stats.tokensSpent > 0) {
+        player.stats.tokensSpent -= 1;
+    }
+}
+
+function recordCardWon(player) {
+    player.stats.cardsWon += 1;
+    player.stats.currentStreak += 1;
+    if (player.stats.currentStreak > player.stats.bestStreak) {
+        player.stats.bestStreak = player.stats.currentStreak;
+    }
+}
+
+function recordManualCardAward(player) {
+    recordCardWon(player);
+}
+
+function recordChallengeOverrideWin(player) {
+    if (player.stats.challengesLost > 0) {
+        player.stats.challengesLost -= 1;
+    }
+    player.stats.challengesWon += 1;
+    recordCardWon(player);
+}
+
+function recordPlacementAttempt(player, card, chosenPosition, correct) {
+    player.stats.placementAttempts += 1;
+    if (correct) {
+        player.stats.correctPlacements += 1;
+        return;
+    }
+
+    player.stats.currentStreak = 0;
+    const correctPosition = findCorrectPosition(player.timeline, card);
+    const slotDistance = Math.abs(chosenPosition - correctPosition);
+    const miss = {
+        title: card.title,
+        artist: card.artist,
+        year: card.year,
+        chosenPosition,
+        correctPosition,
+        slotDistance,
+    };
+    const previous = player.stats.biggestMiss;
+    if (!previous || slotDistance > previous.slotDistance) {
+        player.stats.biggestMiss = miss;
+    }
 }
 
 
@@ -423,7 +504,8 @@ function handleEmptyDeck(game) {
 function skipCard(game) {
     let player = game.getCurrentPlayer();
     if (player.tokens < 1) return { success: false, card: null };
-    player.tokens -= 1;
+    spendTokens(player, 1);
+    player.stats.skipsUsed += 1;
     discardCard(game);
     let nextCard = drawCard(game);
     return { success: true, card: nextCard };
@@ -439,7 +521,9 @@ function skipCard(game) {
 function buyPlacement(game) {
     let player = game.getCurrentPlayer();
     if (player.tokens < 3) return { success: false, position: null };
-    player.tokens -= 3;
+    spendTokens(player, 3);
+    player.stats.turnsPlayed += 1;
+    player.stats.buyPlacementsUsed += 1;
     let card = game.currentCard;
 
     // Walk the timeline left to right to find where the card's year fits.
@@ -450,6 +534,8 @@ function buyPlacement(game) {
     }
 
     insertCardIntoTimeline(player, card, position);
+    recordPlacementAttempt(player, card, position, true);
+    recordCardWon(player);
     game.currentCard = null;
     return { success: true, position };
 }
@@ -467,7 +553,8 @@ function initiateSteal(game, stealerIndex, stealPosition, stealNameGuess = null)
     let stealer = game.players[stealerIndex];
     if (stealer.tokens < 1) return { success: false };
     if (game.pendingSteal !== null) return { success: false }; // already one steal this turn
-    stealer.tokens -= 1;
+    spendTokens(stealer, 1);
+    stealer.stats.challengesStarted += 1;
     game.pendingSteal = { stealerIndex, stealPosition, stealNameGuess };
     return { success: true, stealer };
 }
@@ -492,18 +579,24 @@ function resolveTurn(game, activePosition, nameGuess) {
 
     // Did the active player place the card in the right position?
     let activeCorrect = isPlacementCorrect(activePlayer.timeline, card, activePosition);
+    activePlayer.stats.turnsPlayed += 1;
+    recordPlacementAttempt(activePlayer, card, activePosition, activeCorrect);
 
     // Name guess — evaluated regardless of placement correctness (fix for original rules)
     let nameGuessCorrect = false;
     let nameGuessDetail  = null;   // { artistCorrect, titleCorrect } — Chill mode only
     let tokenEarned      = false;  // true only when a token was actually added (not capped)
     if (nameGuess) {
+        activePlayer.stats.nameGuesses += 1;
         if (mode === "chill") {
             const chillResult = checkNameGuessChill(card, nameGuess.artist, nameGuess.title);
             nameGuessCorrect = chillResult.correct;
             nameGuessDetail  = chillResult;
         } else {
             nameGuessCorrect = checkNameGuess(card, nameGuess.artist, nameGuess.title);
+        }
+        if (nameGuessCorrect) {
+            activePlayer.stats.correctNameGuesses += 1;
         }
         // Original & Chill: correct name = bonus token (not in PRO — naming is mandatory there)
         if (mode !== "pro" && nameGuessCorrect) {
@@ -533,16 +626,21 @@ function resolveTurn(game, activePosition, nameGuess) {
         if (activeKeepsCard) {
             // Active player wins — their card, their win
             insertCardIntoTimeline(activePlayer, card, activePosition);
+            recordCardWon(activePlayer);
+            stealer.stats.challengesLost += 1;
             stealResult = { outcome: 'active_wins', stealer };
         } else if (stealerKeepsCard) {
             // Stealer wins — card auto-placed on the stealer's own timeline
             // PRO: token returned to stealer (earning-a-steal is the reward itself)
-            if (mode === "pro") stealer.tokens += 1;
+            if (mode === "pro") refundToken(stealer);
             let correctPos = findCorrectPosition(stealer.timeline, card);
             insertCardIntoTimeline(stealer, card, correctPos);
+            stealer.stats.challengesWon += 1;
+            recordCardWon(stealer);
             stealResult = { outcome: 'steal_wins', stealer, card };
         } else {
             // Both fail — card discarded, stealer already lost their token
+            stealer.stats.challengesLost += 1;
             stealResult = { outcome: 'both_wrong', stealer, activeCorrect, stealPositionCorrect: stealCorrect };
         }
         game.pendingSteal = null;
@@ -551,11 +649,73 @@ function resolveTurn(game, activePosition, nameGuess) {
         // No steal — normal flow
         if (activeKeepsCard) {
             insertCardIntoTimeline(activePlayer, card, activePosition);
+            recordCardWon(activePlayer);
         }
     }
 
     game.currentCard = null;
     return { activeCorrect, activeKeepsCard, nameGuessCorrect, nameGuessDetail, tokenEarned, stealResult, card };
+}
+
+function percentage(part, total) {
+    if (total === 0) return 0;
+    return Math.round((part / total) * 100);
+}
+
+function collectGameStats(game, winners, reason = null) {
+    const winnerList = Array.isArray(winners) ? winners : [winners];
+    const winnerIds = new Set(winnerList.map(player => player.name));
+    const standings = [...game.players].sort(
+        (a, b) => b.timeline.length - a.timeline.length || b.tokens - a.tokens || a.name.localeCompare(b.name)
+    );
+
+    const players = standings.map((player, index) => {
+        const stats = player.stats;
+        return {
+            rank: index + 1,
+            name: player.name,
+            isWinner: winnerIds.has(player.name),
+            finalCards: player.timeline.length,
+            finalTokens: player.tokens,
+            turnsPlayed: stats.turnsPlayed,
+            placementAttempts: stats.placementAttempts,
+            correctPlacements: stats.correctPlacements,
+            placementAccuracy: percentage(stats.correctPlacements, stats.placementAttempts),
+            nameGuesses: stats.nameGuesses,
+            correctNameGuesses: stats.correctNameGuesses,
+            nameAccuracy: percentage(stats.correctNameGuesses, stats.nameGuesses),
+            tokensEarned: stats.tokensEarned,
+            tokensSpent: stats.tokensSpent,
+            cardsWon: stats.cardsWon,
+            currentStreak: stats.currentStreak,
+            bestStreak: stats.bestStreak,
+            skipsUsed: stats.skipsUsed,
+            buyPlacementsUsed: stats.buyPlacementsUsed,
+            challengesStarted: stats.challengesStarted,
+            challengesWon: stats.challengesWon,
+            challengesLost: stats.challengesLost,
+            biggestMiss: stats.biggestMiss,
+        };
+    });
+
+    const bestBy = (field) => players
+        .filter(player => player[field] > 0)
+        .sort((a, b) => b[field] - a[field] || b.finalCards - a.finalCards || a.name.localeCompare(b.name))[0] || null;
+
+    return {
+        reason,
+        winnerNames: winnerList.map(player => player.name).join(' & '),
+        totalTurns: players.reduce((sum, player) => sum + player.turnsPlayed, 0),
+        totalCardsWon: players.reduce((sum, player) => sum + player.cardsWon, 0),
+        players,
+        highlights: {
+            bestPlacement: bestBy('placementAccuracy'),
+            bestName: bestBy('nameAccuracy'),
+            bestStreak: bestBy('bestStreak'),
+            mostTokensEarned: bestBy('tokensEarned'),
+            challengeWinner: bestBy('challengesWon'),
+        },
+    };
 }
 
 

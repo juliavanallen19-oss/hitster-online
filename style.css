@@ -2048,7 +2048,7 @@ body {
   }
 
   /* Sizing — padding-bottom prevents descenders (g, j, p) from clipping */
-  .active-player-name  { font-size: 1.3rem; padding-bottom: 3px; }
+  .active-player-name  { font-size: 1.3rem; padding-bottom: 8px; }
   .active-player-label { font-size: 0.82rem; }
 
   /* Finish game and token badge — same font size */

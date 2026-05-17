@@ -750,24 +750,6 @@ function beginTurn() {
         modeBadge.textContent = modeLabels[game.mode] || game.mode;
     }
 
-    // Mode-specific name-guess hint text
-    const isPro   = game.mode === "pro";
-    const isChill = game.mode === "chill";
-    const hintEl  = document.getElementById('name-guess-hint');
-
-    if (hintEl) hintEl.classList.remove('hidden');
-    if (isPro) {
-        // PRO: form is REQUIRED to keep the card (visual emphasis via .name-guess-form--required)
-        el('name-guess-form').classList.add('name-guess-form--required');
-        if (hintEl) hintEl.textContent = '🔥 PRO: name BOTH the title and artist or lose the card';
-    } else if (isChill) {
-        if (hintEl) hintEl.textContent = 'Optional: 😎 Name the title OR artist for a bonus ✪';
-    } else if (game.mode === "quickfire") {
-        if (hintEl) hintEl.textContent = 'Optional: ⚡ Name both the title and artist for a bonus ✪';
-    } else {
-        if (hintEl) hintEl.textContent = 'Optional: 🎵 Name both the title and artist for a bonus ✪';
-    }
-
     // Show action buttons; submit only appears after Place here
     el('place-btn').classList.remove('hidden');
     el('skip-btn').classList.remove('hidden');
@@ -780,6 +762,24 @@ function beginTurn() {
 
     // Name guess area visible from the very start of every turn
     el('name-guess-area').classList.remove('hidden');
+
+    // Mode-specific name-guess hint — set AFTER area is shown so it is always visible
+    const isPro   = game.mode === "pro";
+    const isChill = game.mode === "chill";
+    const hintEl  = document.getElementById('name-guess-hint');
+    if (hintEl) {
+        hintEl.classList.remove('hidden');
+        if (isPro) {
+            hintEl.textContent = '🔥 PRO: name BOTH the title and artist or lose the card';
+            el('name-guess-form').classList.add('name-guess-form--required');
+        } else if (isChill) {
+            hintEl.textContent = 'Optional: 😎 Name the title OR artist for a bonus ✪';
+        } else if (game.mode === "quickfire") {
+            hintEl.textContent = 'Optional: ⚡ Name both the title and artist for a bonus ✪';
+        } else {
+            hintEl.textContent = 'Optional: 🎵 Name both the title and artist for a bonus ✪';
+        }
+    }
 
     // Reset Spotify preview — hide embed and button
     el('spotify-preview-container').classList.add('hidden');

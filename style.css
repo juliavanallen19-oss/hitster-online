@@ -29,6 +29,14 @@ body {
   color: #f0f0f0;                /* off-white text */
   min-height: 100vh;             /* fallback */
   min-height: 100dvh;            /* dynamic viewport height — survives mobile toolbars */
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Re-enable text selection and cursor only in actual input fields */
+input, textarea, [contenteditable] {
+  user-select: text;
+  -webkit-user-select: text;
 }
 
 /* ===== Setup screen layout ===== */

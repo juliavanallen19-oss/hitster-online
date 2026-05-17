@@ -119,6 +119,16 @@
   <!-- token counters, action buttons.                               -->
   <!-- =========================================================== -->
   <div id="game-screen" class="screen">
+    <!-- Confirmation dialog for joker actions (Skip / Challenge / Buy Placement) -->
+    <div id="confirm-overlay" class="confirm-overlay" aria-modal="true" role="dialog">
+      <div class="confirm-card">
+        <p id="confirm-message" class="confirm-message"></p>
+        <div class="confirm-actions">
+          <button type="button" id="confirm-yes-btn" class="primary-btn confirm-yes-btn">Yes, do it</button>
+          <button type="button" id="confirm-no-btn" class="secondary-btn confirm-no-btn">Discard</button>
+        </div>
+      </div>
+    </div>
     <!-- Player name intro splash shown between turns -->
     <div id="turn-splash" class="turn-splash" aria-live="polite">
       <span id="turn-splash-name" class="turn-splash-name"></span>

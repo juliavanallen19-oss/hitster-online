@@ -390,6 +390,31 @@ function renderTimeline() {
     renderTimelineInto(el('timeline-container'), player.timeline, activePosition, stealPos, true, null, stealerName);
 }
 
+// =============================================================
+// CONFIRMATION DIALOG — prevents accidental joker use
+// =============================================================
+
+let confirmCallback = null;
+
+function showConfirm(message, onConfirm) {
+    confirmCallback = onConfirm;
+    el('confirm-message').textContent = message;
+    el('confirm-overlay').classList.add('confirm-overlay--visible');
+}
+
+function hideConfirm() {
+    el('confirm-overlay').classList.remove('confirm-overlay--visible');
+    confirmCallback = null;
+}
+
+el('confirm-yes-btn').addEventListener('click', () => {
+    const cb = confirmCallback;
+    hideConfirm();
+    if (cb) cb();
+});
+
+el('confirm-no-btn').addEventListener('click', hideConfirm);
+
 function updatePillsScrollHint() {
     const hint = el('pills-scroll-hint');
     const list = el('players-list');
@@ -1246,16 +1271,16 @@ el('steal-btn').addEventListener('click', () => {
         showMessage('Only one steal per turn is allowed.', true);
         return;
     }
-    renderStealPanel();
-    el('steal-panel').classList.remove('hidden');
-    updatePhasePrompt({ hasSlot: selectedPosition !== null, placed: activePosition !== null });
-    // If only one eligible challenger, renderStealPanel auto-selects them via renderStealSlots
-    // which will hide the button. For 2+ challengers, grey it until someone is selected.
-    if (eligibleChallengers.length > 1) {
-        setButtonEnabled(el('steal-btn'), false);
-    }
-    requestAnimationFrame(() => {
-        el('steal-panel').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    showConfirm('Challenge this placement? (costs 1 ✪)', () => {
+        renderStealPanel();
+        el('steal-panel').classList.remove('hidden');
+        updatePhasePrompt({ hasSlot: selectedPosition !== null, placed: activePosition !== null });
+        if (eligibleChallengers.length > 1) {
+            setButtonEnabled(el('steal-btn'), false);
+        }
+        requestAnimationFrame(() => {
+            el('steal-panel').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        });
     });
 });
 
@@ -1668,7 +1693,8 @@ el('skip-btn').addEventListener('click', () => {
         showMessage("You don't have enough tokens. Gain them first to use this feature.", true);
         return;
     }
-    if (isQuickFire()) stopQuickFireTimer();
+    showConfirm('Skip this card? (costs 1 ✪)', () => {
+        if (isQuickFire()) stopQuickFireTimer();
     const result = skipCard(game);
     if (result.success) {
         lastPlayedCard   = result.card;
@@ -1702,14 +1728,16 @@ el('skip-btn').addEventListener('click', () => {
             showWinScreen(handleEmptyDeck(game), 'deck-empty');
         }
     }
+    });
 });
 
 // --- Buy placement ---
-el('buy-btn').addEventListener('click', async () => {
+el('buy-btn').addEventListener('click', () => {
     if (game.getCurrentPlayer().tokens < 3) {
         showMessage("You don't have enough tokens. Gain them first to use this feature.", true);
         return;
     }
+    showConfirm('Buy automatic placement? (costs 3 ✪)', async () => {
     if (isQuickFire()) { stopQuickFireTimer(); el('quickfire-player').classList.add('hidden'); }
     hideMessageBars();
     const card = game.currentCard;
@@ -1743,6 +1771,7 @@ el('buy-btn').addEventListener('click', async () => {
         el('next-turn-btn').classList.remove('hidden');
         updatePhasePrompt({ hasSlot: selectedPosition !== null, placed: activePosition !== null });
     }
+    });
 });
 
 // --- How to Play modal ---

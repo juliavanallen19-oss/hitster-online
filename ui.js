@@ -490,6 +490,15 @@ el('confirm-yes-btn').addEventListener('click', () => {
 
 el('confirm-no-btn').addEventListener('click', hideConfirm);
 
+// Token cap popup — shown whenever a player hits or can't exceed the 5-token limit
+function showTokenCapPopup() {
+    el('token-cap-overlay').classList.add('confirm-overlay--visible');
+}
+function hideTokenCapPopup() {
+    el('token-cap-overlay').classList.remove('confirm-overlay--visible');
+}
+el('token-cap-btn').addEventListener('click', hideTokenCapPopup);
+
 // Multi-challenger selector: used when several non-active players have enough tokens.
 // Shows a modal listing each eligible challenger; selecting one calls onSelect(index).
 function showChallengerModal(challengers, onSelect) {
@@ -780,6 +789,11 @@ async function animateTokenEarned(playerIndex = game.currentPlayerIndex) {
     badge.addEventListener('animationend', () => badge.classList.remove('token-badge--bump'), { once: true });
 
     setTimeout(() => token.remove(), 200);
+
+    // If this earn just brought the player to the cap, remind them to use jokers
+    if (game.players[playerIndex]?.tokens >= 5) {
+        setTimeout(showTokenCapPopup, 400);
+    }
 }
 
 // Enables/disables the "Place token here" submit button based on whether the
@@ -970,6 +984,13 @@ function beginTurn() {
         el('spotify-preview-container').innerHTML = '';
         el('quickfire-player').classList.remove('hidden');
         resetQuickFirePlayer();
+        // Pre-load the audio while the player is reading the card so it is
+        // already buffered by the time they press Play — reduces start-up lag.
+        if (game.currentCard.preview_url) {
+            qfAudio = new Audio(game.currentCard.preview_url);
+            qfAudio.preload = 'auto';
+            qfAudio.volume  = 0.85;
+        }
     } else {
         el('flip-card').classList.remove('flip-card--quickfire');
         el('flip-card').classList.remove('qr-pulse');
@@ -1326,8 +1347,11 @@ el('qf-play-btn').addEventListener('click', () => {
     qfAudioStarted = true;
     hideMessageBars();
     el('qf-card-subtitle').classList.add('qf-card-subtitle--hidden');
-    qfAudio = new Audio(url);
-    qfAudio.volume = 0.85;
+    // Re-use the pre-loaded audio element if available; otherwise create fresh.
+    if (!qfAudio) {
+        qfAudio = new Audio(url);
+        qfAudio.volume = 0.85;
+    }
     qfAudio.play().then(() => {
         startQuickFireCountdown();
         updatePhasePrompt({ hasSlot: selectedPosition !== null, placed: activePosition !== null });
@@ -1428,11 +1452,18 @@ el('submit-btn').addEventListener('click', async () => {
         el('scan-hint').classList.add('hidden');
         el('submit-btn').classList.add('hidden');
         if (correct) {
-            game.players[game.currentPlayerIndex].tokens += 1;
+            const qfTokenAdded = earnToken(game.players[game.currentPlayerIndex]);
             updateTokenDisplay();
             renderAllPlayers();
-            animateTokenEarned();
-            showRevealMessage('⏱ Card discarded — but bonus token earned! ✪', 'success');
+            if (qfTokenAdded) {
+                animateTokenEarned();
+            } else {
+                soundTokenCapped();
+                setTimeout(showTokenCapPopup, 300);
+            }
+            showRevealMessage(qfTokenAdded
+                ? '⏱ Card discarded — but bonus token earned! ✪'
+                : '⏱ Card discarded — name was right, but already at max tokens.', 'success');
         } else {
             showRevealMessage("⏱ Card discarded. Better luck next turn!", 'error');
             if (attempted) {
@@ -1551,6 +1582,7 @@ el('submit-btn').addEventListener('click', async () => {
         tokenSpan.classList.add('token-count--capped');
         soundTokenCapped();
         tokenSpan.addEventListener('animationend', () => tokenSpan.classList.remove('token-count--capped'), { once: true });
+        setTimeout(showTokenCapPopup, 300);
     }
 
     // Render active player's timeline (with --won-pending placeholder if they won)
@@ -1758,11 +1790,18 @@ el('override-btn').addEventListener('click', async () => {
         qfDiscardOverridePending = false;
         el('override-btn').classList.add('hidden');
         hideNextTurnBtn();
-        overrideAndGrantToken(game);
+        const qfOverrideAdded = overrideAndGrantToken(game);
         updateTokenDisplay();
         renderAllPlayers();
-        animateTokenEarned();
-        showRevealMessage('Override accepted — bonus token awarded! ✪', 'success');
+        if (qfOverrideAdded) {
+            animateTokenEarned();
+        } else {
+            soundTokenCapped();
+            setTimeout(showTokenCapPopup, 300);
+        }
+        showRevealMessage(qfOverrideAdded
+            ? 'Override accepted — bonus token awarded! ✪'
+            : 'Override accepted — name was right, but already at max tokens.', 'success');
         showNextTurnBtn();
         updateNextTurnButton();
         return;
@@ -1795,12 +1834,19 @@ el('override-btn').addEventListener('click', async () => {
         renderAllPlayers();
     } else {
         // Original/Chill: just grant the bonus token for the correct guess
-        overrideAndGrantToken(game);
+        const overrideAdded = overrideAndGrantToken(game);
         updateTokenDisplay();
         renderAllPlayers();
         el('override-btn').classList.add('hidden');
-        animateTokenEarned();
-        showRevealMessage('Override accepted — bonus token awarded! ✪', 'success');
+        if (overrideAdded) {
+            animateTokenEarned();
+        } else {
+            soundTokenCapped();
+            setTimeout(showTokenCapPopup, 300);
+        }
+        showRevealMessage(overrideAdded
+            ? 'Override accepted — bonus token awarded! ✪'
+            : 'Override accepted — name was right, but already at max tokens.', 'success');
     }
 
     showNextTurnBtn();
@@ -1819,7 +1865,7 @@ el('steal-override-btn').addEventListener('click', async () => {
     stealerForOverride = null;
 
     el('name-guess-area').classList.add('hidden'); // no longer needed for review
-    refundToken(stealer); // return the token they paid to initiate the steal
+    const refundAdded = refundToken(stealer); // return the token they paid to initiate the steal
     const pos   = findCorrectPosition(stealer.timeline, lastPlayedCard);
     justWonCard = lastPlayedCard;
     insertCardIntoTimeline(stealer, lastPlayedCard, pos);
@@ -1831,7 +1877,9 @@ el('steal-override-btn').addEventListener('click', async () => {
 
     updateTokenDisplay();
     renderAllPlayers();
-    animateTokenEarned(game.players.indexOf(stealer));
+    if (refundAdded) {
+        animateTokenEarned(game.players.indexOf(stealer));
+    }
 
     await flyCardToTimeline('stealer-timeline-container');
     soundCorrectPlacement();

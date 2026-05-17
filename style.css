@@ -1,8 +1,3 @@
-/* =============================================================
-   STEP 1 — minimal styling, just enough to show one screen at a time.
-   We'll add the real visual design in Steps 2–5.
-   ============================================================= */
-
 /* All three screens are hidden by default... */
 .screen {
   display: none;
@@ -13,14 +8,8 @@
   display: block;
 }
 
-/* =============================================================
-   STEP 2 — setup screen styling
-   ============================================================= */
-
 /* ===== Page-wide foundation ===== */
 
-/* The body in Step 1 had a white background and basic padding.
-   Replace those rules with this dark, branded look. */
 body {
   font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
   margin: 0;
@@ -448,19 +437,10 @@ input, textarea, [contenteditable] {
   box-shadow: 0 8px 24px rgba(61, 210, 255, 0.3);
 }
 
-/* =============================================================
-   UTILITY
-   ============================================================= */
-
 /* JS toggles this class to show/hide elements throughout the game */
 .hidden {
   display: none !important;
 }
-
-/* =============================================================
-   STEP 3 — Game board layout (Task 1.5)
-   Mobile-first: single column by default, wider on larger screens.
-   ============================================================= */
 
 /* Outer wrapper: full width on mobile (no 600px cap), centered */
 .game-container {
@@ -692,8 +672,6 @@ input, textarea, [contenteditable] {
   color: #6a6a78;
 }
 
-/* The old deck-counter in the song-card is no longer rendered in HTML, but keep
-   a safe fallback rule in case anything still references it */
 .deck-counter { display: none; }
 
 /* Generic icon button — small, square, hover-tint */
@@ -1002,8 +980,6 @@ input, textarea, [contenteditable] {
 
 /* ===== Timeline section ===== */
 
-/* The endpoints (1960/2026) are gone — we use a decade-axis below the track instead.
-   .timeline-year-range now just wraps the scroll wrapper so existing HTML still works. */
 .timeline-year-range {
   display: block;
   min-width: 0;
@@ -1013,7 +989,6 @@ input, textarea, [contenteditable] {
   min-width: 0;
 }
 
-/* Legacy endpoint labels (kept hidden — the new design uses .decade-axis ticks instead) */
 .timeline-year-label {
   display: none;
 }
@@ -1231,9 +1206,7 @@ input, textarea, [contenteditable] {
   border-radius: 4px;
 }
 
-/* Legacy `.player-row` markup is no longer used (replaced by `.player-pill` in the header) */
-
-/* ===== Song card component (Tasks 1.6 + 1.10) ===== */
+/* ===== Song card component ===== */
 
 /* The card wraps QR code, guess form, reveal button, and song info */
 .song-card {
@@ -1278,7 +1251,7 @@ input, textarea, [contenteditable] {
 }
 
 
-/* ===== Timeline enhancements (Task 1.7) ===== */
+/* ===== Timeline slot interactions ===== */
 
 /* Slots are clickable — bigger tap target on hover, glowing pink */
 .timeline-slot {
@@ -1322,7 +1295,7 @@ input, textarea, [contenteditable] {
 .timeline-card.decade-20s { border-color: #b0b8cc; }
 .timeline-card.decade-20s .card-year { color: #b0b8cc; }
 
-/* ===== Win screen (Task 1.8) ===== */
+/* ===== Win screen ===== */
 
 .win-container {
   max-width: 960px;
@@ -1422,7 +1395,7 @@ input, textarea, [contenteditable] {
   100% { opacity: 1; transform: scale(1); }
 }
 
-/* ===== Disabled button state (tasks 5.4, 5.5) ===== */
+/* ===== Disabled button state ===== */
 
 .btn-disabled {
   opacity: 0.35;
@@ -1448,7 +1421,7 @@ input, textarea, [contenteditable] {
   color: #c0c0cc;
 }
 
-/* ===== Feedback message bar (task 5.7) ===== */
+/* ===== Feedback message bar ===== */
 
 .message-bar {
   background: #1a1a22;
@@ -1464,7 +1437,7 @@ input, textarea, [contenteditable] {
   margin-bottom: 12px;
 }
 
-/* ===== Selected timeline slot (task 5.4) ===== */
+/* ===== Selected timeline slot ===== */
 
 /* The slot the active player has tapped — clearly marked as "selected, awaiting confirm" */
 .timeline-slot.selected {
@@ -2923,14 +2896,6 @@ input, textarea, [contenteditable] {
   border-bottom: 1px solid #2a2a36;
 }
 
-/* =============================================================
-   REFINE 2026 — design tokens + UI/UX polish overlay
-   Loaded last so it overrides earlier rules.
-   Goal: tighten layouts (fit important UI on viewport), refine
-   typography, normalize button language, give the app a more
-   intentional visual identity without changing logic.
-   ============================================================= */
-
 :root {
   /* Surfaces */
   --bg-0: #0b0b10;
@@ -3255,7 +3220,6 @@ select:focus-visible,
   font-weight: 600;
 }
 
-/* Spotify preview button — bring it in-palette (was green) */
 .preview-btn {
   background: var(--grad-info);
   color: #0a0a12;

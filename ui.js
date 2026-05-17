@@ -1646,22 +1646,20 @@ el('next-turn-btn').addEventListener('click', () => {
         showWinScreen(result.winner, 'goal');
         return;
     }
-    // Show player name splash before loading the new turn
+    // Show player name splash before loading the new turn.
+    // beginTurn() fires while the splash still covers the board so the
+    // board is fully ready the moment the overlay fades out — no flicker.
     const nextPlayer = game.getCurrentPlayer();
     const splash     = el('turn-splash');
-    const splashName = el('turn-splash-name');
-    splashName.textContent = nextPlayer.name;
-    splash.classList.remove('hidden', 'turn-splash--shrink');
-    // After 900 ms start shrink-out transition
-    setTimeout(() => {
-        splash.classList.add('turn-splash--shrink');
-        // After transition finishes, hide and start the turn
-        setTimeout(() => {
-            splash.classList.add('hidden');
-            splash.classList.remove('turn-splash--shrink');
-            beginTurn();
-        }, 380);
-    }, 900);
+    el('turn-splash-name').textContent = nextPlayer.name;
+
+    // Force name/label back to hidden state in case this isn't the first turn
+    splash.classList.remove('turn-splash--visible');
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+        splash.classList.add('turn-splash--visible');         // fade in  (300 ms)
+        setTimeout(beginTurn, 650);                           // reset board while splash covers it
+        setTimeout(() => splash.classList.remove('turn-splash--visible'), 1050); // fade out (300 ms)
+    }));
 });
 
 // --- Skip card ---

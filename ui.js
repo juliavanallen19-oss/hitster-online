@@ -16,10 +16,12 @@ let stealNameGuessLogged  = false; // PRO: true once the stealer clicks "Log son
 let pendingStealNameGuess = null;  // PRO: { title, artist } logged by the stealer before locking
 
 // --- Quick Fire state ---
-let qfTimerInterval = null;   // setInterval handle for the countdown tick
-let qfTimerSeconds  = 30;     // seconds remaining in current countdown
-let qfAudio         = null;   // HTMLAudioElement for the preview clip
-let qfAudioStarted  = false;  // true once the player has pressed Play this turn
+let qfTimerInterval  = null;   // setInterval handle for the countdown tick
+let qfTimerSeconds   = 30;     // seconds remaining in current countdown
+let qfAudio          = null;   // HTMLAudioElement for the preview clip
+let qfAudioStarted   = false;  // true once the player has pressed Play this turn
+let qfDiscardedCard         = null;   // card saved when time runs out before placement
+let qfDiscardOverridePending = false; // true while override-btn is shown for a discard bonus guess
 
 // --- Shorthand helper ---
 function el(id) { return document.getElementById(id); }
@@ -34,19 +36,22 @@ function stopQuickFireTimer() {
 
 function resetQuickFirePlayer() {
     stopQuickFireTimer();
-    qfTimerSeconds = 30;
-    qfAudioStarted = false;
+    qfTimerSeconds           = 30;
+    qfAudioStarted           = false;
+    qfDiscardedCard          = null;
+    qfDiscardOverridePending = false;
     el('qf-play-icon').textContent     = '▶';
     el('qf-countdown').textContent     = '30';
     el('qf-countdown').classList.remove('qf-countdown--urgent');
     el('qf-progress-fill').style.width = '100%';
-    el('qf-timer-display').classList.add('hidden');
+    el('qf-timer-display').classList.remove('qf-timer-display--visible');
+    el('qf-card-subtitle').classList.remove('qf-card-subtitle--hidden');
     el('qf-play-btn').disabled = false;
 }
 
 function startQuickFireCountdown() {
     qfTimerSeconds = 30;
-    el('qf-timer-display').classList.remove('hidden');
+    el('qf-timer-display').classList.add('qf-timer-display--visible');
     el('qf-play-icon').textContent = '⏸';
     el('qf-play-btn').disabled = true;
 
@@ -62,16 +67,27 @@ function startQuickFireCountdown() {
 function onQuickFireTimeUp() {
     setButtonEnabled(el('skip-btn'), false);
     setButtonEnabled(el('buy-btn'),  false);
+    if (activePosition !== null) {
+        // Card already placed — steal may still be in progress, so don't lock the timeline.
+        // Just stop the urgent pulse and let normal post-placement flow continue.
+        el('qf-countdown').classList.remove('qf-countdown--urgent');
+        return;
+    }
+    // Card not placed — lock the timeline and discard the card.
+    // Clear any slot the player had highlighted (it was never confirmed via Place Here).
+    selectedPosition = null;
+    renderTimeline();
     el('timeline-container').classList.add('timeline--locked');
-    if (activePosition !== null) return; // already placed — normal flow continues
+    qfDiscardedCard = game.currentCard;
     discardCard(game);
     el('place-btn').classList.add('hidden');
     el('skip-btn').classList.add('hidden');
     el('buy-btn').classList.add('hidden');
     el('steal-btn').classList.add('hidden');
-    el('submit-btn').classList.add('hidden');
-    showRevealMessage("⏱ Time's up — card discarded.", 'error');
-    el('next-turn-btn').classList.remove('hidden');
+    el('submit-btn').textContent = 'Reveal the song ✨';
+    el('submit-btn').classList.remove('hidden');
+    setButtonEnabled(el('submit-btn'), true);
+    showRevealMessage("⏱ Time's up — card discarded. Name the song & artist for a bonus!", 'error');
     updatePhasePrompt({ hasSlot: false, placed: false });
 }
 
@@ -596,9 +612,13 @@ function updatePhasePrompt({ hasSlot, placed }) {
         return;
     }
     if (isQuickFire()) {
-        promptEl.textContent = qfAudioStarted
-            ? '⚡ Timer running — tap a slot on your timeline, then Place card here.'
-            : '⚡ Tap Play to start the 30-second preview, then place your card.';
+        if (qfDiscardedCard !== null) {
+            promptEl.textContent = '⏱ Card discarded — optionally name the song & artist below for a bonus ✪';
+        } else if (qfAudioStarted) {
+            promptEl.textContent = '⚡ Timer running — tap a slot on your timeline, then Place card here.';
+        } else {
+            promptEl.textContent = '⚡ Tap Play to start the 30-second preview, then place your card.';
+        }
     } else {
         promptEl.textContent = '🎧 Listen first via the QR code, then tap a slot on your timeline.';
     }
@@ -788,6 +808,25 @@ function beginTurn() {
         modeBadge.textContent = modeLabels[game.mode] || game.mode;
     }
 
+    // Mode-specific name-guess hint text
+    const isPro   = game.mode === "pro";
+    const isChill = game.mode === "chill";
+    const hintEl  = document.getElementById('name-guess-hint');
+
+    if (hintEl) hintEl.classList.remove('hidden');
+    if (isPro) {
+        // PRO: form is REQUIRED to keep the card (visual emphasis via .name-guess-form--required)
+        el('name-guess-form').classList.add('name-guess-form--required');
+        if (hintEl) hintEl.textContent = '🔥 PRO: name BOTH the title and artist or lose the card';
+    } else if (isChill) {
+        if (hintEl) hintEl.textContent = 'Optional: 😎 Name the title OR artist for a bonus ✪';
+    } else if (game.mode === "quickfire") {
+        if (hintEl) hintEl.textContent = 'Optional: ⚡ Name both the title and artist for a bonus ✪';
+    } else {
+        if (hintEl) hintEl.textContent = 'Optional: 🎵 Name both the title and artist for a bonus ✪';
+    }
+
+
     // Show action buttons; submit only appears after Place here
     el('place-btn').classList.remove('hidden');
     el('skip-btn').classList.remove('hidden');
@@ -838,8 +877,9 @@ function beginTurn() {
     el('timeline-container').classList.remove('timeline--locked');
     if (isQuickFire()) {
         el('qr-container').innerHTML = '';
-        el('flip-card').classList.remove('qr-pulse');
+        el('qr-container').classList.add('hidden');
         el('flip-card').classList.add('flip-card--quickfire');
+        el('flip-card').classList.add('qr-pulse');
         el('scan-hint').classList.add('hidden');
         el('preview-btn').classList.add('hidden');
         el('spotify-preview-container').classList.add('hidden');
@@ -848,6 +888,8 @@ function beginTurn() {
         resetQuickFirePlayer();
     } else {
         el('flip-card').classList.remove('flip-card--quickfire');
+        el('flip-card').classList.remove('qr-pulse');
+        el('qr-container').classList.remove('hidden');
         generateQRCode(game.currentCard.spotify_url);
         el('flip-card').classList.add('qr-pulse');
         el('quickfire-player').classList.add('hidden');
@@ -1209,6 +1251,8 @@ el('qf-play-btn').addEventListener('click', () => {
     const url = game?.currentCard?.preview_url;
     if (!url) { showMessage('No audio preview available for this card.', true); return; }
     qfAudioStarted = true;
+    hideMessageBars();
+    el('qf-card-subtitle').classList.add('qf-card-subtitle--hidden');
     qfAudio = new Audio(url);
     qfAudio.volume = 0.85;
     qfAudio.play().then(() => {
@@ -1220,6 +1264,7 @@ el('qf-play-btn').addEventListener('click', () => {
         qfAudioStarted = false;
         el('qf-play-icon').textContent = '▶';
         el('qf-play-btn').disabled = false;
+        el('qf-card-subtitle').classList.remove('qf-card-subtitle--hidden');
     });
 });
 
@@ -1286,6 +1331,39 @@ el('steal-btn').addEventListener('click', () => {
 
 // --- Submit & reveal (also doubles as "Place token here" during steal mode) ---
 el('submit-btn').addEventListener('click', async () => {
+    // Quick Fire discard bonus: time ran out before card was placed
+    if (isQuickFire() && qfDiscardedCard !== null) {
+        const artist    = el('guess-artist').value.trim();
+        const title     = el('guess-title').value.trim();
+        const attempted = !!(artist || title);
+        const correct   = !!(artist && title && checkNameGuess(qfDiscardedCard, artist, title));
+        const savedCard = qfDiscardedCard;
+        qfDiscardedCard = null;
+        hideMessageBars();
+        showSongInfo(savedCard);
+        el('flip-card-inner').classList.add('flipped');
+        soundCardFlip();
+        el('scan-hint').classList.add('hidden');
+        el('submit-btn').classList.add('hidden');
+        if (correct) {
+            game.players[game.currentPlayerIndex].tokens += 1;
+            updateTokenDisplay();
+            renderAllPlayers();
+            animateTokenEarned();
+            showRevealMessage('⏱ Card discarded — but bonus token earned! ✪', 'success');
+        } else {
+            showRevealMessage("⏱ Card discarded. Better luck next turn!", 'error');
+            if (attempted) {
+                qfDiscardOverridePending = true;
+                el('override-btn').textContent = '✏️ Actually, the artist & title were correct';
+                el('override-btn').classList.remove('hidden');
+            }
+        }
+        el('next-turn-btn').classList.remove('hidden');
+        updatePhasePrompt({ hasSlot: false, placed: false });
+        return;
+    }
+
     // If a stealer is actively choosing their slot, this button acts as "Place token here"
     if (stealModeStealerIndex !== null) {
         if (pendingStealPosition === null) {
@@ -1589,6 +1667,21 @@ el('submit-btn').addEventListener('click', async () => {
 
 // --- Override: group decides the name guess was actually correct ---
 el('override-btn').addEventListener('click', async () => {
+    // Quick Fire discard override: player typed a guess that was marked wrong
+    if (qfDiscardOverridePending) {
+        qfDiscardOverridePending = false;
+        el('override-btn').classList.add('hidden');
+        el('next-turn-btn').classList.add('hidden');
+        overrideAndGrantToken(game);
+        updateTokenDisplay();
+        renderAllPlayers();
+        animateTokenEarned();
+        showRevealMessage('Override accepted — bonus token awarded! ✪', 'success');
+        el('next-turn-btn').classList.remove('hidden');
+        updateNextTurnButton();
+        return;
+    }
+
     el('next-turn-btn').classList.add('hidden'); // prevent beginTurn() firing mid-animation
     el('steal-override-btn').classList.add('hidden'); // only one override can apply
     el('steal-guess-review').classList.add('hidden');
@@ -1704,9 +1797,9 @@ el('skip-btn').addEventListener('click', () => {
         soundSkipCard();
         if (result.card) {
             if (isQuickFire()) {
-                el('flip-card').classList.remove('qr-pulse');
                 el('quickfire-player').classList.remove('hidden');
                 resetQuickFirePlayer();
+                el('flip-card').classList.add('qr-pulse');
                 renderPlayerHeader();
                 renderTimeline();
                 renderAllPlayers();
@@ -1825,8 +1918,10 @@ el('finish-game-btn').addEventListener('click', () => {
 el('play-again-btn').addEventListener('click', () => {
     closeHtpModal();
     stopQuickFireTimer();
-    qfTimerSeconds = 30;
-    qfAudioStarted = false;
+    qfTimerSeconds           = 30;
+    qfAudioStarted           = false;
+    qfDiscardedCard          = null;
+    qfDiscardOverridePending = false;
     el('quickfire-player').classList.add('hidden');
     game             = null;
     selectedPosition = null;
@@ -1858,6 +1953,11 @@ el('play-again-btn').addEventListener('click', () => {
 // =============================================================
 // INITIALISE ON PAGE LOAD
 // =============================================================
+
+// Stop the quickfire card pulse on any tap/click so the player knows the card is "seen"
+document.addEventListener('click', () => {
+    if (isQuickFire()) el('flip-card').classList.remove('qr-pulse');
+}, true);
 
 // Hide the pills scroll-hint arrow when the user scrolls to the end
 el('players-list').addEventListener('scroll', updatePillsScrollHint);

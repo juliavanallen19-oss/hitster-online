@@ -304,12 +304,14 @@ function spendTokens(player, amount) {
 }
 
 function refundToken(player) {
-    if (player.tokens < 5) {
+    const added = player.tokens < 5;
+    if (added) {
         player.tokens += 1;
     }
     if (player.stats.tokensSpent > 0) {
         player.stats.tokensSpent -= 1;
     }
+    return added;
 }
 
 function recordCardWon(player) {
@@ -365,7 +367,7 @@ function recordPlacementAttempt(player, card, chosenPosition, correct) {
 
 function overrideAndGrantToken(game) {
     let activePlayer = game.getCurrentPlayer();
-    earnToken(activePlayer);
+    return earnToken(activePlayer);
 }
 
 

@@ -232,9 +232,18 @@ function updateStartingPlayerDropdown() {
     const select  = el('starting-player-select');
     const current = select.value;
     select.innerHTML = '';
-    inputs.forEach(input => {
-        const name = input.value.trim();
-        if (!name) return; // skip empty rows
+    const named = Array.from(inputs).map(i => i.value.trim()).filter(n => n.length > 0);
+    if (named.length === 0) {
+        // Placeholder so the empty <select> doesn't read as a broken UI element
+        const opt = document.createElement('option');
+        opt.value = '';
+        opt.textContent = 'Enter player names above…';
+        opt.disabled = true;
+        opt.selected = true;
+        select.appendChild(opt);
+        return;
+    }
+    named.forEach(name => {
         const opt       = document.createElement('option');
         opt.value       = name; // store name, not index
         opt.textContent = name;
@@ -912,7 +921,6 @@ function showWinScreen(winners, reason = null) {
         const metrics = createEl('div', 'win-rank-metrics');
         [
             ['Correctly placed', player.placementAttempts ? `${player.placementAccuracy}%` : '—'],
-            ['Song guess', player.nameGuesses ? `${player.nameAccuracy}%` : '—'],
             ['Best streak', String(player.bestStreak)],
             ['Challenges', `${player.challengesWon}/${player.challengesStarted}`],
         ].forEach(([label, value]) => metrics.appendChild(createMiniMetric(label, value)));
@@ -1744,6 +1752,9 @@ let closeHtpModal = () => {};
     const closeModal = () => { modal.classList.remove('open'); modal.setAttribute('aria-hidden', 'true');  };
     closeHtpModal = closeModal;
     el('game-how-to-play-btn').addEventListener('click', openModal);
+    // Setup screen "? How to Play" entry — opens the same modal (no more inline duplicate)
+    const setupHtpBtn = document.getElementById('setup-htp-btn');
+    if (setupHtpBtn) setupHtpBtn.addEventListener('click', openModal);
     modal.querySelector('.htp-modal-close').addEventListener('click', closeModal);
     modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
     document.addEventListener('keydown', e => { if (e.key === 'Escape' && modal.classList.contains('open')) closeModal(); });
@@ -1808,7 +1819,7 @@ el('play-again-btn').addEventListener('click', () => {
     updateDeleteButtons();
     updateAddPlayerButton();
     updateStartingPlayerDropdown();
-    document.querySelector('.how-to-play').open = false;
+    // (Inline HTP <details> was removed in favour of the modal — nothing to collapse here.)
     showScreen('setup-screen');
 });
 

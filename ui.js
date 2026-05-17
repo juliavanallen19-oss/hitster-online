@@ -126,6 +126,7 @@ function createPlayerInputRow(index) {
 function showScreen(id) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     el(id).classList.add('active');
+    window.scrollTo(0, 0);
 }
 
 
@@ -247,9 +248,18 @@ function updateStartingPlayerDropdown() {
     const select  = el('starting-player-select');
     const current = select.value;
     select.innerHTML = '';
-    inputs.forEach(input => {
-        const name = input.value.trim();
-        if (!name) return; // skip empty rows
+    const named = Array.from(inputs).map(i => i.value.trim()).filter(n => n.length > 0);
+    if (named.length === 0) {
+        // Placeholder so the empty <select> doesn't read as a broken UI element
+        const opt = document.createElement('option');
+        opt.value = '';
+        opt.textContent = 'Enter player names above…';
+        opt.disabled = true;
+        opt.selected = true;
+        select.appendChild(opt);
+        return;
+    }
+    named.forEach(name => {
         const opt       = document.createElement('option');
         opt.value       = name; // store name, not index
         opt.textContent = name;
@@ -396,6 +406,31 @@ function renderTimeline() {
     renderTimelineInto(el('timeline-container'), player.timeline, activePosition, stealPos, true, null, stealerName);
 }
 
+// =============================================================
+// CONFIRMATION DIALOG — prevents accidental joker use
+// =============================================================
+
+let confirmCallback = null;
+
+function showConfirm(message, onConfirm) {
+    confirmCallback = onConfirm;
+    el('confirm-message').textContent = message;
+    el('confirm-overlay').classList.add('confirm-overlay--visible');
+}
+
+function hideConfirm() {
+    el('confirm-overlay').classList.remove('confirm-overlay--visible');
+    confirmCallback = null;
+}
+
+el('confirm-yes-btn').addEventListener('click', () => {
+    const cb = confirmCallback;
+    hideConfirm();
+    if (cb) cb();
+});
+
+el('confirm-no-btn').addEventListener('click', hideConfirm);
+
 function updatePillsScrollHint() {
     const hint = el('pills-scroll-hint');
     const list = el('players-list');
@@ -433,8 +468,12 @@ function renderAllPlayers() {
 
         list.appendChild(pill);
     });
-    // Use rAF so the browser has laid out the new pills before measuring overflow
-    requestAnimationFrame(updatePillsScrollHint);
+    // Use rAF so the browser has laid out the new pills before measuring overflow / scrolling
+    requestAnimationFrame(() => {
+        updatePillsScrollHint();
+        const activePill = list.querySelector('.player-pill--active');
+        if (activePill) activePill.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+    });
 }
 
 // Fills in the flip card back with the song's info (year / artist / title)
@@ -714,6 +753,7 @@ function updateNextTurnButton() {
 // =============================================================
 
 function beginTurn() {
+    window.scrollTo(0, 0);
     selectedPosition      = null;
     activePosition        = null;
     lastPlayedCard        = null;
@@ -786,6 +826,7 @@ function beginTurn() {
         if (hintEl) hintEl.textContent = 'Optional: 🎵 Name both the title and artist for a bonus ✪';
     }
 
+
     // Show action buttons; submit only appears after Place here
     el('place-btn').classList.remove('hidden');
     el('skip-btn').classList.remove('hidden');
@@ -799,10 +840,28 @@ function beginTurn() {
     // Name guess area visible from the very start of every turn
     el('name-guess-area').classList.remove('hidden');
 
-    // Reset Spotify preview — hide embed, show the play button again
+    // Mode-specific name-guess hint — set AFTER area is shown so it is always visible
+    const isPro   = game.mode === "pro";
+    const isChill = game.mode === "chill";
+    const hintEl  = document.getElementById('name-guess-hint');
+    if (hintEl) {
+        hintEl.classList.remove('hidden');
+        if (isPro) {
+            hintEl.textContent = '🔥 PRO: name BOTH the title and artist or lose the card';
+            el('name-guess-form').classList.add('name-guess-form--required');
+        } else if (isChill) {
+            hintEl.textContent = 'Optional: 😎 Name the title OR artist for a bonus ✪';
+        } else if (game.mode === "quickfire") {
+            hintEl.textContent = 'Optional: ⚡ Name both the title and artist for a bonus ✪';
+        } else {
+            hintEl.textContent = 'Optional: 🎵 Name both the title and artist for a bonus ✪';
+        }
+    }
+
+    // Reset Spotify preview — hide embed and button
     el('spotify-preview-container').classList.add('hidden');
     el('spotify-preview-container').innerHTML = '';
-    el('preview-btn').classList.remove('hidden');
+    el('preview-btn').classList.add('hidden');
 
     // Draw a card if none is in play
     if (!game.currentCard) {
@@ -933,7 +992,6 @@ function showWinScreen(winners, reason = null) {
         const metrics = createEl('div', 'win-rank-metrics');
         [
             ['Correctly placed', player.placementAttempts ? `${player.placementAccuracy}%` : '—'],
-            ['Song guess', player.nameGuesses ? `${player.nameAccuracy}%` : '—'],
             ['Best streak', String(player.bestStreak)],
             ['Challenges', `${player.challengesWon}/${player.challengesStarted}`],
         ].forEach(([label, value]) => metrics.appendChild(createMiniMetric(label, value)));
@@ -1258,16 +1316,16 @@ el('steal-btn').addEventListener('click', () => {
         showMessage('Only one steal per turn is allowed.', true);
         return;
     }
-    renderStealPanel();
-    el('steal-panel').classList.remove('hidden');
-    updatePhasePrompt({ hasSlot: selectedPosition !== null, placed: activePosition !== null });
-    // If only one eligible challenger, renderStealPanel auto-selects them via renderStealSlots
-    // which will hide the button. For 2+ challengers, grey it until someone is selected.
-    if (eligibleChallengers.length > 1) {
-        setButtonEnabled(el('steal-btn'), false);
-    }
-    requestAnimationFrame(() => {
-        el('steal-panel').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    showConfirm('Challenge this placement? (costs 1 ✪)', () => {
+        renderStealPanel();
+        el('steal-panel').classList.remove('hidden');
+        updatePhasePrompt({ hasSlot: selectedPosition !== null, placed: activePosition !== null });
+        if (eligibleChallengers.length > 1) {
+            setButtonEnabled(el('steal-btn'), false);
+        }
+        requestAnimationFrame(() => {
+            el('steal-panel').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        });
     });
 });
 
@@ -1706,22 +1764,20 @@ el('next-turn-btn').addEventListener('click', () => {
         showWinScreen(result.winner, 'goal');
         return;
     }
-    // Show player name splash before loading the new turn
+    // Show player name splash before loading the new turn.
+    // beginTurn() fires while the splash still covers the board so the
+    // board is fully ready the moment the overlay fades out — no flicker.
     const nextPlayer = game.getCurrentPlayer();
     const splash     = el('turn-splash');
-    const splashName = el('turn-splash-name');
-    splashName.textContent = nextPlayer.name;
-    splash.classList.remove('hidden', 'turn-splash--shrink');
-    // After 900 ms start shrink-out transition
-    setTimeout(() => {
-        splash.classList.add('turn-splash--shrink');
-        // After transition finishes, hide and start the turn
-        setTimeout(() => {
-            splash.classList.add('hidden');
-            splash.classList.remove('turn-splash--shrink');
-            beginTurn();
-        }, 380);
-    }, 900);
+    el('turn-splash-name').textContent = nextPlayer.name + "'s";
+
+    // Force name/label back to hidden state in case this isn't the first turn
+    splash.classList.remove('turn-splash--visible');
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+        splash.classList.add('turn-splash--visible');         // fade in  (300 ms)
+        setTimeout(beginTurn, 650);                           // reset board while splash covers it
+        setTimeout(() => splash.classList.remove('turn-splash--visible'), 1050); // fade out (300 ms)
+    }));
 });
 
 // --- Skip card ---
@@ -1730,7 +1786,8 @@ el('skip-btn').addEventListener('click', () => {
         showMessage("You don't have enough tokens. Gain them first to use this feature.", true);
         return;
     }
-    if (isQuickFire()) stopQuickFireTimer();
+    showConfirm('Skip this card? (costs 1 ✪)', () => {
+        if (isQuickFire()) stopQuickFireTimer();
     const result = skipCard(game);
     if (result.success) {
         lastPlayedCard   = result.card;
@@ -1754,7 +1811,6 @@ el('skip-btn').addEventListener('click', () => {
                 el('flip-card').classList.add('qr-pulse');
                 el('spotify-preview-container').classList.add('hidden');
                 el('spotify-preview-container').innerHTML = '';
-                el('preview-btn').classList.remove('hidden');
                 renderPlayerHeader();
                 renderTimeline();
                 renderAllPlayers();
@@ -1765,15 +1821,18 @@ el('skip-btn').addEventListener('click', () => {
             showWinScreen(handleEmptyDeck(game), 'deck-empty');
         }
     }
+    });
 });
 
 // --- Buy placement ---
-el('buy-btn').addEventListener('click', async () => {
+el('buy-btn').addEventListener('click', () => {
     if (game.getCurrentPlayer().tokens < 3) {
         showMessage("You don't have enough tokens. Gain them first to use this feature.", true);
         return;
     }
+    showConfirm('Buy automatic placement? (costs 3 ✪)', async () => {
     if (isQuickFire()) { stopQuickFireTimer(); el('quickfire-player').classList.add('hidden'); }
+    hideMessageBars();
     const card = game.currentCard;
     justWonCard = card; // set before buyPlacement clears currentCard
     const result = buyPlacement(game);
@@ -1805,6 +1864,7 @@ el('buy-btn').addEventListener('click', async () => {
         el('next-turn-btn').classList.remove('hidden');
         updatePhasePrompt({ hasSlot: selectedPosition !== null, placed: activePosition !== null });
     }
+    });
 });
 
 // --- How to Play modal ---
@@ -1816,6 +1876,9 @@ let closeHtpModal = () => {};
     const closeModal = () => { modal.classList.remove('open'); modal.setAttribute('aria-hidden', 'true');  };
     closeHtpModal = closeModal;
     el('game-how-to-play-btn').addEventListener('click', openModal);
+    // Setup screen "? How to Play" entry — opens the same modal (no more inline duplicate)
+    const setupHtpBtn = document.getElementById('setup-htp-btn');
+    if (setupHtpBtn) setupHtpBtn.addEventListener('click', openModal);
     modal.querySelector('.htp-modal-close').addEventListener('click', closeModal);
     modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
     document.addEventListener('keydown', e => { if (e.key === 'Escape' && modal.classList.contains('open')) closeModal(); });
@@ -1882,7 +1945,7 @@ el('play-again-btn').addEventListener('click', () => {
     updateDeleteButtons();
     updateAddPlayerButton();
     updateStartingPlayerDropdown();
-    document.querySelector('.how-to-play').open = false;
+    // (Inline HTP <details> was removed in favour of the modal — nothing to collapse here.)
     showScreen('setup-screen');
 });
 

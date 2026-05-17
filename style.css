@@ -427,6 +427,7 @@ body {
   color: #f0f0f0;
   font-weight: 600;
   transform: scale(1.04);
+  margin-inline: 4px;
   box-shadow: 0 0 0 1px rgba(255, 61, 139, 0.2), 0 4px 12px rgba(255, 61, 139, 0.15);
 }
 
@@ -2023,7 +2024,7 @@ body {
     scrollbar-width: none;
     gap: 6px;
     align-self: center;
-    padding: 2px 32px 2px 4px; /* left: room for scaled active pill; right: room for › arrow */
+    padding: 2px 32px 2px 8px; /* left: room for scaled active pill; right: room for › arrow */
     /* Gradient fade on the right hints that more pills can be scrolled into view */
     -webkit-mask-image: linear-gradient(to right, black 78%, transparent 100%);
     mask-image: linear-gradient(to right, black 78%, transparent 100%);
@@ -2043,9 +2044,17 @@ body {
     display: none;
   }
 
-  /* › scroll-hint arrow — shown by JS only when pills overflow */
-  .turn-header {
-    position: relative;
+  /* › scroll-hint arrow — sits in grid row 2 col 4, auto-centred with pills row */
+  .pills-scroll-hint.visible {
+    position: static;
+    grid-row: 2;
+    grid-column: 4;
+    align-self: center;
+    justify-self: end;
+    bottom: auto;
+    right: auto;
+    margin-right: 2px;
+    margin-top: -4px;
   }
 
   /* Sizing — padding-bottom prevents descenders (g, j, p) from clipping */
@@ -3011,6 +3020,7 @@ select:focus-visible,
   border-color: var(--accent);
   color: var(--text-0);
   transform: scale(1.06);
+  margin-inline: 4px;
   box-shadow: var(--glow-brand);
 }
 .player-pill--active .player-pill-name {

@@ -2428,11 +2428,14 @@ body {
   color: #3dd2ff;
 }
 
-/* Dark card face in Quick Fire mode */
+/* Dark card face in Quick Fire mode — golden border matches the card back */
 .flip-card--quickfire .flip-card-front {
   background: #1a1a22;
+  border: 2px solid #ffae3d;
+  border-radius: 12px;
   padding: 16px;
   box-sizing: border-box;
+  overflow: hidden;
 }
 
 /* Player container — fills the card front */
@@ -2446,13 +2449,28 @@ body {
   height: 100%;
 }
 
-/* Play button */
+/* Subtitle below the play button — fades out when play is pressed, fades back in on reset */
+.qf-card-subtitle {
+  margin: 0;
+  font-size: 0.78rem;
+  color: #8a8a98;
+  text-align: center;
+  opacity: 1;
+  transition: opacity 0.3s ease;
+}
+.qf-card-subtitle--hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Play button — flex-shrink:0 prevents it from compressing when timer appears */
 .qf-play-btn {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 10px;
   width: 100%;
+  flex-shrink: 0;
   padding: 14px 20px;
   font-size: 1.05rem;
   font-weight: 700;
@@ -2470,13 +2488,21 @@ body {
 .qf-play-btn:disabled { opacity: 0.5; cursor: default; }
 .qf-play-icon { font-size: 1.2rem; line-height: 1; }
 
-/* Timer display */
+/* Timer display — uses opacity + max-height so it fades in smoothly */
 .qf-timer-display {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 6px;
   width: 100%;
+  opacity: 0;
+  max-height: 0;
+  overflow: hidden;
+  transition: opacity 0.4s ease, max-height 0.4s ease;
+}
+.qf-timer-display--visible {
+  opacity: 1;
+  max-height: 150px;
 }
 
 .qf-countdown {

@@ -192,6 +192,35 @@ function initSetupScreen() {
         });
     });
 
+    // Custom "Who goes first?" dropdown toggle
+    el('starting-player-select').addEventListener('click', () => {
+        const trigger = el('starting-player-select');
+        const list    = el('starting-player-list');
+        if (trigger.disabled) return;
+        const isOpen = !list.hidden;
+        if (!isOpen) {
+            list.hidden = false;
+            trigger.setAttribute('aria-expanded', 'true');
+            // Cap list height to available space below the trigger
+            const rect = trigger.getBoundingClientRect();
+            const spaceBelow = window.innerHeight - rect.bottom;
+            list.style.maxHeight = Math.min(200, spaceBelow - 8) + 'px';
+        } else {
+            list.hidden = true;
+            trigger.setAttribute('aria-expanded', 'false');
+        }
+    });
+    document.addEventListener('click', e => {
+        const wrapper = document.getElementById('starting-player-wrapper');
+        if (wrapper && !wrapper.contains(e.target)) {
+            const list = el('starting-player-list');
+            if (list && !list.hidden) {
+                list.hidden = true;
+                el('starting-player-select').setAttribute('aria-expanded', 'false');
+            }
+        }
+    });
+
     updateDeleteButtons();
     updateAddPlayerButton();
     updateStartingPlayerDropdown();
@@ -242,30 +271,50 @@ function updateDeleteButtons() {
     });
 }
 
-// "Who goes first?" dropdown — only shows players who have typed a name (fix #2)
+// "Who goes first?" custom dropdown — only shows players who have typed a name
 function updateStartingPlayerDropdown() {
     const inputs  = document.querySelectorAll('#player-inputs .player-name-input');
-    const select  = el('starting-player-select');
-    const current = select.value;
-    select.innerHTML = '';
+    const trigger = el('starting-player-select');
+    const list    = el('starting-player-list');
+    const current = trigger.dataset.value || '';
+    list.innerHTML = '';
     const named = Array.from(inputs).map(i => i.value.trim()).filter(n => n.length > 0);
     if (named.length === 0) {
-        // Placeholder so the empty <select> doesn't read as a broken UI element
-        const opt = document.createElement('option');
-        opt.value = '';
-        opt.textContent = 'Enter player names above…';
-        opt.disabled = true;
-        opt.selected = true;
-        select.appendChild(opt);
+        trigger.querySelector('.custom-select-value').textContent = 'Enter player names above…';
+        trigger.dataset.value = '';
+        trigger.disabled = true;
+        list.hidden = true;
+        trigger.setAttribute('aria-expanded', 'false');
         return;
     }
+    trigger.disabled = false;
+    const selected = named.includes(current) ? current : named[0];
+    trigger.querySelector('.custom-select-value').textContent = selected;
+    trigger.dataset.value = selected;
     named.forEach(name => {
-        const opt       = document.createElement('option');
-        opt.value       = name; // store name, not index
-        opt.textContent = name;
-        select.appendChild(opt);
+        const li = document.createElement('li');
+        li.className = 'custom-select-option' + (name === selected ? ' custom-select-option--selected' : '');
+        li.setAttribute('role', 'option');
+        li.setAttribute('aria-selected', name === selected ? 'true' : 'false');
+        li.dataset.value = name;
+        li.textContent = name;
+        li.addEventListener('click', () => setStartingPlayer(name));
+        list.appendChild(li);
     });
-    if (current) select.value = current; // restore previous selection if still present
+}
+
+function setStartingPlayer(name) {
+    const trigger = el('starting-player-select');
+    const list    = el('starting-player-list');
+    trigger.querySelector('.custom-select-value').textContent = name;
+    trigger.dataset.value = name;
+    trigger.setAttribute('aria-expanded', 'false');
+    list.hidden = true;
+    list.querySelectorAll('.custom-select-option').forEach(opt => {
+        const sel = opt.dataset.value === name;
+        opt.classList.toggle('custom-select-option--selected', sel);
+        opt.setAttribute('aria-selected', sel ? 'true' : 'false');
+    });
 }
 
 function validateWinTarget() {
@@ -299,7 +348,7 @@ function onStartGame() {
     }
     const winTarget = parseInt(el('win-target-input').value.trim(), 10);
 
-    const startingName  = el('starting-player-select').value;
+    const startingName  = el('starting-player-select').dataset.value || '';
     const startingIndex = names.indexOf(startingName);
     const mode          = el('mode-select').value;
 

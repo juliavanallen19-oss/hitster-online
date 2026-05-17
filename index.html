@@ -28,7 +28,7 @@
 
     <!-- ===== How to Play link — opens the modal (single source of truth) ===== -->
     <button type="button" id="setup-htp-btn" class="setup-htp-link" aria-haspopup="dialog">
-      <span class="q-icon">?</span><span>New here? — Read <strong>How to Play</strong></span>
+      <span class="q-icon">?</span><span>New here? — Click to read <strong>How to Play</strong></span>
     </button>
 
     <!-- ===== 2-col on ≥860px: left = players + settings, right = mode picker ===== -->
@@ -63,9 +63,14 @@
           <section class="setup-section">
             <h2>Who goes first?</h2>
             <p class="hint">Updates as you type names.</p>
-            <select id="starting-player-select" class="full-width-select">
-              <option value="0">Player 1</option>
-            </select>
+            <div class="custom-select" id="starting-player-wrapper">
+              <button type="button" class="custom-select-trigger" id="starting-player-select"
+                      aria-haspopup="listbox" aria-expanded="false">
+                <span class="custom-select-value">Player 1</span>
+                <svg class="custom-select-chevron" xmlns="http://www.w3.org/2000/svg" width="12" height="8" viewBox="0 0 12 8" aria-hidden="true"><path d="M1 1l5 5 5-5" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
+              <ul class="custom-select-list" role="listbox" id="starting-player-list" hidden></ul>
+            </div>
           </section>
         </div>
 
@@ -331,7 +336,10 @@
       <p class="win-subtitle">built the longest timeline</p>
       <!-- Card count + tokens for the winner(s) — set by JS -->
       <p id="winner-stats" class="winner-stats">—</p>
-      <div id="win-recap-hero" class="win-recap-hero"></div>
+      <div class="win-stats-section">
+        <h3 class="win-ranking-title">Game Statistics</h3>
+        <div id="win-recap-hero" class="win-recap-hero"></div>
+      </div>
       <div id="win-highlights" class="win-highlights"></div>
       <!-- Full ranking of all players — built by JS -->
       <div id="win-ranking" class="win-ranking"></div>

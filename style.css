@@ -167,6 +167,98 @@ input, textarea, [contenteditable] {
   background-position: right 14px center;
 }
 
+/* ===== Custom select (Who goes first?) ===== */
+
+.custom-select {
+  position: relative;
+  width: 100%;
+}
+
+.custom-select-trigger {
+  width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 12px 14px;
+  font-size: 0.95rem;
+  font-family: inherit;
+  background: #1a1a22;
+  color: #f0f0f0;
+  border: 1px solid #2a2a36;
+  border-radius: 8px;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.custom-select-trigger:focus,
+.custom-select-trigger[aria-expanded="true"] {
+  border-color: #ff3d8b;
+  background: #1e1e28;
+  outline: none;
+}
+
+.custom-select-chevron {
+  flex-shrink: 0;
+  color: #9a9aa8;
+  transition: transform 0.15s ease;
+}
+
+.custom-select-trigger[aria-expanded="true"] .custom-select-chevron {
+  transform: rotate(180deg);
+}
+
+.custom-select-list {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 200;
+  background: #1a1a22;
+  border: 1px solid #2a2a36;
+  border-radius: 8px;
+  overflow-y: auto;
+  max-height: 200px;
+  list-style: none;
+  margin: 0;
+  padding: 4px 0;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+}
+
+.custom-select-option {
+  padding: 10px 14px;
+  cursor: pointer;
+  color: #f0f0f0;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: background 0.1s ease;
+}
+
+.custom-select-option::before {
+  content: '';
+  display: inline-block;
+  width: 14px;
+  flex-shrink: 0;
+}
+
+.custom-select-option:hover {
+  background: #1e1e28;
+}
+
+.custom-select-option--selected {
+  color: #ff3d8b;
+}
+
+.custom-select-option--selected::before {
+  content: '✓';
+  font-size: 0.85rem;
+  color: #ff3d8b;
+}
+
 /* ===== Gradient question-mark icon (shared between setup toggle and game-screen button) ===== */
 
 .q-icon {
@@ -1497,21 +1589,33 @@ input, textarea, [contenteditable] {
   color: #9a9aa8;
 }
 
+.win-stats-section {
+  width: 100%;
+  border-top: 1px solid #2a2a36;
+  padding-top: 14px;
+  margin-top: 6px;
+  margin-bottom: 10px;
+}
+
+.win-stats-section .win-ranking-title {
+  margin-bottom: 10px;
+}
+
 .win-recap-hero {
   width: 100%;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 10px;
-  margin: 4px 0 10px;
+  margin: 0;
 }
 
 .win-recap-card {
-  min-height: 86px;
+  min-height: 68px;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 6px;
-  padding: 14px 12px;
+  gap: 4px;
+  padding: 10px 12px;
   background: linear-gradient(180deg, #1a1a22 0%, #121218 100%);
   border: 1px solid #2a2a36;
   border-radius: 8px;
@@ -2938,10 +3042,7 @@ select:focus-visible,
   align-items: center;
   justify-content: center;
   font-weight: 800;
-  background: var(--grad-brand);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  color: #ff3d8b;
 }
 
 /* Section headers: drop heavy gradient, use a small label treatment */

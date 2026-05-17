@@ -1412,12 +1412,16 @@ body {
 
 /* ===== Override button (appears after reveal if name guess was wrong) ===== */
 
-.override-btn {
+.secondary-btn.override-btn {
   width: 100%;
   box-sizing: border-box;
-  border-color: #f0b429;
-  color: #f0b429;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid #f0b429;
+  background: rgba(240, 180, 41, 0.10);
+  color: #f5d988;
   font-size: 0.875rem;
+  text-align: center;
   margin-top: 0;
   animation: override-btn-in 0.4s ease;
 }
@@ -1427,9 +1431,9 @@ body {
   to   { opacity: 1; transform: translateY(0);   }
 }
 
-.override-btn:hover {
-  background: rgba(240, 180, 41, 0.12);
-  border-color: #f0b429;
+.secondary-btn.override-btn:hover {
+  background: rgba(240, 180, 41, 0.18);
+  border-color: #f5c842;
 }
 
 /* ===== Deck counter (below scan hint) ===== */
@@ -1788,14 +1792,15 @@ body {
 
 /* ===== PRO steal override button — blue tint to distinguish from active player's override ===== */
 
-.steal-override-btn {
+.secondary-btn.steal-override-btn {
     border-color: #3dd2ff;
-    color: #3dd2ff;
+    background: rgba(61, 210, 255, 0.08);
+    color: #a8ecff;
     margin-top: 6px;
 }
 
-.steal-override-btn:hover {
-    background: rgba(61, 210, 255, 0.1);
+.secondary-btn.steal-override-btn:hover {
+    background: rgba(61, 210, 255, 0.16);
     border-color: #3dd2ff;
 }
 

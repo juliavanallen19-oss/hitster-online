@@ -1701,6 +1701,7 @@ el('buy-btn').addEventListener('click', async () => {
         return;
     }
     if (isQuickFire()) { stopQuickFireTimer(); el('quickfire-player').classList.add('hidden'); }
+    hideMessageBars();
     const card = game.currentCard;
     justWonCard = card; // set before buyPlacement clears currentCard
     const result = buyPlacement(game);

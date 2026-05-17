@@ -427,8 +427,12 @@ function renderAllPlayers() {
 
         list.appendChild(pill);
     });
-    // Use rAF so the browser has laid out the new pills before measuring overflow
-    requestAnimationFrame(updatePillsScrollHint);
+    // Use rAF so the browser has laid out the new pills before measuring overflow / scrolling
+    requestAnimationFrame(() => {
+        updatePillsScrollHint();
+        const activePill = list.querySelector('.player-pill--active');
+        if (activePill) activePill.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+    });
 }
 
 // Fills in the flip card back with the song's info (year / artist / title)

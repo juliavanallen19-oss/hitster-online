@@ -1676,7 +1676,7 @@ el('next-turn-btn').addEventListener('click', () => {
     // board is fully ready the moment the overlay fades out — no flicker.
     const nextPlayer = game.getCurrentPlayer();
     const splash     = el('turn-splash');
-    el('turn-splash-name').textContent = nextPlayer.name;
+    el('turn-splash-name').textContent = nextPlayer.name + "'s";
 
     // Force name/label back to hidden state in case this isn't the first turn
     splash.classList.remove('turn-splash--visible');

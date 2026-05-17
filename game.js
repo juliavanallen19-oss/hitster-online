@@ -698,9 +698,13 @@ function collectGameStats(game, winners, reason = null) {
         };
     });
 
-    const bestBy = (field) => players
-        .filter(player => player[field] > 0)
-        .sort((a, b) => b[field] - a[field] || b.finalCards - a.finalCards || a.name.localeCompare(b.name))[0] || null;
+    const bestBy = (field) => {
+        const eligible = players.filter(player => player[field] > 0);
+        if (!eligible.length) return null;
+        eligible.sort((a, b) => b[field] - a[field]);
+        const top = eligible[0][field];
+        return eligible.filter(p => p[field] === top); // returns array of all tied players
+    };
 
     return {
         reason,

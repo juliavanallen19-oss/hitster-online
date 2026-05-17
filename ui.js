@@ -658,6 +658,7 @@ function updateButtonStates() {
     setButtonEnabled(el('skip-btn'),   !placed && player.tokens >= 1);
     setButtonEnabled(el('buy-btn'),    !placed && player.tokens >= 3);
 
+    syncActionAreaWidth();
     updatePhasePrompt({ hasSlot, placed });
 }
 
@@ -830,16 +831,23 @@ function updateNextTurnButton() {
 }
 
 
-// Shows/hides the next-turn button and keeps the action-area resolved class in sync
-// so the primary button stretches full-width when secondary actions are all hidden.
+// Syncs the action-area width class: when all secondary buttons (skip/steal/buy)
+// are hidden the primary CTA should stretch full-width on desktop.
+function syncActionAreaWidth() {
+    const hasVisibleSecondary = ['skip-btn', 'steal-btn', 'buy-btn'].some(
+        id => !el(id).classList.contains('hidden')
+    );
+    el('action-area').classList.toggle('action-area--resolved', !hasVisibleSecondary);
+}
+
 function showNextTurnBtn() {
     el('next-turn-btn').classList.remove('hidden');
-    el('action-area').classList.add('action-area--resolved');
+    syncActionAreaWidth();
 }
 
 function hideNextTurnBtn() {
     el('next-turn-btn').classList.add('hidden');
-    el('action-area').classList.remove('action-area--resolved');
+    syncActionAreaWidth();
 }
 
 // =============================================================
@@ -992,6 +1000,7 @@ function onSlotClick(position) {
             return;
         }
         pendingStealPosition = position;
+        hideMessageBars(); // clear any "already taken" hint from a previous click
         renderTimeline(); // show the chosen slot highlighted in the timeline
         updatePlaceTokenButton();
         return;
@@ -1097,13 +1106,13 @@ function renderWinRecap(recap) {
     hero.innerHTML = '';
     highlights.innerHTML = '';
 
-    const bestStreak = recap.highlights.bestStreak;
-    const challengeWinner = recap.highlights.challengeWinner;
+    const bestStreak = recap.highlights.bestStreak; // array or null
+    const challengeWinner = recap.highlights.challengeWinner; // array or null
 
     [
         ['Turns played', recap.totalTurns],
         ['Cards won', recap.totalCardsWon],
-        ['Best streak', bestStreak ? `${bestStreak.bestStreak} by ${bestStreak.name}` : '—'],
+        ['Best streak', bestStreak ? `${bestStreak[0].bestStreak} by ${bestStreak.map(p => p.name).join(' & ')}` : '—'],
     ].forEach(([label, value]) => {
         const card = createEl('div', 'win-recap-card');
         card.append(
@@ -1135,9 +1144,13 @@ function renderWinRecap(recap) {
     highlights.appendChild(grid);
 }
 
-function buildHighlight(title, player, detail) {
-    if (!player) return null;
-    return { title, value: player.name, detail: detail(player) };
+function buildHighlight(title, players, detail) {
+    if (!players || !players.length) return null;
+    return {
+        title,
+        value: players.map(p => p.name).join(' & '),
+        detail: detail(players[0]), // all tied players share the same metric value
+    };
 }
 
 
@@ -1190,8 +1203,9 @@ function renderStealSlots(stealerIndex) {
     stealNameGuessLogged  = false;
     pendingStealNameGuess = null;
     el('timeline-container').classList.add('steal-mode');
-    el('steal-btn').classList.add('hidden'); // hide until cancel or next turn
+    el('steal-btn').classList.add('hidden'); // hide until next turn
     renderTimeline();
+    syncActionAreaWidth(); // all secondary now hidden → primary button gets full width
 
     panel.innerHTML = '';
 
@@ -1228,6 +1242,9 @@ function renderStealSlots(stealerIndex) {
         });
         guess.append(titleInput, artistInput, logBtn);
         panel.appendChild(guess);
+        panel.classList.remove('hidden'); // only shown in PRO mode
+    } else {
+        panel.classList.add('hidden'); // no content in non-PRO modes → keep hidden
     }
 
     // Repurpose the submit button as "Place token here" while steal mode is active
@@ -1376,8 +1393,7 @@ el('steal-btn').addEventListener('click', () => {
     }
 
     const startChallenge = (challengerIndex) => {
-        renderStealSlots(challengerIndex);
-        el('steal-panel').classList.remove('hidden');
+        renderStealSlots(challengerIndex); // controls steal-panel visibility internally
         updatePhasePrompt({ hasSlot: selectedPosition !== null, placed: activePosition !== null });
         requestAnimationFrame(() => {
             el('steal-panel').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -1605,9 +1621,13 @@ el('submit-btn').addEventListener('click', async () => {
         el('stealer-timeline-section').classList.remove('hidden');
 
         soundStealWins();
-        if (result.tokenEarned || isPro) {
+        if (isPro) {
+            // PRO: the stealer's token is returned when they win — fly to stealer
             const stealerIndex = game.players.indexOf(stealer);
             setTimeout(() => animateTokenEarned(stealerIndex), 900);
+        } else if (result.tokenEarned) {
+            // Chill/Original: active player earned a name-guess bonus — fly to active player
+            setTimeout(() => animateTokenEarned(game.currentPlayerIndex), 900);
         }
         await flyCardToTimeline('stealer-timeline-container');
         await sleep(1800);
@@ -1919,6 +1939,8 @@ el('buy-btn').addEventListener('click', () => {
         el('skip-btn').classList.add('hidden');
         el('steal-btn').classList.add('hidden');
         el('buy-btn').classList.add('hidden');
+        el('name-guess-area').classList.add('hidden');
+        syncActionAreaWidth();
 
         await sleep(700);
         await flyCardToTimeline('timeline-container');

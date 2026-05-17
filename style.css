@@ -2561,6 +2561,72 @@ input, textarea, [contenteditable] {
 }
 
 /* =============================================================
+   CONFIRM OVERLAY — joker action confirmation dialog
+   ============================================================= */
+.confirm-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 400;
+  background: rgba(10, 10, 16, 0.82);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  box-sizing: border-box;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.confirm-overlay--visible {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.confirm-card {
+  background: #16161e;
+  border: 1px solid #3a3a48;
+  border-radius: 14px;
+  padding: 28px 24px 22px;
+  max-width: 340px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  transform: scale(0.94) translateY(8px);
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.confirm-overlay--visible .confirm-card {
+  transform: scale(1) translateY(0);
+}
+
+.confirm-message {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #f0f0f0;
+  text-align: center;
+  line-height: 1.5;
+}
+
+.confirm-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.confirm-yes-btn {
+  width: 100%;
+}
+
+.confirm-no-btn {
+  width: 100%;
+  margin-top: 0;
+}
+
+/* =============================================================
    TURN SPLASH — full-screen player name intro
    Opacity-based show/hide so transitions are always smooth —
    no display:none jump. beginTurn() fires while still visible
@@ -3399,6 +3465,20 @@ select:focus-visible,
   .turn-header {
     grid-template-rows: auto auto;
   }
+}
+
+/* ───── Confirm dialog: compact on mobile ────────── */
+@media (max-width: 767px) {
+  .confirm-overlay { align-items: center; padding: 32px; }
+  .confirm-card {
+    border-radius: 14px;
+    padding: 22px 20px 20px;
+    gap: 16px;
+    max-width: 320px;
+  }
+  .confirm-message { font-size: 0.95rem; }
+  .confirm-actions { flex-direction: column; gap: 10px; }
+  .confirm-yes-btn, .confirm-no-btn { width: 100%; min-height: 44px; font-size: 0.95rem; margin-top: 0; }
 }
 
 /* ───── Tiny viewport (<420px) — squeeze a bit more ────────── */

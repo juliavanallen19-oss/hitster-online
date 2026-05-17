@@ -110,6 +110,7 @@ function createPlayerInputRow(index) {
 function showScreen(id) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     el(id).classList.add('active');
+    window.scrollTo(0, 0);
 }
 
 
@@ -694,6 +695,7 @@ function updateNextTurnButton() {
 // =============================================================
 
 function beginTurn() {
+    window.scrollTo(0, 0);
     selectedPosition      = null;
     activePosition        = null;
     lastPlayedCard        = null;
@@ -753,6 +755,7 @@ function beginTurn() {
     const isChill = game.mode === "chill";
     const hintEl  = document.getElementById('name-guess-hint');
 
+    if (hintEl) hintEl.classList.remove('hidden');
     if (isPro) {
         // PRO: form is REQUIRED to keep the card (visual emphasis via .name-guess-form--required)
         el('name-guess-form').classList.add('name-guess-form--required');

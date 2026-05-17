@@ -2584,6 +2584,19 @@ input, textarea, [contenteditable] {
   opacity: 1;
 }
 
+/* Wrapper line — flexbox so name+'s and "turn" sit side-by-side and
+   wrap gracefully to a second line only when the name is very long */
+.turn-splash-line {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: baseline;
+  gap: 0 0.35em;
+  margin: 0;
+  padding: 0 24px;
+  max-width: 100%;
+}
+
 /* Name: gradient text, springs in then fades with the overlay */
 .turn-splash-name {
   font-size: clamp(1.3rem, 6.5vw, 2.6rem);
@@ -2592,9 +2605,6 @@ input, textarea, [contenteditable] {
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  text-align: center;
-  padding: 0 24px;
-  max-width: 100%;
   white-space: nowrap;
   opacity: 0;
   transform: scale(0.82) translateY(12px);
@@ -2607,9 +2617,10 @@ input, textarea, [contenteditable] {
 }
 
 .turn-splash-label {
-  font-size: 1.1rem;
+  font-size: clamp(1.3rem, 6.5vw, 2.6rem);
+  font-weight: 800;
   color: #9a9aa8;
-  margin-top: 8px;
+  white-space: nowrap;
   opacity: 0;
   transform: translateY(10px);
   transition: opacity 0.3s ease 0.22s, transform 0.3s ease 0.22s;

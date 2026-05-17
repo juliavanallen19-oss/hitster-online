@@ -1,32 +1,23 @@
-// =============================================================
-// HITSTER ONLINE — ui.js
-// Connects the HTML interface to the game logic in game.js.
-// =============================================================
+let selectedPosition      = null;
+let activePosition        = null;
+let lastPlayedCard        = null;
+let justWonCard           = null;
+let stealModeStealerIndex = null;
+let stealerForOverride    = null;
+let finishConfirmTimer    = null;
+let pendingStealPosition  = null;
+let stealNameGuessLogged  = false;
+let pendingStealNameGuess = null;
 
-// --- UI state ---
-let selectedPosition      = null; // slot the active player clicked (index into timeline gaps)
-let activePosition        = null; // confirmed after Place Here is clicked (used in resolveTurn)
-let lastPlayedCard        = null; // stored for reveal display
-let justWonCard           = null; // card that was just added to a timeline (gets glow animation)
-let stealModeStealerIndex = null; // when set, timeline slot clicks register pending steal positions
-let stealerForOverride    = null; // stealer Player object held for the steal-override-btn click
-let finishConfirmTimer    = null; // temporary second-click confirmation for finishing early
-let pendingStealPosition  = null; // slot the stealer tapped, not yet locked with "Place token here"
-let stealNameGuessLogged  = false; // PRO: true once the stealer clicks "Log song title & artist"
-let pendingStealNameGuess = null;  // PRO: { title, artist } logged by the stealer before locking
+let qfTimerInterval  = null;
+let qfTimerSeconds   = 30;
+let qfAudio          = null;
+let qfAudioStarted   = false;
+let qfDiscardedCard         = null;
+let qfDiscardOverridePending = false;
 
-// --- Quick Fire state ---
-let qfTimerInterval  = null;   // setInterval handle for the countdown tick
-let qfTimerSeconds   = 30;     // seconds remaining in current countdown
-let qfAudio          = null;   // HTMLAudioElement for the preview clip
-let qfAudioStarted   = false;  // true once the player has pressed Play this turn
-let qfDiscardedCard         = null;   // card saved when time runs out before placement
-let qfDiscardOverridePending = false; // true while override-btn is shown for a discard bonus guess
-
-// --- Shorthand helper ---
 function el(id) { return document.getElementById(id); }
 
-// --- Quick Fire helpers ---
 function isQuickFire() { return game && game.mode === "quickfire"; }
 
 function stopQuickFireTimer() {
@@ -120,22 +111,12 @@ function createPlayerInputRow(index) {
 }
 
 
-// =============================================================
-// SCREEN MANAGEMENT
-// =============================================================
-
 function showScreen(id) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     el(id).classList.add('active');
     window.scrollTo(0, 0);
 }
 
-
-// =============================================================
-// FEEDBACK MESSAGE BAR
-// persistent = true  → stays until beginTurn() clears it
-// persistent = false → auto-hides after 3.5 s
-// =============================================================
 
 let messageTimer = null;
 
@@ -165,10 +146,6 @@ function showMessage(text, persistent = false) {
     }
 }
 
-
-// =============================================================
-// SETUP SCREEN
-// =============================================================
 
 function initSetupScreen() {
     el('add-player-btn').addEventListener('click', addPlayerInput);
@@ -373,10 +350,6 @@ function onStartGame() {
 }
 
 
-// =============================================================
-// RENDERING HELPERS
-// =============================================================
-
 function renderPlayerHeader() {
     const player = game.getCurrentPlayer();
     el('active-player-name').textContent        = player.name;
@@ -465,10 +438,6 @@ function renderTimeline() {
     renderTimelineInto(el('timeline-container'), player.timeline, activePosition, stealPos, true, null, stealerName);
 }
 
-// =============================================================
-// CONFIRMATION DIALOG — prevents accidental joker use
-// =============================================================
-
 let confirmCallback = null;
 
 function showConfirm(message, onConfirm) {
@@ -490,7 +459,6 @@ el('confirm-yes-btn').addEventListener('click', () => {
 
 el('confirm-no-btn').addEventListener('click', hideConfirm);
 
-// Token cap popup — shown whenever a player hits or can't exceed the 5-token limit
 function showTokenCapPopup() {
     el('token-cap-overlay').classList.add('confirm-overlay--visible');
 }
@@ -499,8 +467,6 @@ function hideTokenCapPopup() {
 }
 el('token-cap-btn').addEventListener('click', hideTokenCapPopup);
 
-// Multi-challenger selector: used when several non-active players have enough tokens.
-// Shows a modal listing each eligible challenger; selecting one calls onSelect(index).
 function showChallengerModal(challengers, onSelect) {
     el('challenger-message').textContent = 'Who wants to challenge? (costs 1 ✪)';
     const actions = el('challenger-actions');
@@ -651,10 +617,6 @@ function showRevealMessage(text, type = 'info') {
 }
 
 
-// =============================================================
-// BUTTON STATES
-// =============================================================
-
 function updateButtonStates() {
     const player  = game.getCurrentPlayer();
     const hasSlot = selectedPosition !== null;
@@ -672,7 +634,6 @@ function updateButtonStates() {
     updatePhasePrompt({ hasSlot, placed });
 }
 
-// Sets the big "what should I do now?" text above the timeline based on phase.
 function updatePhasePrompt({ hasSlot, placed }) {
     const promptEl = el('phase-prompt');
     if (!promptEl) return;
@@ -796,8 +757,6 @@ async function animateTokenEarned(playerIndex = game.currentPlayerIndex) {
     }
 }
 
-// Enables/disables the "Place token here" submit button based on whether the
-// stealer has tapped a slot (and, in PRO mode, also logged their name guess).
 function updatePlaceTokenButton() {
     if (stealModeStealerIndex === null) return;
     const isPro = game.mode === "pro";
@@ -812,8 +771,6 @@ function resetFinishButton() {
     btn.textContent = 'Finish game';
 }
 
-// Sets the label and any persistent message on the next-turn button depending on
-// whether the win target has been hit and how many players remain in the final round.
 function updateNextTurnButton() {
     const btn = el('next-turn-btn');
     const winner = checkWinCondition(game);
@@ -846,8 +803,6 @@ function updateNextTurnButton() {
 }
 
 
-// Syncs the action-area width class: when all secondary buttons (skip/steal/buy)
-// are hidden the primary CTA should stretch full-width on desktop.
 function syncActionAreaWidth() {
     const hasVisibleSecondary = ['skip-btn', 'steal-btn', 'buy-btn'].some(
         id => !el(id).classList.contains('hidden')
@@ -864,10 +819,6 @@ function hideNextTurnBtn() {
     el('next-turn-btn').classList.add('hidden');
     syncActionAreaWidth();
 }
-
-// =============================================================
-// TURN FLOW
-// =============================================================
 
 function beginTurn() {
     window.scrollTo(0, 0);
@@ -896,7 +847,6 @@ function beginTurn() {
     el('name-guess-area').classList.add('hidden');
     el('name-guess-form').classList.remove('hidden');
     el('name-guess-form').classList.remove('name-guess-form--required');
-    el('name-guess-toggle-btn').classList.add('hidden'); // legacy toggle is never shown
     el('reveal-message').classList.add('hidden');
     hideNextTurnBtn();
     hideMessageBars();
@@ -1035,14 +985,6 @@ function onSlotClick(position) {
 }
 
 
-// =============================================================
-// WIN SCREEN
-// reason: 'goal'           → someone reached the target card count
-//         'deck-empty'     → deck ran out naturally
-//         'finished-early' → player clicked "Finish game"
-//         null             → no note shown
-// =============================================================
-
 function showWinScreen(winners, reason = null) {
     soundWin();
     const list = Array.isArray(winners) ? winners : [winners];
@@ -1176,12 +1118,6 @@ function buildHighlight(title, players, detail) {
 }
 
 
-// =============================================================
-// STEAL PANEL (challenger version)
-// After Place Here, non-active players can challenge by picking
-// a different slot on the active player's timeline.
-// =============================================================
-
 function renderStealPanel() {
     const panel     = el('steal-panel');
     const nonActive = game.players
@@ -1276,8 +1212,6 @@ function renderStealSlots(stealerIndex) {
     updatePhasePrompt({ hasSlot: selectedPosition !== null, placed: activePosition !== null });
 }
 
-// Called when "Place token here" is clicked during steal mode.
-// Locks in the stealer's chosen position and (in PRO) their logged name guess.
 function lockSteal() {
     const stealerIndex = stealModeStealerIndex;
     const stealPos     = pendingStealPosition;
@@ -1316,11 +1250,6 @@ function lockSteal() {
 }
 
 
-// =============================================================
-// EVENT LISTENERS
-// =============================================================
-
-// --- Spotify preview ---
 el('preview-btn').addEventListener('click', () => {
     const url = game?.currentCard?.spotify_url;
     if (!url) return;
@@ -1339,7 +1268,6 @@ el('preview-btn').addEventListener('click', () => {
     container.classList.remove('hidden');
 });
 
-// --- Quick Fire play button ---
 el('qf-play-btn').addEventListener('click', () => {
     if (qfAudioStarted) return;
     const url = game?.currentCard?.preview_url;
@@ -1365,18 +1293,7 @@ el('qf-play-btn').addEventListener('click', () => {
     });
 });
 
-// --- Name guess toggle ---
-el('name-guess-toggle-btn').addEventListener('click', () => {
-    const form = el('name-guess-form');
-    const btn  = el('name-guess-toggle-btn');
-    const open = form.classList.toggle('hidden');
-    // open is true when we just ADDED 'hidden' (i.e. collapsed)
-    btn.textContent = open
-        ? (game?.mode === 'chill' ? '😎 Name artist OR title for a bonus token ✪' : '🎵 Name song & artist for a bonus token ✪')
-        : '▲ Hide';
-});
 
-// --- Place Here ---
 el('place-btn').addEventListener('click', () => {
     if (selectedPosition === null) {
         showMessage('First tap a slot in your timeline, then hit "Place here".', true);
@@ -1398,7 +1315,6 @@ el('place-btn').addEventListener('click', () => {
     updateButtonStates();
 });
 
-// --- HITSTER! steal ---
 el('steal-btn').addEventListener('click', () => {
     const nonActive = game.players
         .map((p, i) => ({ player: p, index: i }))
@@ -1435,7 +1351,6 @@ el('steal-btn').addEventListener('click', () => {
     }
 });
 
-// --- Submit & reveal (also doubles as "Place token here" during steal mode) ---
 el('submit-btn').addEventListener('click', async () => {
     // Quick Fire discard bonus: time ran out before card was placed
     if (isQuickFire() && qfDiscardedCard !== null) {
@@ -1508,7 +1423,6 @@ el('submit-btn').addEventListener('click', async () => {
     // Chill allows one field alone; PRO is already handled above
     if (!isPro && !isChill && ((artist && !title) || (!artist && title))) {
         el('name-guess-form').classList.remove('hidden');
-        el('name-guess-toggle-btn').textContent = '▲ Hide';
         showMessage('Fill in BOTH song title and artist name, or leave both empty to skip the guess.');
         return;
     }
@@ -1783,7 +1697,6 @@ el('submit-btn').addEventListener('click', async () => {
     updatePhasePrompt({ hasSlot: selectedPosition !== null, placed: activePosition !== null });
 });
 
-// --- Override: group decides the name guess was actually correct ---
 el('override-btn').addEventListener('click', async () => {
     // Quick Fire discard override: player typed a guess that was marked wrong
     if (qfDiscardOverridePending) {
@@ -1853,7 +1766,6 @@ el('override-btn').addEventListener('click', async () => {
     updateNextTurnButton();
 });
 
-// --- Steal override: stealer had right position but wrong name (PRO) ---
 el('steal-override-btn').addEventListener('click', async () => {
     if (!stealerForOverride) return;
     hideNextTurnBtn(); // prevent beginTurn() firing mid-animation
@@ -1891,7 +1803,6 @@ el('steal-override-btn').addEventListener('click', async () => {
     updateNextTurnButton();
 });
 
-// --- Next turn ---
 el('next-turn-btn').addEventListener('click', () => {
     const result = endTurn(game);
     if (result.won) {
@@ -1914,7 +1825,6 @@ el('next-turn-btn').addEventListener('click', () => {
     }));
 });
 
-// --- Skip card ---
 el('skip-btn').addEventListener('click', () => {
     if (game.getCurrentPlayer().tokens < 1) {
         showMessage("You don't have enough tokens. Gain them first to use this feature.", true);
@@ -1958,7 +1868,6 @@ el('skip-btn').addEventListener('click', () => {
     });
 });
 
-// --- Buy placement ---
 el('buy-btn').addEventListener('click', () => {
     if (game.getCurrentPlayer().tokens < 3) {
         showMessage("You don't have enough tokens. Gain them first to use this feature.", true);
@@ -2003,7 +1912,6 @@ el('buy-btn').addEventListener('click', () => {
     });
 });
 
-// --- How to Play modal ---
 let closeHtpModal = () => {};
 (function () {
     const modal    = el('how-to-play-modal');
@@ -2035,7 +1943,6 @@ let closeHtpModal = () => {};
     applySize(localStorage.getItem('htp-font-size') || 'medium');
 })();
 
-// --- Finish game early ---
 el('finish-game-btn').addEventListener('click', () => {
     if (!game) return;
     const btn = el('finish-game-btn');
@@ -2050,7 +1957,6 @@ el('finish-game-btn').addEventListener('click', () => {
     showWinScreen(handleEmptyDeck(game), 'finished-early');
 });
 
-// --- Play Again ---
 el('play-again-btn').addEventListener('click', () => {
     closeHtpModal();
     stopQuickFireTimer();
@@ -2086,16 +1992,10 @@ el('play-again-btn').addEventListener('click', () => {
 });
 
 
-// =============================================================
-// INITIALISE ON PAGE LOAD
-// =============================================================
-
-// Stop the quickfire card pulse on any tap/click so the player knows the card is "seen"
 document.addEventListener('click', () => {
     if (isQuickFire()) el('flip-card').classList.remove('qr-pulse');
 }, true);
 
-// Hide the pills scroll-hint arrow when the user scrolls to the end
 el('players-list').addEventListener('scroll', updatePillsScrollHint);
 
 initSetupScreen();

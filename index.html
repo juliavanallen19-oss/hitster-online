@@ -5,20 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Hitster Online</title>
 
-  <!-- Our own stylesheet -->
   <link rel="stylesheet" href="style.css">
 
-  <!-- QR code library (Task 1.3). Loaded from a CDN so we don't have to host it ourselves. -->
-  <!-- This must come BEFORE game.js, because game.js calls `new QRCode(...)`. -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 <body>
 
-  <!-- =========================================================== -->
-  <!-- SCREEN 1: SETUP                                               -->
-  <!-- The first thing players see. Players enter names, pick mode,  -->
-  <!-- and click Start. We'll fill this in properly in Step 2.       -->
-  <!-- =========================================================== -->
   <div id="setup-screen" class="screen active">
 
   <div class="setup-container">
@@ -26,16 +18,13 @@
     <h1>Hitster Online</h1>
     <p class="tagline">Build your timeline. Guess the year. <span class="tagline-win">Win the game.</span></p>
 
-    <!-- ===== How to Play link — opens the modal (single source of truth) ===== -->
     <button type="button" id="setup-htp-btn" class="setup-htp-link" aria-haspopup="dialog">
       <span class="q-icon">?</span><span>New here? — Click to read <strong>How to Play</strong></span>
     </button>
 
-    <!-- ===== 2-col on ≥860px: left = players + settings, right = mode picker ===== -->
     <div class="setup-grid">
       <div class="setup-grid--left">
 
-        <!-- ===== Player names section ===== -->
         <section class="setup-section">
           <h2>Players</h2>
           <p class="hint">Add 2 to 6 players.</p>
@@ -52,7 +41,6 @@
           <button type="button" id="add-player-btn" class="secondary-btn">+ Add player</button>
         </section>
 
-        <!-- ===== Settings row: Goal + Starting player side-by-side on desktop ===== -->
         <div class="setup-settings-row">
           <section class="setup-section">
             <h2>Goal</h2>
@@ -74,10 +62,9 @@
           </section>
         </div>
 
-      </div><!-- /.setup-grid--left -->
+      </div>
 
       <div class="setup-grid--right">
-        <!-- ===== Game mode ===== -->
         <section class="setup-section">
           <h2>Game mode</h2>
           <div class="mode-cards" id="mode-cards">
@@ -98,7 +85,6 @@
               <span class="mode-card-desc">3 tokens to start. Hear a 30-second preview and place your card before time runs out!</span>
             </button>
           </div>
-          <!-- Hidden select keeps the selected value for onStartGame() to read -->
           <select id="mode-select" class="hidden">
             <option value="original">Original</option>
             <option value="chill">Chill</option>
@@ -106,25 +92,20 @@
             <option value="quickfire">Quick Fire</option>
           </select>
         </section>
-      </div><!-- /.setup-grid--right -->
-    </div><!-- /.setup-grid -->
+      </div>
+    </div>
 
     <div id="setup-message-bar" class="message-bar setup-message-bar hidden" role="alert"></div>
 
-    <!-- ===== Start button ===== -->
+    <p class="sound-hint">🔊 Turn on your sound for the best experience</p>
+
     <button type="button" id="start-game-btn" class="primary-btn">Start Game</button>
 
   </div>
 
 </div>
 
-  <!-- =========================================================== -->
-  <!-- SCREEN 2: GAME BOARD                                          -->
-  <!-- The main playing area: active player, QR card, timeline,      -->
-  <!-- token counters, action buttons.                               -->
-  <!-- =========================================================== -->
   <div id="game-screen" class="screen">
-    <!-- Confirmation dialog for joker actions (Skip / Challenge / Buy Placement) -->
     <div id="confirm-overlay" class="confirm-overlay" aria-modal="true" role="dialog">
       <div class="confirm-card">
         <p id="confirm-message" class="confirm-message"></p>
@@ -134,7 +115,6 @@
         </div>
       </div>
     </div>
-    <!-- Token cap notification — shown whenever a player hits or exceeds the 5-token limit -->
     <div id="token-cap-overlay" class="confirm-overlay" aria-modal="true" role="dialog">
       <div class="confirm-card">
         <p class="confirm-message">Maximum token amount achieved, think about using jokers 😉</p>
@@ -143,16 +123,13 @@
         </div>
       </div>
     </div>
-    <!-- Multi-challenger selector modal (shown when several players can challenge) -->
     <div id="challenger-overlay" class="confirm-overlay" aria-modal="true" role="dialog">
       <div class="confirm-card">
         <p id="challenger-message" class="confirm-message"></p>
         <div id="challenger-actions" class="confirm-actions">
-          <!-- Filled dynamically by JS -->
         </div>
       </div>
     </div>
-    <!-- Player name intro splash shown between turns -->
     <div id="turn-splash" class="turn-splash" aria-live="polite">
       <p class="turn-splash-line">
         <span id="turn-splash-name" class="turn-splash-name"></span><span class="turn-splash-label">turn</span>
@@ -160,15 +137,10 @@
     </div>
     <div class="game-container">
 
-      <!-- ===== HEADER ============================================
-           Row 1: brand + roster of all players (pills) + finish-game icon
-           Row 2: huge "Active player's turn" banner with their token count
-           ============================================================ -->
       <header class="turn-header">
         <div class="turn-header-row1">
           <div class="brand">🎵 Hitster</div>
           <div id="players-list" class="players-list">
-            <!-- player pills inserted by JS -->
           </div>
           <button type="button" id="game-how-to-play-btn" class="icon-btn how-to-play-btn" title="How to play" aria-label="How to play"><span class="q-icon">?</span></button>
           <button type="button" id="finish-game-btn" class="finish-game-btn" title="End game now" aria-label="End game now">Finish game</button>
@@ -187,19 +159,14 @@
         </div>
       </header>
 
-      <!-- ===== Main board: card on the left, stack of game UI on the right (desktop).
-              On mobile both wrappers use `display: contents` so the existing single-column flow is unchanged. ===== -->
       <div class="board-main">
-      <!-- ===== Song card: flip card + name guess form ===== -->
       <section class="card-area">
         <div id="song-card" class="song-card">
 
-          <!-- Flip card: front = QR code, back = revealed year / artist / title -->
           <div id="flip-card" class="flip-card">
             <div id="flip-card-inner" class="flip-card-inner">
               <div class="flip-card-front">
                 <div id="qr-container" class="qr-container"></div>
-                <!-- Quick Fire audio player — sits inside the card, hidden in other modes -->
                 <div id="quickfire-player" class="quickfire-player hidden">
                   <button type="button" id="qf-play-btn" class="qf-play-btn">
                     <span id="qf-play-icon" class="qf-play-icon">▶</span>
@@ -226,18 +193,14 @@
           <button type="button" id="preview-btn" class="preview-btn hidden">▶ Play Spotify Preview</button>
           <div id="spotify-preview-container" class="spotify-preview-container hidden"></div>
 
-          <!-- Reveal outcome message — shown in the card area after the flip -->
           <div id="reveal-message" class="reveal-message hidden"></div>
 
-          <!-- Override button: appears after reveal if a name guess was wrong -->
           <button type="button" id="override-btn" class="secondary-btn override-btn hidden">
             ✏️ Actually, the artist &amp; title were correct
           </button>
-          <!-- PRO challenge override: appears when challenger had the right year but wrong name -->
           <button type="button" id="steal-override-btn" class="secondary-btn override-btn steal-override-btn hidden">
             ✏️ Override challenge: artist &amp; title were actually correct
           </button>
-          <!-- PRO: shows what the stealer typed, so players can compare before deciding to override -->
           <div id="steal-guess-review" class="steal-guess-review hidden">
             <p id="steal-guess-review-label" class="steal-guess-review-label"></p>
             <input type="text" id="steal-review-title"  class="player-name-input" disabled placeholder="Song title">
@@ -247,14 +210,10 @@
         </div>
       </section>
 
-      <!-- Right-side stack: phase prompt, timeline, message, actions, steal panel -->
       <div class="board-stack">
 
-      <!-- Phase prompt — tells the active player what to do next.
-           Text is set by JS in updateButtonStates(). -->
       <div id="phase-prompt" class="phase-prompt">🎧 Scan the QR with your phone, listen, then tap a slot</div>
 
-      <!-- ===== Active player's timeline ===== -->
       <section class="timeline-section">
         <div class="timeline-header">
           <h2 class="section-label" id="timeline-label">Your timeline</h2>
@@ -263,13 +222,11 @@
         <div class="timeline-year-range">
           <div class="timeline-scroll-wrapper">
             <div id="timeline-container" class="timeline-track">
-              <!-- Timeline cards inserted by JS -->
             </div>
           </div>
         </div>
       </section>
 
-      <!-- ===== Stealer's timeline (shown briefly when steal succeeds) ===== -->
       <section id="stealer-timeline-section" class="timeline-section hidden">
         <h2 class="section-label" id="stealer-timeline-label"></h2>
         <div class="timeline-year-range">
@@ -280,13 +237,7 @@
         </div>
       </section>
 
-      <!-- Name guess: always-visible inputs from start of turn -->
-      <!-- Placed here (after timeline) so on mobile the step order is: listen → place → guess name -->
       <div id="name-guess-area" class="name-guess-area hidden">
-        <!-- Toggle kept for legacy JS but hidden by default; only PRO mode uses .name-guess-form--required -->
-        <button type="button" id="name-guess-toggle-btn" class="secondary-btn name-guess-toggle-btn hidden">
-          🎵 Name song &amp; artist for a bonus token ✪
-        </button>
         <p class="name-guess-hint" id="name-guess-hint">🎵 Name song &amp; artist for a bonus token ✪</p>
         <div id="name-guess-form" class="name-guess-form">
           <input type="text" id="guess-title" class="player-name-input" placeholder="Song title" maxlength="60">
@@ -294,10 +245,8 @@
         </div>
       </div>
 
-      <!-- ===== Feedback message bar ===== -->
       <div id="message-bar" class="message-bar hidden" role="alert"></div>
 
-      <!-- ===== Action buttons ===== -->
       <section id="action-area" class="action-area">
         <div class="primary-action">
           <button type="button" id="place-btn" class="primary-btn">Place card here ✓</button>
@@ -323,52 +272,38 @@
         </div>
       </section>
 
-      <!-- ===== HITSTER! steal panel ===== -->
       <div id="steal-panel" class="steal-panel hidden"></div>
 
-      <!-- PRO: stealer's locked-in guess, visible from "Place token here" until after reveal -->
       <div id="steal-live-guess" class="steal-live-guess hidden">
         <p id="steal-live-guess-label" class="steal-live-guess-label"></p>
         <input type="text" id="steal-live-guess-title"  class="player-name-input" disabled placeholder="Song title">
         <input type="text" id="steal-live-guess-artist" class="player-name-input" disabled placeholder="Artist name">
       </div>
 
-      </div> <!-- /.board-stack -->
-      </div> <!-- /.board-main -->
+      </div>
+      </div>
 
     </div>
   </div>
 
-  <!-- =========================================================== -->
-  <!-- SCREEN 3: WIN                                                 -->
-  <!-- Shown when someone wins. Filled in Step 5.                    -->
-  <!-- =========================================================== -->
   <div id="win-screen" class="screen">
     <div class="win-container">
       <div class="win-trophy">🏆</div>
-      <!-- Shown only when the game ended because the deck ran out -->
       <p id="win-deck-note" class="win-deck-note hidden">The song deck is empty</p>
-      <!-- "We have a winner!" or "We have a winning team!" — set by JS -->
       <h1 id="win-headline" class="win-title">We have a winner!</h1>
       <p id="winner-name" class="winner-name">—</p>
       <p class="win-subtitle">built the longest timeline</p>
-      <!-- Card count + tokens for the winner(s) — set by JS -->
       <p id="winner-stats" class="winner-stats">—</p>
       <div class="win-stats-section">
         <h3 class="win-ranking-title">Game Statistics</h3>
         <div id="win-recap-hero" class="win-recap-hero"></div>
       </div>
       <div id="win-highlights" class="win-highlights"></div>
-      <!-- Full ranking of all players — built by JS -->
       <div id="win-ranking" class="win-ranking"></div>
       <button type="button" id="play-again-btn" class="primary-btn">Play again</button>
     </div>
   </div>
 
-  <!-- =========================================================== -->
-  <!-- HOW TO PLAY MODAL                                             -->
-  <!-- Shared overlay triggered from the game screen ? button        -->
-  <!-- =========================================================== -->
   <div id="how-to-play-modal" class="htp-modal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="htp-modal-title">
     <div class="htp-modal-inner">
       <div class="htp-modal-header">
@@ -463,12 +398,6 @@
     </div>
   </div>
 
-  <!-- =========================================================== -->
-  <!-- SCRIPTS                                                       -->
-  <!-- Loaded at the bottom so all the HTML above already exists     -->
-  <!-- when the JavaScript runs. Order matters: game.js first        -->
-  <!-- (defines the game logic), then ui.js (which uses it).         -->
-  <!-- =========================================================== -->
   <script src="data/songs.js"></script>
   <script src="game.js"></script>
   <script src="sounds.js"></script>

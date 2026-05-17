@@ -3197,6 +3197,7 @@ select:focus-visible,
   .setup-settings-row .setup-section { margin-bottom: 0; }
   .win-target-input { width: 100%; }
   #start-game-btn { margin-top: 24px; }
+  .sound-hint { margin-top: 20px; }
 }
 
 /* ───── Buttons: normalized family ──────────────────────────── */
@@ -3455,6 +3456,7 @@ select:focus-visible,
   border-radius: var(--r-md);
 }
 .scan-hint { color: var(--text-2); font-size: 0.85rem; }
+.sound-hint { color: var(--text-2); font-size: 0.85rem; text-align: center; margin-bottom: 0; }
 
 /* ───── Win screen polish ───────────────────────────────────── */
 

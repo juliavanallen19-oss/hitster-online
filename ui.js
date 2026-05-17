@@ -918,7 +918,6 @@ function showWinScreen(winners, reason = null) {
         const metrics = createEl('div', 'win-rank-metrics');
         [
             ['Correctly placed', player.placementAttempts ? `${player.placementAccuracy}%` : '—'],
-            ['Song guess', player.nameGuesses ? `${player.nameAccuracy}%` : '—'],
             ['Best streak', String(player.bestStreak)],
             ['Challenges', `${player.challengesWon}/${player.challengesStarted}`],
         ].forEach(([label, value]) => metrics.appendChild(createMiniMetric(label, value)));

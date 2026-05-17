@@ -355,7 +355,16 @@ function onStartGame() {
     try {
         startGame(names, mode, startingIndex >= 0 ? startingIndex : 0, winTarget);
         showScreen('game-screen');
-        beginTurn();
+        // Show player name splash for the first turn, exactly as between turns
+        const firstPlayer = game.getCurrentPlayer();
+        const splash0     = el('turn-splash');
+        el('turn-splash-name').textContent = firstPlayer.name + "'s";
+        splash0.classList.remove('turn-splash--visible');
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+            splash0.classList.add('turn-splash--visible');
+            setTimeout(beginTurn, 650);
+            setTimeout(() => splash0.classList.remove('turn-splash--visible'), 1050);
+        }));
     } catch (err) {
         showMessage('Something went wrong starting the game — please try again.');
         console.error('startGame error:', err);
@@ -479,6 +488,30 @@ el('confirm-yes-btn').addEventListener('click', () => {
 });
 
 el('confirm-no-btn').addEventListener('click', hideConfirm);
+
+// Multi-challenger selector: used when several non-active players have enough tokens.
+// Shows a modal listing each eligible challenger; selecting one calls onSelect(index).
+function showChallengerModal(challengers, onSelect) {
+    el('challenger-message').textContent = 'Who wants to challenge? (costs 1 ✪)';
+    const actions = el('challenger-actions');
+    actions.innerHTML = '';
+    challengers.forEach(({ player, index }) => {
+        const label = `${player.name} — ${player.tokens} token${player.tokens !== 1 ? 's' : ''}`;
+        const btn   = createButton(label, 'secondary-btn steal-player-btn', () => {
+            hideChallengerModal();
+            onSelect(index);
+        });
+        btn.dataset.playerIndex = index;
+        actions.appendChild(btn);
+    });
+    const discardBtn = createButton('Discard', 'secondary-btn confirm-no-btn', hideChallengerModal);
+    actions.appendChild(discardBtn);
+    el('challenger-overlay').classList.add('confirm-overlay--visible');
+}
+
+function hideChallengerModal() {
+    el('challenger-overlay').classList.remove('confirm-overlay--visible');
+}
 
 function updatePillsScrollHint() {
     const hint = el('pills-scroll-hint');
@@ -652,7 +685,7 @@ function updatePhasePrompt({ hasSlot, placed }) {
     }
     if (placed) {
         promptEl.textContent = game.pendingSteal
-            ? '🎵 Challenge placed — tap "Reveal the year".'
+            ? '🎵 Challenge placed — tap "Reveal the song".'
             : '🎵 Reveal now, or let an opponent challenge first.';
         return;
     }
@@ -797,6 +830,18 @@ function updateNextTurnButton() {
 }
 
 
+// Shows/hides the next-turn button and keeps the action-area resolved class in sync
+// so the primary button stretches full-width when secondary actions are all hidden.
+function showNextTurnBtn() {
+    el('next-turn-btn').classList.remove('hidden');
+    el('action-area').classList.add('action-area--resolved');
+}
+
+function hideNextTurnBtn() {
+    el('next-turn-btn').classList.add('hidden');
+    el('action-area').classList.remove('action-area--resolved');
+}
+
 // =============================================================
 // TURN FLOW
 // =============================================================
@@ -830,7 +875,7 @@ function beginTurn() {
     el('name-guess-form').classList.remove('name-guess-form--required');
     el('name-guess-toggle-btn').classList.add('hidden'); // legacy toggle is never shown
     el('reveal-message').classList.add('hidden');
-    el('next-turn-btn').classList.add('hidden');
+    hideNextTurnBtn();
     hideMessageBars();
     el('steal-panel').classList.add('hidden');
     el('stealer-timeline-section').classList.add('hidden');
@@ -863,9 +908,9 @@ function beginTurn() {
     el('steal-btn').classList.remove('hidden');
     el('buy-btn').classList.remove('hidden');
     el('submit-btn').classList.add('hidden');
-    el('submit-btn').textContent = 'Reveal the year ✨';
+    el('submit-btn').textContent = 'Reveal the song ✨';
     setButtonEnabled(el('submit-btn'), true);
-    el('next-turn-btn').classList.add('hidden');
+    hideNextTurnBtn();
 
     // Name guess area visible from the very start of every turn
     el('name-guess-area').classList.remove('hidden');
@@ -1185,25 +1230,6 @@ function renderStealSlots(stealerIndex) {
         panel.appendChild(guess);
     }
 
-    const cancel = createButton('Cancel', 'secondary-btn', () => {
-        stealModeStealerIndex = null;
-        pendingStealPosition  = null;
-        stealNameGuessLogged  = false;
-        pendingStealNameGuess = null;
-        el('timeline-container').classList.remove('steal-mode');
-        el('steal-panel').classList.add('hidden');
-        el('steal-btn').classList.remove('hidden');
-        game.pendingSteal = null;
-        el('submit-btn').classList.remove('submit-btn--challenge');
-        el('submit-btn').textContent = 'Reveal the year ✨';
-        setButtonEnabled(el('submit-btn'), true);
-        renderTimeline();
-        updateButtonStates();
-        updatePhasePrompt({ hasSlot: selectedPosition !== null, placed: activePosition !== null });
-    });
-    cancel.id = 'cancel-steal-btn';
-    panel.appendChild(cancel);
-
     // Repurpose the submit button as "Place token here" while steal mode is active
     el('submit-btn').textContent = 'Place token here ⚔️';
     el('submit-btn').classList.add('submit-btn--challenge');
@@ -1241,14 +1267,13 @@ function lockSteal() {
     }
 
     el('submit-btn').classList.remove('submit-btn--challenge');
-    el('submit-btn').textContent = 'Reveal the year ✨';
+    el('submit-btn').textContent = 'Reveal the song ✨';
     setButtonEnabled(el('submit-btn'), true);
 
     updateTokenDisplay();
     renderAllPlayers();
     renderTimeline(); // re-render with the locked steal token marker
     updateButtonStates();
-    showMessage(`${result.stealer.name} has placed their token! Click "Reveal the year" when ready.`, true);
 }
 
 
@@ -1333,8 +1358,11 @@ el('place-btn').addEventListener('click', () => {
 
 // --- HITSTER! steal ---
 el('steal-btn').addEventListener('click', () => {
-    const eligibleChallengers = game.players.filter((p, i) => i !== game.currentPlayerIndex && p.tokens >= 1);
-    if (eligibleChallengers.length === 0) {
+    const nonActive = game.players
+        .map((p, i) => ({ player: p, index: i }))
+        .filter(({ index }) => index !== game.currentPlayerIndex && game.players[index].tokens >= 1);
+
+    if (nonActive.length === 0) {
         showMessage('No player has enough tokens to steal.', true);
         return;
     }
@@ -1346,17 +1374,24 @@ el('steal-btn').addEventListener('click', () => {
         showMessage('Only one steal per turn is allowed.', true);
         return;
     }
-    showConfirm('Challenge this placement? (costs 1 ✪)', () => {
-        renderStealPanel();
+
+    const startChallenge = (challengerIndex) => {
+        renderStealSlots(challengerIndex);
         el('steal-panel').classList.remove('hidden');
         updatePhasePrompt({ hasSlot: selectedPosition !== null, placed: activePosition !== null });
-        if (eligibleChallengers.length > 1) {
-            setButtonEnabled(el('steal-btn'), false);
-        }
         requestAnimationFrame(() => {
             el('steal-panel').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         });
-    });
+    };
+
+    if (nonActive.length === 1) {
+        // Single eligible challenger: name them in the confirm popup
+        const { player, index } = nonActive[0];
+        showConfirm(`${player.name} — Challenge this placement? (costs 1 ✪)`, () => startChallenge(index));
+    } else {
+        // Multiple eligible challengers: show direct selector modal (no intermediate confirm)
+        showChallengerModal(nonActive, startChallenge);
+    }
 });
 
 // --- Submit & reveal (also doubles as "Place token here" during steal mode) ---
@@ -1389,7 +1424,7 @@ el('submit-btn').addEventListener('click', async () => {
                 el('override-btn').classList.remove('hidden');
             }
         }
-        el('next-turn-btn').classList.remove('hidden');
+        showNextTurnBtn();
         updatePhasePrompt({ hasSlot: false, placed: false });
         return;
     }
@@ -1578,11 +1613,11 @@ el('submit-btn').addEventListener('click', async () => {
         await sleep(1800);
 
         if (isPro) {
-            showRevealMessage(`🎉 ${sName} wins the challenge! Artist & title correct — token returned ✪`, 'success');
+            showRevealMessage(`${sName} takes the card! Artist & title correct — token returned ✪`, 'success');
         } else if (ngAttempted) {
-            showRevealMessage(`🎉 ${sName} wins the challenge! ${nameGuessFeedback}`, ng ? 'success' : 'error');
+            showRevealMessage(`${sName} takes the card! ${nameGuessFeedback}`, ng ? 'success' : 'error');
         } else {
-            showRevealMessage(`🎉 ${sName} wins the challenge!`, 'error');
+            showRevealMessage(`${sName} takes the card! ✅`, 'success');
         }
 
     } else if (result.activeKeepsCard) {
@@ -1689,7 +1724,7 @@ el('submit-btn').addEventListener('click', async () => {
         el('steal-live-guess').classList.add('hidden');
     }
 
-    el('next-turn-btn').classList.remove('hidden');
+    showNextTurnBtn();
     updateNextTurnButton();
     // Reflect the new "turn complete" phase in the prompt
     updatePhasePrompt({ hasSlot: selectedPosition !== null, placed: activePosition !== null });
@@ -1701,18 +1736,18 @@ el('override-btn').addEventListener('click', async () => {
     if (qfDiscardOverridePending) {
         qfDiscardOverridePending = false;
         el('override-btn').classList.add('hidden');
-        el('next-turn-btn').classList.add('hidden');
+        hideNextTurnBtn();
         overrideAndGrantToken(game);
         updateTokenDisplay();
         renderAllPlayers();
         animateTokenEarned();
         showRevealMessage('Override accepted — bonus token awarded! ✪', 'success');
-        el('next-turn-btn').classList.remove('hidden');
+        showNextTurnBtn();
         updateNextTurnButton();
         return;
     }
 
-    el('next-turn-btn').classList.add('hidden'); // prevent beginTurn() firing mid-animation
+    hideNextTurnBtn(); // prevent beginTurn() firing mid-animation
     el('steal-override-btn').classList.add('hidden'); // only one override can apply
     el('steal-guess-review').classList.add('hidden');
     el('steal-live-guess').classList.remove('steal-live-guess--override');
@@ -1747,14 +1782,14 @@ el('override-btn').addEventListener('click', async () => {
         showRevealMessage('Override accepted — bonus token awarded! ✪', 'success');
     }
 
-    el('next-turn-btn').classList.remove('hidden');
+    showNextTurnBtn();
     updateNextTurnButton();
 });
 
 // --- Steal override: stealer had right position but wrong name (PRO) ---
 el('steal-override-btn').addEventListener('click', async () => {
     if (!stealerForOverride) return;
-    el('next-turn-btn').classList.add('hidden'); // prevent beginTurn() firing mid-animation
+    hideNextTurnBtn(); // prevent beginTurn() firing mid-animation
     const stealer = stealerForOverride;
     el('override-btn').classList.add('hidden'); // only one override can apply
     el('steal-override-btn').classList.add('hidden');
@@ -1783,7 +1818,7 @@ el('steal-override-btn').addEventListener('click', async () => {
 
     showRevealMessage(`Override accepted — ${stealer.name} wins the card! Token returned. ✅`, 'success');
 
-    el('next-turn-btn').classList.remove('hidden');
+    showNextTurnBtn();
     updateNextTurnButton();
 });
 
@@ -1891,7 +1926,7 @@ el('buy-btn').addEventListener('click', () => {
         await sleep(1800); // wait for the 1.5s glow to finish, then a short buffer before the message
 
         showRevealMessage('Card automatically placed at the correct position! ✅', 'success');
-        el('next-turn-btn').classList.remove('hidden');
+        showNextTurnBtn();
         updatePhasePrompt({ hasSlot: selectedPosition !== null, placed: activePosition !== null });
     }
     });

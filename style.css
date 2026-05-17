@@ -2398,6 +2398,14 @@ input, textarea, [contenteditable] {
     gap: 10px;
   }
 
+  /* When turn is resolved, hide secondary actions and let the primary button fill the full row */
+  .action-area--resolved .secondary-actions {
+    display: none;
+  }
+  .action-area--resolved .primary-action {
+    flex: 1 1 100%;
+  }
+
   .icon-action-btn {
     padding: 12px 8px;
     font-size: 0.85rem;

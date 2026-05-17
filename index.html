@@ -134,6 +134,15 @@
         </div>
       </div>
     </div>
+    <!-- Multi-challenger selector modal (shown when several players can challenge) -->
+    <div id="challenger-overlay" class="confirm-overlay" aria-modal="true" role="dialog">
+      <div class="confirm-card">
+        <p id="challenger-message" class="confirm-message"></p>
+        <div id="challenger-actions" class="confirm-actions">
+          <!-- Filled dynamically by JS -->
+        </div>
+      </div>
+    </div>
     <!-- Player name intro splash shown between turns -->
     <div id="turn-splash" class="turn-splash" aria-live="polite">
       <p class="turn-splash-line">
@@ -280,10 +289,10 @@
       <div id="message-bar" class="message-bar hidden" role="alert"></div>
 
       <!-- ===== Action buttons ===== -->
-      <section class="action-area">
+      <section id="action-area" class="action-area">
         <div class="primary-action">
           <button type="button" id="place-btn" class="primary-btn">Place card here ✓</button>
-          <button type="button" id="submit-btn" class="primary-btn hidden">Reveal the year ✨</button>
+          <button type="button" id="submit-btn" class="primary-btn hidden">Reveal the song ✨</button>
           <button type="button" id="next-turn-btn" class="primary-btn hidden">Continue to next turn →</button>
         </div>
         <div class="secondary-actions">

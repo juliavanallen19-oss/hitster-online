@@ -367,6 +367,12 @@ input, textarea, [contenteditable] {
   margin-top: 4px;
 }
 
+.htp-divider {
+  border: none;
+  border-top: 1px solid #2a2a36;
+  margin: 20px 0 4px;
+}
+
 /* ===== Win target input ===== */
 
 .win-target-input {

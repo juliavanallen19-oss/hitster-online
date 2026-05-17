@@ -87,6 +87,7 @@ function onQuickFireTimeUp() {
     el('submit-btn').textContent = 'Reveal the song ✨';
     el('submit-btn').classList.remove('hidden');
     setButtonEnabled(el('submit-btn'), true);
+    syncActionAreaWidth();
     showRevealMessage("⏱ Time's up — card discarded. Name the song & artist for a bonus!", 'error');
     updatePhasePrompt({ hasSlot: false, placed: false });
 }
